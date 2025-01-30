@@ -193,4 +193,16 @@ class AccountRole {
             return false;
         }
     }
+
+    
+    public static function isScholar()
+    {
+        if (Auth::check()) {
+            foreach (Auth::user()->role as $role) {
+              if (strtolower($role->Role) == "scholar")
+                return true;
+            }
+        }
+        return false;
+    }
 }

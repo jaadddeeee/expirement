@@ -1,32 +1,40 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Basic Inputs - Forms')
+@section('title', 'Scholar')
 
 @section('page-script')
     <script src="{{ asset('assets/js/form-basic-inputs.js') }}"></script>
 @endsection
 
 @section('content')
-    <h4 class="fw-bold py-3 mb-4">
-        <span class="text-muted fw-light">Forms /</span> Basic Inputs
-    </h4>
+    {{-- <h4 class="fw-bold py-3 mb-4">
+        Scholarship
+    </h4> --}}
 
     <div class="row">
         <div class="col-md-6">
             <div class="card mb-4">
-                <h5 class="card-header">Default</h5>
+                <h5 class="card-header">Scholarship</h5>
                 <div class="card-body">
-                    <div>
-                        <label for="defaultFormControlInput" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="defaultFormControlInput" placeholder="John Doe"
-                            aria-describedby="defaultFormControlHelp" />
-                        <div id="defaultFormControlHelp" class="form-text">We'll never share your details with anyone else.
-                        </div>
+                    <div class="mb-3">
+                        <label for="defaultFormControlInput" class="form-label">Scholarship Name</label>
+                        <input type="text" class="form-control" id="defaultFormControlInput"
+                            placeholder="Enter Scholarship Name" aria-describedby="defaultFormControlHelp" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="defaultSelect" class="form-label">Scholarship Type</label>
+                        <select id="defaultSelect" class="form-select">
+                            <option>Select Scholarship Type</option>
+                            <option value="1">Internal</option>
+                            <option value="2">External</option>
+                            <option value="3">Others</option>
+                        </select>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        {{-- <div class="col-md-6">
             <div class="card mb-4">
                 <h5 class="card-header">Float label</h5>
                 <div class="card-body">
@@ -38,9 +46,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
-        <!-- Form controls -->
+        {{-- <!-- Form controls -->
         <div class="col-md-6">
             <div class="card mb-4">
                 <h5 class="card-header">Form Controls</h5>
@@ -442,6 +450,6 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 @endsection

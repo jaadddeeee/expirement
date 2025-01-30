@@ -39,6 +39,7 @@ class MenuServiceProvider extends ServiceProvider
         $menuUISA = [];
         $menuPresident = [];
         $menuVPAA = [];
+        $menuScholar = [];
 
         $menuAll = file_get_contents(base_path('resources/menu/verticalMenuAll.json'));
         array_push($verticalMenuData, json_decode($menuAll));
@@ -101,6 +102,11 @@ class MenuServiceProvider extends ServiceProvider
         if (ROLE::isScholarship()){
           $menuTES= file_get_contents(base_path('resources/menu/verticalMenuScholarship.json'));
           array_push($verticalMenuData, json_decode($menuTES));
+        }
+
+        if (ROLE::isScholar()){
+          $menuScholar = file_get_contents(base_path('resources/menu/verticalMenuScholar.json'));
+          array_push($verticalMenuData, json_decode($menuScholar));
         }
         \View::share('menuData', $verticalMenuData);
     });

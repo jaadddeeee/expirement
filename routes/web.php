@@ -571,3 +571,6 @@ Route::get('/form/layouts-horizontal', $controller_path . '\form_layouts\Horizon
 
 // tables
 Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tables-basic');
+
+// scholar
+Route::get('/scholar', $controller_path . '\SLSU\ScholarController@index')->name('scholar');
