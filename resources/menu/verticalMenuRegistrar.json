@@ -1,0 +1,101 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Registrar"
+    },
+    {
+      "name": "Enrolment",
+      "url": "/registrar/enrolment",
+      "icon": "menu-icon tf-icons bx bx bxs-pencil",
+      "slug": "registrar-enrolment"
+    },
+    {
+      "name": "Requested Subject",
+      "url": "/uisa/requested-subject",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "requested-subject"
+    },
+    {
+      "name": "Certificate",
+      "url": "/registrar/certificate",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "registrar-manage"
+    },
+    {
+      "name": "SLSU Report",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "manage-report",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Enrollment",
+          "slug": "arta",
+          "submenu": [
+            {
+              "url": "/report/count",
+              "name": "Count",
+              "slug": "enrolment-count"
+            }
+          ]
+        },
+        {
+          "url": "/registrar/report/arta",
+          "name": "ARTA",
+          "slug": "arta"
+        },
+        {
+          "url": "/registrar/report/formslkra",
+          "name": "Form SL KRA1.1",
+          "slug": "formslkra"
+        },
+        {
+          "url": "/registrar/report/unencoded",
+          "name": "Unencoded Grades",
+          "slug": "unencoded-grades"
+        },
+        {
+          "url": "/registrar/report/unencoded",
+          "name": "Unencoded Grades",
+          "slug": "unencoded-grades"
+        }
+      ]
+    },
+    {
+      "name": "CHED Report",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "manage-report",
+      "submenu": [
+        {
+          "url": "/ched/report/graduation-list",
+          "name": "Graduation List",
+          "slug": "graduation-list"
+        }
+      ]
+    },
+
+    {
+      "name": "Tracker",
+      "icon": "menu-icon tf-icons bx bx bx-target-lock",
+      "slug": "manage-report",
+      "submenu": [
+        {
+          "url": "/registrar/tracker/gradesheet",
+          "name": "Gradesheet",
+          "slug": "gradesheet"
+        }
+      ]
+    },
+    {
+      "name": "By Pass",
+      "icon": "menu-icon tf-icons bx bx bx-target-lock",
+      "slug": "manage-report",
+      "submenu": [
+        {
+          "url": "/registrar/bypass/maxunit",
+          "name": "Gradesheet",
+          "slug": "gradesheet"
+        }
+      ]
+    }
+  ]
+}

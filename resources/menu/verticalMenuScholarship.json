@@ -1,0 +1,19 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Scholarship"
+    },
+    {
+      "name": "Set-up",
+      "icon": "menu-icon tf-icons bx bx bx-cog",
+      "slug": "manage-scholarship",
+      "submenu": [
+        {
+          "url": "/scholarship/set-up/type",
+          "name": "Scholarship Type",
+          "slug": "manage-scholarship-type"
+        }
+      ]
+    }
+  ]
+}

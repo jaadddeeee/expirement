@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "menuHeader": "UISA"
+    },
+    {
+      "name": "Requested Subject",
+      "url": "/uisa/requested-subject",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "requested-subject"
+    }
+  ]
+}

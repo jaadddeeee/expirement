@@ -1,0 +1,8 @@
+
+added column AllowSuper, HRMISID in table accountusers
+added table accountrole
+
+August 19, 2023
+added value in defaultvalue table
+  - useSmart
+  - canSendSMS

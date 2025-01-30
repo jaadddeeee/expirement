@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "menuHeader": "OSAS"
+    },
+    {
+      "name": "Certificate",
+      "url": "/osas/certificate",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "osas-certificate"
+    }
+  ]
+}

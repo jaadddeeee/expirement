@@ -1,0 +1,72 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Department"
+    },
+    {
+      "name": "Enrolment",
+      "url": "/department/enrolment",
+      "icon": "menu-icon tf-icons bx bx bxs-edit",
+      "slug": "enrolment"
+    },
+    {
+      "name": "Enrolment Tracker",
+      "url": "/department/track",
+      "icon": "menu-icon tf-icons bx bx bx-target-lock",
+      "slug": "track-enrolment"
+    },
+    {
+      "name": "Recognition",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "recognition",
+      "submenu": [
+        {
+          "name": "Latin Honors",
+          "url": "/recognition/latin-honors",
+          "slug": "recognition-latin-honors"
+        },
+        {
+          "name": "Dean's Lists",
+          "url": "/recognition/deans-list",
+          "slug": "recognition-deans-list"
+        }
+      ]
+    },
+    {
+      "name": "Report",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "manage-report",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Enrollment",
+          "slug": "arta",
+          "submenu": [
+            {
+              "url": "/report/count",
+              "name": "Count",
+              "slug": "enrolment-count"
+            }
+          ]
+        },
+        {
+          "url": "/department/report/pre-reg-survey",
+          "name": "Pre-Reg Survey",
+          "slug": "arta"
+        }
+      ]
+    },
+    {
+      "name": "Manage",
+      "icon": "menu-icon tf-icons bx bx bxs-cog",
+      "slug": "manage",
+      "submenu": [
+        {
+          "url": "/department/employee",
+          "name": "Employee",
+          "slug": "manage-employee"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Clearance"
+    },
+    {
+      "url": "/clearance",
+      "name": "Manage",
+      "icon": "menu-icon tf-icons bx bx bxs-cog",
+      "slug": "manage"
+    }
+  ]
+}

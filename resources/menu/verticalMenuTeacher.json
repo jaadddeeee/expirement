@@ -1,0 +1,25 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Teacher"
+    },
+    {
+      "url": "/teacher/my-class",
+      "name": "My Class",
+      "icon": "menu-icon tf-icons bx bx bxs-user-account",
+      "slug": "my-class"
+    },
+    {
+      "url": "/teacher/encode-grades",
+      "name": "Encode Grade",
+      "icon": "menu-icon tf-icons bx bx bx-dock-top",
+      "slug": "encode-grades"
+    },
+    {
+      "url": "/teacher/faculty-evaluation",
+      "name": "AFES Result",
+      "icon": "menu-icon tf-icons bx bx bx-bar-chart-alt",
+      "slug": "teacher-result-evaluation"
+    }
+  ]
+}

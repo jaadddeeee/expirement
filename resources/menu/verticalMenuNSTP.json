@@ -1,0 +1,35 @@
+{
+  "menu": [
+    {
+      "menuHeader": "NSTP"
+    },
+    {
+      "url": "/nstp/grades",
+      "name": "Grade",
+      "icon": "menu-icon tf-icons bx bx bx-copyright",
+      "slug": "manage-nstp"
+    },
+    {
+      "name": "Report",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "manage-nstp",
+      "submenu": [
+        {
+          "url": "/nstp/with-serial",
+          "name": "NSTP with Serial #",
+          "slug": "nstp-with-serial-number"
+        },
+        {
+          "url": "/nstp/with-no-serial",
+          "name": "NSTP with No Serial #",
+          "slug": "nstp-with-no-serial-number"
+        },
+        {
+          "url": "/nstp/officially-enrolled",
+          "name": "Officially Enrolled",
+          "slug": "nstp-officially-enrolled"
+        }
+      ]
+    }
+  ]
+}

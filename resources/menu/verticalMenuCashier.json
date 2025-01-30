@@ -1,0 +1,25 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Cashier"
+    },
+    {
+      "name": "Payment",
+      "url": "/cashier/payment",
+      "icon": "menu-icon tf-icons bx bx bx-money",
+      "slug": "payment"
+    },
+    {
+      "name": "Set-up",
+      "icon": "menu-icon tf-icons bx bx bx-cog",
+      "slug": "manage-settings",
+      "submenu": [
+        {
+          "url": "/cashier/set-up/scholarships",
+          "name": "Scholarships",
+          "slug": "scholarships"
+        }
+      ]
+    }
+  ]
+}

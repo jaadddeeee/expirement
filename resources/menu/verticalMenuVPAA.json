@@ -1,0 +1,32 @@
+{
+  "menu": [
+    {
+      "menuHeader": "VPAA"
+    },
+    {
+      "url": "/faculty-evaluation/indexvpaa",
+      "name": "AFES",
+      "icon": "menu-icon tf-icons bx bx bx-user",
+      "slug": "manage"
+    },
+    {
+      "name": "Report",
+      "icon": "menu-icon tf-icons bx bx bxs-book",
+      "slug": "manage-report",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Enrollment",
+          "slug": "arta",
+          "submenu": [
+            {
+              "url": "/report/count",
+              "name": "Count",
+              "slug": "enrolment-count"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
