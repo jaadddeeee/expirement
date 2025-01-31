@@ -9,43 +9,46 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\Department;
 
-class AccountRole {
+class AccountRole
+{
 
-    public static function hasRole($ro,$id,$campus){
-      // dd($role);
-      $out = [];
-      if (Auth::check()) {
-          $roles = DB::connection(strtolower($campus))
-            ->table("accountrole")
-            ->where("EmpID", $id)
-            ->get();
-          foreach ($roles as $role) {
-            if (strtolower($role->Role) == strtolower($ro))
-            return $role;
-          }
-      }
-      return $out;
+    public static function hasRole($ro, $id, $campus)
+    {
+        // dd($role);
+        $out = [];
+        if (Auth::check()) {
+            $roles = DB::connection(strtolower($campus))
+                ->table("accountrole")
+                ->where("EmpID", $id)
+                ->get();
+            foreach ($roles as $role) {
+                if (strtolower($role->Role) == strtolower($ro))
+                    return $role;
+            }
+        }
+        return $out;
     }
 
-    public static function isDepartmentHead(){
-      $out = false;
-      $depts = Department::where('DepartmentHead', auth()->user()->Emp_No)
-              ->where("Active", 0)
-              ->first();
+    public static function isDepartmentHead()
+    {
+        $out = false;
+        $depts = Department::where('DepartmentHead', auth()->user()->Emp_No)
+            ->where("Active", 0)
+            ->first();
 
-      if (!empty($depts)){
-        $out = true;
-      }
+        if (!empty($depts)) {
+            $out = true;
+        }
 
-      return $out;
+        return $out;
     }
 
     public static function isTES()
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "tes")
-                return true;
+                if (strtolower($role->Role) == "tes")
+                    return true;
             }
         }
         return false;
@@ -55,8 +58,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "osas")
-                return true;
+                if (strtolower($role->Role) == "osas")
+                    return true;
             }
         }
         return false;
@@ -66,8 +69,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "cashier")
-                return true;
+                if (strtolower($role->Role) == "cashier")
+                    return true;
             }
         }
         return false;
@@ -77,8 +80,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "teacher")
-                return true;
+                if (strtolower($role->Role) == "teacher")
+                    return true;
             }
         }
         return false;
@@ -88,8 +91,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "clearance")
-                return true;
+                if (strtolower($role->Role) == "clearance")
+                    return true;
             }
         }
         return false;
@@ -99,8 +102,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "nstp")
-                return true;
+                if (strtolower($role->Role) == "nstp")
+                    return true;
             }
         }
         return false;
@@ -111,8 +114,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "registrar")
-                return true;
+                if (strtolower($role->Role) == "registrar")
+                    return true;
             }
         }
         return false;
@@ -122,8 +125,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "department")
-                return true;
+                if (strtolower($role->Role) == "department")
+                    return true;
             }
         }
         return false;
@@ -133,8 +136,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "uisa")
-                return true;
+                if (strtolower($role->Role) == "uisa")
+                    return true;
             }
         }
         return false;
@@ -144,8 +147,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "scholarship")
-                return true;
+                if (strtolower($role->Role) == "scholarship")
+                    return true;
             }
         }
         return false;
@@ -155,8 +158,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "president")
-                return true;
+                if (strtolower($role->Role) == "president")
+                    return true;
             }
         }
         return false;
@@ -166,8 +169,8 @@ class AccountRole {
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "vpaa")
-                return true;
+                if (strtolower($role->Role) == "vpaa")
+                    return true;
             }
         }
         return false;
@@ -175,32 +178,44 @@ class AccountRole {
 
 
 
-    public static function checkRolePermission($role,$permission){
-        try{
-            if($role->hasPermissionTo($permission)){
+    public static function checkRolePermission($role, $permission)
+    {
+        try {
+            if ($role->hasPermissionTo($permission)) {
                 return true;
             }
             return false;
-        }catch (Exception $e){
+        } catch (Exception $e) {
             return false;
         }
     }
 
-    public static function demoUserPermission(){
-        if(Auth::user()->hasRole('demo_admin')){
+    public static function demoUserPermission()
+    {
+        if (Auth::user()->hasRole('demo_admin')) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-    
+    public static function isStudentID()
+    {
+        if (Auth::check()) {
+            foreach (Auth::user()->role as $role) {
+                if (strtolower($role->Role) == "student")
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public static function isScholar()
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-              if (strtolower($role->Role) == "scholar")
-                return true;
+                if (strtolower($role->Role) == "scholar")
+                    return true;
             }
         }
         return false;
