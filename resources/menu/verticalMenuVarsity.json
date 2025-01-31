@@ -1,0 +1,28 @@
+{
+    "menu": [
+        {
+            "menuHeader": "Varsity Management"
+        },
+        {
+            "name": "Event",
+            "url": "/varsity/event",
+            "icon": "menu-icon tf-icons bx bx-calendar-event",
+            "slug": "event"
+            
+        },
+        {
+            "name": "Coaches",
+            "url": "#",
+            "icon": "menu-icon tf-icons bx bx-trophy",
+            "slug": "coaches"
+            
+        },
+        {
+            "name": "Varsity",
+            "url": "#",
+            "icon": "menu-icon tf-icons bx bx-basketball",
+            "slug": "varsity"
+            
+        }
+    ] 
+}

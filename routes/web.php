@@ -574,3 +574,7 @@ Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tab
 
 // scholar
 Route::get('/scholar', $controller_path . '\SLSU\ScholarController@index')->name('scholar');
+
+//varsity
+Route::get('/varsity/event', $controller_path . '\SLSU\VarsityController@index')->name('varsity-event');
+

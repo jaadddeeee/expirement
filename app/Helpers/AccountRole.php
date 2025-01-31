@@ -205,4 +205,15 @@ class AccountRole {
         }
         return false;
     }
+
+    public static function isVarsity()
+    {
+        if (Auth::check()) {
+            foreach (Auth::user()->role as $role) {
+              if (strtolower($role->Role) == "varsity")
+                return true;
+            }
+        }
+        return false;
+    }
 }
