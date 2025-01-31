@@ -36,6 +36,8 @@
                 <div class="border"
                     style="width: 50%; height: 1000px; background-image: url('{{ asset('images/front.png') }}'); 
                     background-size: cover; background-position: center;">
+                    <label for="">{{ $student->StudentNo }}</label>
+
                 </div>
 
                 <!-- Back Image Container -->
@@ -43,6 +45,14 @@
                     style="width: 50%; height: 1000px; background-image: url('{{ asset('images/back.png') }}'); 
                     background-size: cover; background-position: center;">
                 </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <div class="text-end">
+                <hr>
+                <button type="submit" class="btn btn-primary mt-2 mb-2"><i
+                        class='bx bxs-printer me-1'></i><span>Print</span></button>
             </div>
         </div>
     </div>
