@@ -10,6 +10,6 @@ use Illuminate\Http\Request;
 class ScholarController extends Controller
 {
     public function index(){
-        return view('slsu.scholar.scholar');
+        return view('slsu.scholar.index');
     }
 }
