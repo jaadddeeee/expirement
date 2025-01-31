@@ -173,8 +173,6 @@ class AccountRole {
         return false;
     }
 
-
-
     public static function checkRolePermission($role,$permission){
         try{
             if($role->hasPermissionTo($permission)){
@@ -194,7 +192,6 @@ class AccountRole {
         }
     }
 
-    
     public static function isScholar()
     {
         if (Auth::check()) {
@@ -204,5 +201,5 @@ class AccountRole {
             }
         }
         return false;
-    }
+    }   
 }
