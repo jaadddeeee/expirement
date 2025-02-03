@@ -39,8 +39,9 @@
                 </div>
             </div>
         </div>
-        <div class="text-nowrap mb-4">
-            <table id="tableLogs" class="table table-striped">
+        <div class="table-responsive mb-4">
+
+            <table class="table table-striped datatable">
                 <thead>
                     <tr>
                         <th>ID</th>

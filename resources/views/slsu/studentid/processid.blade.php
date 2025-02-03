@@ -39,15 +39,19 @@
                             <div class="image-container d-block border mx-auto"
                                 style="position: relative; overflow: hidden; width: 100%; height: 700px;">
 
-                                @if ($student->Sex === 'Male')
-                                    <img src="{{ asset('images/face-male.jpg') }}" id="previewProfile" alt="Profile Picture"
-                                        class="d-block mx-auto mb-3"
-                                        style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;">
-                                @elseif ($student->Sex === 'Female')
-                                    <img src="{{ asset('images/face-female.jpg') }}" id="previewProfile"
-                                        alt="Profile Picture" class="d-block mx-auto mb-3"
-                                        style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;">
-                                @endif
+                                @php
+                                    $image = '';
+                                    if ($student->Sex === 'Male') {
+                                        $image = 'face-male.jpg';
+                                    } elseif ($student->Sex === 'Female') {
+                                        $image = 'face-female.jpg';
+                                    }
+                                @endphp
+
+                                <img src="{{ asset('images/' . $image) }}" id="previewProfile" alt="Profile Picture"
+                                    class="d-block mx-auto mb-3"
+                                    style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;">
+
 
                                 <div class="zoom-controls" style="position: absolute; bottom: 10px; right: 10px;">
                                     <button type="button" class="btn btn-danger zoom-btn" id="zoomOutProfile">-</button>
@@ -75,11 +79,23 @@
                             <input class="form-control" type="file" id="signature" name="signature" accept="image/*">
                         </div>
 
+
+                        @php
+                            $semester = '';
+                            if ($registration->Semester === 1) {
+                                $semester = $registration->Semester . 'st';
+                            } elseif ($registration->Semester === 2) {
+                                $semester = $registration->Semester . 'nd';
+                            }
+                        @endphp
+
                         <div class="mb-0">
                             <label for="province" class="form-label">School Year - Semester</label>
                             <input type="text" name="province" id="province" class="form-control"
-                                placeholder="Enter School Year and Semester">
+                                placeholder="Enter School Year and Semester"
+                                value="{{ $registration->SchoolYear }} - {{ $semester }}">
                         </div>
+
                     </div>
 
                     <!-- Right Side: Additional Fields -->

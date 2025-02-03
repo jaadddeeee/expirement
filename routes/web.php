@@ -487,6 +487,8 @@ Route::group(['prefix' => 'request', 'middleware' => ['auth', 'stuid']], functio
   Route::get('/add-new-id', $controller_path . '\SLSU\StudentIdController@getaddnewid')->name('studentid');
   Route::get('/process-id/{id}', $controller_path . '\SLSU\StudentIdController@getprocessid')->name('studentid');
   Route::post('/print-preview/{id}', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('studentid');
+  Route::get('print/student-id/{studentNo}', $controller_path. '\SLSU\StudentIdController@generatePDF')->name('student.print');
+
 });
 
 //SMS

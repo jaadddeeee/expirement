@@ -36,8 +36,25 @@
                 <div class="border"
                     style="width: 50%; height: 1000px; background-image: url('{{ asset('images/front.png') }}'); 
                     background-size: cover; background-position: center;">
-                    <label for="">{{ $student->StudentNo }}</label>
 
+                    <div class="container" style="margin-top: 88px;">
+                        <h3 class=""
+                            style="font-family: 'Trajan Pro', serif; font-size: 34px; color: rgb(0, 0, 0); position: relative; left: 190px;">
+                            Southern Leyte
+                        </h3>
+
+                        <h3 class="d-flex justify-content-center"
+                            style="font-family: 'Trajan Pro', serif; font-size: 28px; color: rgb(0, 0, 0); position: relative; left:18px; top: -20px;">
+                            State
+                            University
+                        </h3>
+
+                        <p class="d-flex justify-content-center"
+                            style="font-family: Arial, serif; position: relative; left: 61px; top: -35px; color: rgb(0, 0, 0);">
+                            Main Campus | San Roque, Sogod, Southern Leyte
+                        </p>
+
+                    </div>
                 </div>
 
                 <!-- Back Image Container -->
@@ -51,8 +68,10 @@
         <div class="card-footer">
             <div class="text-end">
                 <hr>
-                <button type="submit" class="btn btn-primary mt-2 mb-2"><i
-                        class='bx bxs-printer me-1'></i><span>Print</span></button>
+                <a href="{{ route('student.print', Crypt::encryptString($student->StudentNo)) }}"
+                    class="btn btn-primary mt-2 mb-2">
+                    <i class='bx bxs-printer me-1'></i><span>Print</span>
+                </a>
             </div>
         </div>
     </div>
