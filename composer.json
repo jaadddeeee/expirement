@@ -6,7 +6,7 @@
   "license": "MIT",
   "require": {
     "php": "^8.1",
-    "elibyy/tcpdf-laravel": "^10.0",
+    "elibyy/tcpdf-laravel": "^11.2",
     "guzzlehttp/guzzle": "^7.2",
     "hisorange/browser-detect": "^5.0",
     "laravel/framework": "^10.10",

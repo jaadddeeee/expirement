@@ -81,20 +81,19 @@
 
 
                         @php
-                            $semester = '';
-                            if ($registration->Semester === 1) {
-                                $semester = $registration->Semester . 'st';
-                            } elseif ($registration->Semester === 2) {
-                                $semester = $registration->Semester . 'nd';
-                            }
+                            $semesters = GENERAL::Semesters();
+                            $semesterShort = $semesters[$registration->Semester]
+                                ? $semesters[$registration->Semester]['Short']
+                                : 'N/A';
                         @endphp
 
                         <div class="mb-0">
-                            <label for="province" class="form-label">School Year - Semester</label>
-                            <input type="text" name="province" id="province" class="form-control"
+                            <label for="school_year" class="form-label">School Year - Semester</label>
+                            <input type="text" name="school_year" id="school_year" class="form-control"
                                 placeholder="Enter School Year and Semester"
-                                value="{{ $registration->SchoolYear }} - {{ $semester }}">
+                                value="{{ $registration->SchoolYear }} - {{ $semesterShort }}">
                         </div>
+
 
                     </div>
 
