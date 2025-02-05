@@ -46,7 +46,7 @@
                           <td class = 'text-nowrap'>{{ucwords(strtolower(utf8_decode($enrolled->LastName . ', '. $enrolled->FirstName)))}}</td>
                           <td class = 'text-nowrap'>{{$enrolled->courseno}}</td>
                           <td class = 'text-nowrap'>{{$enrolled->coursetitle}}</td>
-                          <td class = 'text-nowrap'><a href = "{{route('list-grades',['sched' => Crypt::encryptstring($enrolled->id),'sy' => Crypt::encryptstring($passsy),'sem' => Crypt::encryptstring($passsem)])}}">{{$enrolled->coursecode}}</a></td>
+                          <td class = 'text-nowrap'><a href = "{{ route('list-grades',['sched' => Crypt::encryptstring($enrolled->id),'sy' => Crypt::encryptstring($passsy),'sem' => Crypt::encryptstring($passsem)])}}">{{$enrolled->coursecode}}</a></td>
                         </tr>
                     @endforeach
                         </tbody>

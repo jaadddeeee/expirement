@@ -203,7 +203,7 @@ class AccountRole
     {
         if (Auth::check()) {
             foreach (Auth::user()->role as $role) {
-                if (strtolower($role->Role) == "student")
+                if (strtolower($role->Role) == "stuid")
                     return true;
             }
         }

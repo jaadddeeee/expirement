@@ -7,7 +7,7 @@
             "name": "School ID Card",
             "url": "/request/student-id",
             "icon": "menu-icon tf-icons bx bx bx-user",
-            "slug": "studentid"
+            "slug": "student-id"
         }   
     ] 
 }

@@ -18,7 +18,7 @@
     </nav>
 
     <div class="card">
-        <form action="{{ url('request/print-preview/' . Crypt::encryptString($student->StudentNo)) }}" method="POST"
+        <form action="{{ route('print-preview', ['stuid' => Crypt::encryptString($student->StudentNo)]) }}" method="POST"
             enctype="multipart/form-data">
             @csrf
             <div class="card-header">
@@ -32,10 +32,8 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <!-- Left Side: Profile Picture & Signature -->
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <!-- Profile Picture Container with Zoom Controls -->
                             <div class="image-container d-block border mx-auto"
                                 style="position: relative; overflow: hidden; width: 100%; height: 700px;">
 
@@ -64,7 +62,6 @@
                         </div>
 
                         <div class="mb-3">
-                            <!-- Signature Container with Zoom Controls -->
                             <div class="image-container d-block border mx-auto"
                                 style="position: relative; overflow: hidden; width: 100%; height: 100px;">
                                 <img src="{{ asset('images/signature.png') }}" id="previewSignature" src=""
@@ -97,7 +94,6 @@
 
                     </div>
 
-                    <!-- Right Side: Additional Fields -->
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="studentName" class="form-label">Name</label>
@@ -194,7 +190,6 @@
     </div>
 
     <script>
-        // Profile Picture Zoom In and Out
         let zoomLevelProfile = 1;
         document.getElementById('zoomInProfile').addEventListener('click', function() {
             zoomLevelProfile += 0.1;
@@ -207,7 +202,6 @@
             }
         });
 
-        // Signature Zoom In and Out
         let zoomLevelSignature = 1;
         document.getElementById('zoomInSignature').addEventListener('click', function() {
             zoomLevelSignature += 0.1;
@@ -220,7 +214,6 @@
             }
         });
 
-        // Image Preview on file selection
         document.getElementById('profilePicture').addEventListener('change', function(event) {
             let reader = new FileReader();
             reader.onload = function(e) {

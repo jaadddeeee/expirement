@@ -483,11 +483,10 @@ Route::group(['prefix' => 'registrar', 'middleware' => ['auth', 'registrar']], f
 
 //Student ID
 Route::group(['prefix' => 'request', 'middleware' => ['auth', 'stuid']], function () use ($controller_path) {
-  Route::get('/student-id', $controller_path . '\SLSU\StudentIdController@index')->name('studentid');
-  Route::get('/add-new-id', $controller_path . '\SLSU\StudentIdController@getaddnewid')->name('studentid');
-  Route::get('/process-id/{id}', $controller_path . '\SLSU\StudentIdController@getprocessid')->name('studentid');
-  Route::post('/print-preview/{id}', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('studentid');
-  Route::get('print/student-id/{studentNo}', $controller_path. '\SLSU\StudentIdController@generatePDF')->name('student.print');
+  Route::get('/student-id', $controller_path . '\SLSU\StudentIdController@index');
+  Route::get('/process-id', $controller_path . '\SLSU\StudentIdController@getprocessid')->name('process-id');
+  Route::post('/print-preview', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('print-preview');
+  Route::get('print', $controller_path. '\SLSU\StudentIdController@generatePDF')->name('print');
 
 });
 
