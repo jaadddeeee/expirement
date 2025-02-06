@@ -82,13 +82,18 @@
                             $semesterShort = $semesters[$registration->Semester]
                                 ? $semesters[$registration->Semester]['Short']
                                 : 'N/A';
+
+                            $schoolYearLabel = GENERAL::setSchoolYearLabel(
+                                $registration->SchoolYear,
+                                $registration->Semester,
+                            );
                         @endphp
 
                         <div class="mb-0">
                             <label for="school_year" class="form-label">School Year - Semester</label>
                             <input type="text" name="school_year" id="school_year" class="form-control"
                                 placeholder="Enter School Year and Semester"
-                                value="{{ $registration->SchoolYear }} - {{ $semesterShort }}">
+                                value="{{ $schoolYearLabel }} - {{ $semesterShort }}">
                         </div>
 
 
@@ -111,12 +116,12 @@
 
                         <div class="mb-3">
                             <label for="course" class="form-label">Course</label>
-                            <h4>{{ $student->Course }}</h4>
+                            <h4>{{ $registration->Course }}</h4>
                         </div>
 
                         <div class="mb-4">
                             <label for="specialization" class="form-label">Specialization</label>
-                            <h4>{{ $student->major }}</h4>
+                            <h4>{{ $registration->Major }}</h4>
                         </div>
 
                         <label class="form-label mb-3" style="color: #39DA8A; ">PERSONAL INFORMATION</label>

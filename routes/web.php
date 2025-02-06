@@ -486,7 +486,7 @@ Route::group(['prefix' => 'request', 'middleware' => ['auth', 'stuid']], functio
   Route::get('/student-id', $controller_path . '\SLSU\StudentIdController@index');
   Route::get('/process-id', $controller_path . '\SLSU\StudentIdController@getprocessid')->name('process-id');
   Route::post('/print-preview', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('print-preview');
-  Route::get('print', $controller_path. '\SLSU\StudentIdController@generatePDF')->name('print');
+  Route::get('print', $controller_path. '\SLSU\StudentIdController@print')->name('print');
 
 });
 
