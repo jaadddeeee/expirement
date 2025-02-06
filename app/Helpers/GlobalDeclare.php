@@ -137,7 +137,23 @@ class GlobalDeclare {
       3 => ["Description" => "Fix Amount - Amount Due"],
     ];
     return $out;
+  }
 
+  public static function ScholarshipsNew(){
+    $out = [
+      1 => ["Description" => "Internal"],
+      2 => ["Description" => "External"],
+    ];
+    return $out;
+  }
+
+  public static function ExternalSchType(){
+    $out = [
+      1 => ["Description" => "Private"],
+      2 => ["Description" => "Local"],
+      3 => ["Description" => "National"],
+    ];
+    return $out;
   }
 
   public static function GradeRemarksString($f, $color = 0 , $bold = ''){

@@ -93,5 +93,4 @@
 @section('page-script')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('storage/js/scholarship.js?id=20240418') }}"></script>
-
 @endsection

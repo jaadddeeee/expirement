@@ -513,7 +513,6 @@ Route::group(['prefix' => 'report', 'middleware' => ['auth']], function () use (
   });
 });
 
-
 // layout
 Route::get('/layouts/without-menu', $controller_path . '\layouts\WithoutMenu@index')->name('layouts-without-menu');
 Route::get('/layouts/without-navbar', $controller_path . '\layouts\WithoutNavbar@index')->name('layouts-without-navbar');
@@ -572,5 +571,20 @@ Route::get('/form/layouts-horizontal', $controller_path . '\form_layouts\Horizon
 // tables
 Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tables-basic');
 
-// scholar
-Route::get('/scholar', $controller_path . '\SLSU\ScholarController@index')->name('scholar');
+// scholarship
+Route::group(['prefix' => 'scholarship-new', 'middleware' => ['auth', 'scholarshipnew']], function () use ($controller_path){
+  Route::get('/scholarships', $controller_path . '\SLSU\ScholarshipNController@index')->name('scholarships');
+  Route::get('/get-scholarships', $controller_path . '\SLSU\ScholarshipNController@getScholarships')->name('get-scholarships');
+  Route::post('/save-scholarship', $controller_path . '\SLSU\ScholarshipNController@save');
+  Route::get('/edit-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@edit')->name('edit-scholarship');
+  Route::post('/update-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@update');
+});
+
+
+
+
+
+
+
+
+

@@ -10,7 +10,7 @@ use ROLE;
 class Scholarship
 {
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next) : Response
     {
 
         if (!ROLE::isScholarship()){

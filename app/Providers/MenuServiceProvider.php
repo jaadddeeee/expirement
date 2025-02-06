@@ -105,9 +105,10 @@ class MenuServiceProvider extends ServiceProvider
         }
 
         if (ROLE::isScholar()){
-          $menuScholar = file_get_contents(base_path('resources/menu/verticalMenuScholar.json'));
+          $menuScholar = file_get_contents(base_path('resources/menu/verticalMenuScholarshipNew.json'));
           array_push($verticalMenuData, json_decode($menuScholar));
         }
+        
         \View::share('menuData', $verticalMenuData);
     });
   }

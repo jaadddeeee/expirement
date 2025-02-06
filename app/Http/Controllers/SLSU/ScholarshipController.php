@@ -52,7 +52,6 @@ class ScholarshipController extends Controller
       }
 
       //check if exist
-
       $ex = Scholarship::where("scholar_name",trim($ScholarshipName))
         ->where('typ', $ScholarshipType)
         ->where('amount',str_replace(",","",$Amount))

@@ -1,0 +1,19 @@
+{
+    "menu": [
+        {
+            "menuHeader": "Scholarship"
+        },
+        {
+            "url": "scholarship-new/scholarships",
+            "name": "Scholarships",
+            "icon": "menu-icon tf-icons bx bxs-graduation",
+            "slug": "scholarships"
+        },
+        {
+            "url": "/scholars",
+            "name": "Scholars",
+            "icon": "menu-icon tf-icons bx bxs-graduation",
+            "slug": "scholars"
+        }
+    ]
+}
