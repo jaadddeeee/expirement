@@ -1,11 +1,11 @@
 {
     "menu": [
         {
-            "menuHeader": "School ID"
+            "menuHeader": "Employee"
         },
         {
-            "name": "School ID",
-            "url": "/school-id/student-list",
+            "name": "Employee ID",
+            "url": "/employee/employee-list",
             "icon": "menu-icon tf-icons bx bx bx-user",
             "slug": "student-id"
         }   

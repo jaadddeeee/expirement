@@ -12,7 +12,8 @@
                 <a href="/request/student-id">School Card ID</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{{ route('process-id', ['stuid' => Crypt::encryptString($student->StudentNo)]) }}">Process ID</a>
+                <a href="{{ route('emp_process-id', ['emid' => Crypt::encryptString($student->StudentNo)]) }}">Process
+                    ID</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
                 {{ $pageTitle }}
@@ -50,7 +51,7 @@
 
                         <p class="d-flex justify-content-center"
                             style="font-family: 'Poppins', sans-serif; font-size: 15px; position: relative; left: 75px; top: -38px; color: #000;">
-                            {{ $defaultValues['CampusString'] }} | {{ $defaultValues['SchoolAddress'] }}
+                            Main Campus | San Roque, Sogod, Southern Leyte
                         </p>
 
                         <div class="profile-box" style="text-align: center; margin-top: -30px;">
@@ -122,7 +123,7 @@
                             </div>
                             <p class="d-flex justify-content-center"
                                 style="font-family: 'Poppins', sans-serif; font-size: 19px; position: relative;  top: -40px; color: #ffffff;">
-                                {{ $defaultValues['SchoolWebsite'] }}
+                                www.southernleytestateu.edu.ph
                             </p>
                         </div>
                     </div>
@@ -203,16 +204,11 @@
 
                     <p class="text-center"
                         style="font-family: 'Poppins', sans-serif; font-size: 35px; font-weight: bold; position: relative; top: 220px;  color: #000000; margin-bottom: -2px;">
-                        {{ strtoupper($defaultValues['PresidentName']) }}
+                        JUDE A. DUARTE, DPA
                     </p>
 
-                    <div class="profile-box" style="text-align: center; margin-top: 120px;">
-                        <img src="{{ asset('images/e_sig_jude.png') }}" alt="Profile Picture"
-                            style="width: 60px; height: 60px;">
-                    </div>
-
                     <p class="text-center"
-                        style="font-family: 'Poppins', sans-serif; font-size: 20px; position: relative; top: 40px;  color: #000000; margin-bottom: -2px;">
+                        style="font-family: 'Poppins', sans-serif; font-size: 20px; position: relative; top: 220px;  color: #000000; margin-bottom: -2px;">
                         University President
                     </p>
                 </div>
@@ -222,7 +218,7 @@
         <div class="card-footer">
             <div class="text-end">
                 <hr>
-                <a href="{{ route('print', ['stuid' => Crypt::encryptString($student->StudentNo)]) }}"
+                <a href="{{ route('print', ['emid' => Crypt::encryptString($student->StudentNo)]) }}"
                     class="btn btn-primary mt-2 mb-2">
                     <i class='bx bxs-printer me-1'></i><span>Print</span>
                 </a>

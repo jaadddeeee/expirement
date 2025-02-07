@@ -4,7 +4,6 @@
 
 
 @section('content')
-
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-style1">
             <li class="breadcrumb-item">
@@ -45,25 +44,25 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>STUDENT ID</th>
-                        <th>STUDENT NAME</th>
+                        <th>Employee ID</th>
+                        <th>Employee NAME</th>
                         <th>SEX</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
                     @php $id = 1; @endphp
-                    @foreach ($student as $students)
+                    @foreach ($employee as $employees)
                         <tr>
                             <td>{{ $id++ }}</td>
-                            <td>{{ $students->StudentNo }}</td>
+                            <td>{{ $employees->AgencyNumber ? $employees->AgencyNumber : 'N/A' }}</td>
                             <td>
-                                {{ $students->FirstName }}
-                                {{ $students->MiddleName ? Str::substr($students->MiddleName, 0, 1) . '.' : '' }}
-                                {{ $students->LastName }}
+                                {{ $employees->FirstName }}
+                                {{ $employees->MiddleName ? Str::substr($employees->MiddleName, 0, 1) . '.' : '' }}
+                                {{ $employees->LastName }}
                                 {{-- {{ $students->Suffix ? $students->Suffix . '.' : '' }} --}}
                             </td>
-                            <td>{{ $students->Sex ? Str::substr($students->Sex, 0, 1) : '' }}</td>
+                            <td>{{ $employees->Sex ? Str::substr(AES::decrypt($employees->Sex), 0, 1) : 'N/A' }}</td>
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
@@ -72,7 +71,7 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item d-flex align-items-center"
-                                            href="{{ route('process-id', ['stuid' => Crypt::encryptString($students->StudentNo)]) }}">
+                                            href="{{ route('emp_process-id', ['emid' => Crypt::encryptString($employees->StudentNo)]) }}">
                                             <i class="bx bxs-id-card me-2"></i>
                                             <span>Process ID</span>
                                         </a>

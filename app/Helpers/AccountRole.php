@@ -210,6 +210,17 @@ class AccountRole
         return false;
     }
 
+    public static function isEmployeeID()
+    {
+        if (Auth::check()) {
+            foreach (Auth::user()->role as $role) {
+                if (strtolower($role->Role) == "emid")
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public static function isScholar()
     {
         if (Auth::check()) {

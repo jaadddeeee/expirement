@@ -482,11 +482,20 @@ Route::group(['prefix' => 'registrar', 'middleware' => ['auth', 'registrar']], f
 });
 
 //Student ID
-Route::group(['prefix' => 'request', 'middleware' => ['auth', 'stuid']], function () use ($controller_path) {
-  Route::get('/student-id', $controller_path . '\SLSU\StudentIdController@index');
+Route::group(['prefix' => 'school-id', 'middleware' => ['auth', 'stuid']], function () use ($controller_path) {
+  Route::get('/student-list', $controller_path . '\SLSU\StudentIdController@index')->name('student-list');
   Route::get('/process-id', $controller_path . '\SLSU\StudentIdController@getprocessid')->name('process-id');
   Route::post('/print-preview', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('print-preview');
   Route::get('print', $controller_path. '\SLSU\StudentIdController@print')->name('print');
+
+});
+
+//Student ID
+Route::group(['prefix' => 'employee', 'middleware' => ['auth', 'emid']], function () use ($controller_path) {
+  Route::get('/employee-list', $controller_path . '\SLSU\EmployeeIDController@index');
+  Route::get('/process-id', $controller_path . '\SLSU\EmployeeIDController@getprocessid')->name('emp_process-id');
+  Route::post('/print-preview', $controller_path . '\SLSU\EmployeeIDController@getprintpreview')->name('emp_print-preview');
+  Route::get('/print', $controller_path. '\SLSU\EmployeeIDController@print')->name('emp_print');
 
 });
 

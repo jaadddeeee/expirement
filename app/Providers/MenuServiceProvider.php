@@ -40,6 +40,7 @@ class MenuServiceProvider extends ServiceProvider
       $menuVPAA = [];
       $menuScholar = [];
       $menuStudentID = [];
+      $menuEmployeeID = [];
 
       $menuAll = file_get_contents(base_path('resources/menu/verticalMenuAll.json'));
       array_push($verticalMenuData, json_decode($menuAll));
@@ -107,6 +108,11 @@ class MenuServiceProvider extends ServiceProvider
       if (ROLE::isStudentID()) {
         $menuStudentID = file_get_contents(base_path('resources/menu/verticalMenuStudentID.json'));
         array_push($verticalMenuData, json_decode($menuStudentID));
+      }
+
+      if (ROLE::isEmployeeID()) {
+        $menuEmployeeID = file_get_contents(base_path('resources/menu/verticalMenuEmployeeID.json'));
+        array_push($verticalMenuData, json_decode($menuEmployeeID));
       }
 
       if (ROLE::isScholar()) {

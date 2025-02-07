@@ -9,7 +9,7 @@
                 <a href="{{ route('home') }}">Home</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="/school-id/student-list">School Card ID</a>
+                <a href="/request/student-id">School Card ID</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
                 {{ $pageTitle }}
@@ -18,7 +18,7 @@
     </nav>
 
     <div class="card">
-        <form action="{{ route('print-preview', ['stuid' => Crypt::encryptString($student->StudentNo)]) }}" method="POST"
+        <form action="{{ route('emp_print-preview', ['emid' => Crypt::encryptString($student->StudentNo)]) }}" method="POST"
             enctype="multipart/form-data">
             @csrf
             <div class="card-header">
