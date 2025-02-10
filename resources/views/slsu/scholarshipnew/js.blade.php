@@ -5,7 +5,7 @@
         }
     });
 
-    // Save Scholarship
+    // save scholarship
     $(document).on("click", "#btnSaveScholar", function(e) {
         e.preventDefault();
         $.ajax({
@@ -46,8 +46,8 @@
         });
     });
 
-    // Fetch and Populate Scholarship for Editing
-    function editScholar(id) {
+    // fetch and populate data
+    function editScholarship(id) {
         $.ajax({
             url: `/scholarship-new/edit-scholarship/${id}`,
             method: 'GET',
@@ -108,9 +108,7 @@
                     setTimeout(function() {
                         $('#offcanvasEditScholar').offcanvas('hide');
                         $("#editMsg").html('');
-                        $.get('/scholarship-new/fetch-scholarships', function(data) {
-                            $(".datatable tbody").html(data);
-                        });
+                        fetchScholarships();
                     }, 1000);
                 } else {
                     $("#editMsg").html(`<div class="alert alert-danger">${Message}</div>`);
@@ -127,7 +125,7 @@
         });
     });
 
-
+    // fetch data to the table after saving, updating and deleting record
     function fetchScholarships() {
         $.ajax({
             url: '/scholarship-new/fetch-scholarships',
@@ -141,6 +139,7 @@
         });
     }
 
+    // dynamic select 
     $('#scholarshipType, #editScholarshipType').on('change', function() {
         let externalOptions = $(this).attr('id') === 'scholarshipType' ? $('#externalOptions') : $(
             '#editExternalOptions');
@@ -152,7 +151,8 @@
         }
     });
 
-    function deleteScholar(encryptedId) {
+    // delete scholarship
+    function deleteScholarship(encryptedId) {
         Swal.fire({
             title: 'Are you sure?',
             text: "This action cannot be undone!",

@@ -29,6 +29,7 @@ class ScholarshipNController extends Controller
         return view('slsu.scholarshipnew.index', compact('pageTitle', 'headerAction', 'scholarships'));
     }
 
+    // save scholarship
     public function save(Request $request)
     {
         try {
@@ -82,6 +83,7 @@ class ScholarshipNController extends Controller
         return view('_partials.scholarships-table', compact('scholarships'))->render();
     }
 
+    // edit scholarship
     public function edit($id)
     {
         try {
@@ -105,6 +107,7 @@ class ScholarshipNController extends Controller
         }
     }
 
+    // update scholarship
     public function update(Request $request, $id)
     {
         try {
@@ -147,6 +150,7 @@ class ScholarshipNController extends Controller
         }
     }
 
+    // delete scholarship using softdeletes
     public function delete($encryptedId)
     {
         try {
