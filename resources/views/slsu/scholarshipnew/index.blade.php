@@ -57,15 +57,19 @@
                                             @endif
                                         </td>
                                         <td class="text-nowrap">
+                                            <!-- Add Button Icon -->
                                             <i class="fa fa-plus-circle text-success me-2" style="cursor: pointer;"
                                                 title="Add"></i>
 
+                                            <!-- Edit Button Icon -->
                                             <i class="fa fa-edit text-warning me-2" style="cursor: pointer;"
                                                 onclick="editScholar('{{ Crypt::encryptString($scholarship->id) }}')"
                                                 title="Edit"></i>
 
+                                            <!-- Delete Button Icon -->
                                             <i class="fa fa-trash text-danger" style="cursor: pointer;"
-                                                onclick="deleteScholar('{{ $scholarship->id }}')" title="Delete"></i>
+                                                onclick="deleteScholar('{{ Crypt::encryptString($scholarship->id) }}')"
+                                                title="Delete"></i>
                                         </td>
                                     </tr>
                                 @endforeach

@@ -5,14 +5,13 @@
         }
     });
 
+    // Save Scholarship
     $(document).on("click", "#btnSaveScholar", function(e) {
         e.preventDefault();
         $.ajax({
             url: '/scholarship-new/save-scholarship',
             method: 'POST',
             data: $("#frmAddScholarship").serialize(),
-            cache: false,
-            dataType: 'json',
             beforeSend: function() {
                 $("#btnSaveScholar")
                     .prop("disabled", true)
@@ -30,9 +29,7 @@
                     setTimeout(function() {
                         $('#offcanvasAddScholar').offcanvas('hide');
                         $("#msg").html('');
-                        $.get('/scholarship-new/get-scholarships', function(data) {
-                            $(".datatable tbody").html(data);
-                        });
+                        fetchScholarships();
                     }, 1000);
                 } else {
                     $("#msg").html(`<div class="alert alert-danger">${Message}</div>`);
@@ -49,58 +46,35 @@
         });
     });
 
-    $('#scholarshipType').on('change', function() {
-        const externalOptions = $('#externalOptions');
-        if ($(this).val() == '2') {
-            externalOptions.show();
-        } else {
-            externalOptions.hide();
-            $('#externalScholarshipType').val('');
-        }
-    });
-
-    $('#editScholarshipType').on('change', function() {
-        if ($(this).val() == '2') {
-            $('#editExternalOptions').show();
-        } else {
-            $('#editExternalOptions').hide();
-            $('#editExternalScholarshipType').val('');
-        }
-    });
-
-    // edit
-    function editScholar(encryptedId) {
-        let url = '{{ route('edit-scholarship', ':id') }}'.replace(':id', encryptedId);
-
-        //window.history.pushState({}, '', url);
-
+    // Fetch and Populate Scholarship for Editing
+    function editScholar(id) {
         $.ajax({
-            url: url,
-            type: 'GET',
-            dataType: 'json',
+            url: `/scholarship-new/edit-scholarship/${id}`,
+            method: 'GET',
             beforeSend: function() {
-                $("#editMsg").html(
-                    "<div class='alert alert-info'><i class='spinner-grow spinner-grow-sm'></i> Loading...</div>"
-                );
+                $('#editMsg').html('');
             },
             success: function(response) {
                 if (response.Error === 0) {
-                    const scholarship = response.Scholarship;
+                    let scholarship = response.Scholarship;
+                    $('#editScholarshipId').val(scholarship.id);
+                    $('#editScholarshipName').val(scholarship.name);
+                    $('#editScholarshipType').val(scholarship.type).change();
 
-                    $("#editScholarshipId").val(encryptedId);
-                    $("#editScholarshipName").val(scholarship.sch_name);
-                    $("#editScholarshipType").val(scholarship.sch_type).trigger('change');
-                    $("#editExternalScholarshipType").val(scholarship.ext_type);
+                    if (scholarship.type == 2) {
+                        $('#editExternalOptions').show();
+                        $('#editExternalScholarshipType').val(scholarship.externalType);
+                    } else {
+                        $('#editExternalOptions').hide();
+                    }
 
-                    $("#offcanvasEditScholar").offcanvas('show');
+                    $('#offcanvasEditScholar').offcanvas('show');
                 } else {
-                    $("#editMsg").html(`<div class="alert alert-danger">${response.Message}</div>`);
+                    alert(response.Message);
                 }
             },
             error: function(xhr) {
-                $("#editMsg").html(
-                    `<div class="alert alert-danger">An unexpected error occurred: ${xhr.statusText}</div>`
-                );
+                alert('Error fetching scholarship: ' + xhr.statusText);
             }
         });
     }
@@ -108,30 +82,38 @@
     // update
     $(document).on("click", "#btnUpdateScholar", function(e) {
         e.preventDefault();
-        const encryptedId = $("#editScholarshipId").val();
+
+        let formData = $("#frmEditScholarship").serializeArray();
 
         $.ajax({
-            url: `/scholarship-new/update-scholarship/${encryptedId}`,
-            type: 'POST',
+            url: '/scholarship-new/update-scholarship/' + $("#editScholarshipId").val(),
+            method: 'PUT',
             data: $("#frmEditScholarship").serialize(),
+            cache: false,
             dataType: 'json',
             beforeSend: function() {
-                $("#btnUpdateScholar").prop("disabled", true).html(
-                    "<i class='spinner-grow spinner-grow-sm'></i> Updating...");
+                $("#btnUpdateScholar")
+                    .prop("disabled", true)
+                    .html("<i class='spinner-grow spinner-grow-sm'></i> Updating...");
                 $("#editMsg").html("");
             },
             success: function(response) {
-                if (response.Error === 0) {
-                    $("#editMsg").html(
-                        `<div class="alert alert-success">${response.Message}</div>`);
+                const {
+                    Error,
+                    Message
+                } = response;
+
+                if (Error === 0) {
+                    $("#editMsg").html(`<div class="alert alert-success">${Message}</div>`);
                     setTimeout(function() {
-                        $("#offcanvasEditScholar").offcanvas('hide');
-                        $.get('/scholarship-new/get-scholarships', function(data) {
+                        $('#offcanvasEditScholar').offcanvas('hide');
+                        $("#editMsg").html('');
+                        $.get('/scholarship-new/fetch-scholarships', function(data) {
                             $(".datatable tbody").html(data);
                         });
                     }, 1000);
                 } else {
-                    $("#editMsg").html(`<div class="alert alert-danger">${response.Message}</div>`);
+                    $("#editMsg").html(`<div class="alert alert-danger">${Message}</div>`);
                 }
             },
             error: function(xhr) {
@@ -144,4 +126,65 @@
             }
         });
     });
+
+
+    function fetchScholarships() {
+        $.ajax({
+            url: '/scholarship-new/fetch-scholarships',
+            method: 'GET',
+            success: function(data) {
+                $(".datatable tbody").html(data);
+            },
+            error: function(xhr) {
+                console.error(`Failed to fetch scholarships: ${xhr.statusText}`);
+            }
+        });
+    }
+
+    $('#scholarshipType, #editScholarshipType').on('change', function() {
+        let externalOptions = $(this).attr('id') === 'scholarshipType' ? $('#externalOptions') : $(
+            '#editExternalOptions');
+        if ($(this).val() == '2') {
+            externalOptions.show();
+        } else {
+            externalOptions.hide();
+            externalOptions.find('select').val('');
+        }
+    });
+
+    function deleteScholar(encryptedId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/scholarship-new/delete-scholarship/${encryptedId}`,
+                    method: 'DELETE',
+                    success: function(response) {
+                        const {
+                            Error,
+                            Message
+                        } = response;
+
+                        if (Error === 0) {
+                            Swal.fire('Deleted!', Message, 'success');
+                            fetchScholarships();
+                        } else {
+                            Swal.fire('Error!', Message, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', xhr.responseText || xhr.statusText, 'error');
+                    }
+                });
+            }
+        });
+    }
 </script>

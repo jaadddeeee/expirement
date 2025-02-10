@@ -22,7 +22,7 @@
 
             <!-- Delete Button Icon -->
             <i class="fa fa-trash text-danger" style="cursor: pointer;"
-                onclick="deleteScholar('{{ $scholarship->id }}')" title="Delete"></i>
+                onclick="deleteScholar('{{ Crypt::encryptString($scholarship->id) }}')" title="Delete"></i>
         </td>
     </tr>
 @endforeach

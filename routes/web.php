@@ -571,16 +571,15 @@ Route::get('/form/layouts-horizontal', $controller_path . '\form_layouts\Horizon
 // tables
 Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tables-basic');
 
-// scholarship
+// scholarship new
 Route::group(['prefix' => 'scholarship-new', 'middleware' => ['auth', 'scholarshipnew']], function () use ($controller_path){
   Route::get('/scholarships', $controller_path . '\SLSU\ScholarshipNController@index')->name('scholarships');
-  Route::get('/get-scholarships', $controller_path . '\SLSU\ScholarshipNController@getScholarships')->name('get-scholarships');
+  Route::get('/fetch-scholarships', $controller_path . '\SLSU\ScholarshipNController@fetchScholarships')->name('fetch-scholarships');
   Route::post('/save-scholarship', $controller_path . '\SLSU\ScholarshipNController@save');
   Route::get('/edit-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@edit')->name('edit-scholarship');
-  Route::post('/update-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@update');
+  Route::put('/update-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@update');
+  Route::delete('/delete-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@delete');
 });
-
-
 
 
 

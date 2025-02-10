@@ -71,6 +71,7 @@ class ClearanceController extends Controller
           'Role' => "Department",
           'DepartmentName' => $dept->DepartmentName
         ]);
+        
       }elseif (strtolower($role->ClearanceRole) == "library"){
           $pageTitle = "Manage Clearance";
           $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>';

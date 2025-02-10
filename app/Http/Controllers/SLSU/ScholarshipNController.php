@@ -21,8 +21,10 @@ class ScholarshipNController extends Controller
         $pageTitle = "Scholarships";
         $headerAction = '<a href="' . url()->previous() . '" class="btn btn-sm btn-primary" role="button">Back</a>';
 
-        $scholarships = ScholarshipNew::orderBy('sch_type')
-            ->orderBy('sch_name')->get();
+        $scholarships = ScholarshipNew::whereNull('deleted_at')
+            ->orderBy('sch_type')
+            ->orderBy('sch_name')
+            ->get();
 
         return view('slsu.scholarshipnew.index', compact('pageTitle', 'headerAction', 'scholarships'));
     }
@@ -65,53 +67,99 @@ class ScholarshipNController extends Controller
     
         } catch (\Exception $e){
             return response()->json(['Error' => 1, "Message" => "An error occurred: " . $e->getMessage()], 400);
+        } catch(DecryptException $e){
+            return "Invalid hash.";
         }
     }
 
-    // mo fetch ang data sa table automatically after saving or updating
-    public function getScholarships()
+    public function fetchScholarships()
     {
-        $scholarships = ScholarshipNew::orderBy('sch_type')
-            ->orderBy('sch_name')->get();
+        $scholarships = ScholarshipNew::whereNull('deleted_at')
+            ->orderBy('sch_type')
+            ->orderBy('sch_name')
+            ->get();
 
         return view('_partials.scholarships-table', compact('scholarships'))->render();
     }
 
-    // edit
     public function edit($id)
     {
-        try{
-            $decryptedId = Crypt::decryptString($id);
-            $scholarship = ScholarshipNew::findOrFail($decryptedId);
-    
+        try {
+            $scholarshipId = Crypt::decryptString($id);
+            $scholarship = ScholarshipNew::findOrFail($scholarshipId);
+
             return response()->json([
                 'Error' => 0,
-                'Scholarship' => $scholarship
+                'Scholarship' => [
+                    'id' => $scholarship->id,
+                    'name' => $scholarship->sch_name,
+                    'type' => $scholarship->sch_type,
+                    'externalType' => $scholarship->ext_type,
+                ]
             ]);
-
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'Error' => 1,
-                'Message' => 'Failed to fetch scholarship data.'
+                'Message' => 'Scholarship not found or an error occurred: ' . $e->getMessage()
             ], 400);
         }
     }
 
-    // update
     public function update(Request $request, $id)
     {
         try {
-            $decryptedId = Crypt::decryptString($id);
-            $scholarship = ScholarshipNew::findOrFail($decryptedId);
+            $scholarship = ScholarshipNew::findOrFail($id);
+            
+            $ScholarshipName = trim($request->ScholarshipName);
+            $ScholarshipType = $request->ScholarshipType;
+            $ExternalSchType = $request->ExternalScholarshipType;
 
-            $scholarship->sch_name = trim($request->ScholarshipName);
-            $scholarship->sch_type = $request->ScholarshipType;
-            $scholarship->ext_type = $request->ExternalScholarshipType ?? 'N/A';
-            $scholarship->save();
+            if (empty($ScholarshipName)) {
+                return response()->json(['Error' => 1, "Message" => "Empty Scholarship Name"]);
+            }
+    
+            if (empty($ScholarshipType) || $ScholarshipType == 0) {
+                return response()->json(['Error' => 1, "Message" => "Please select scholarship type"]);
+            }
 
-            return response()->json(['Error' => 0, 'Message' => 'Scholarship updated successfully.']);
+            if ($ScholarshipType == 1) {
+                $ExternalSchType = 'N/A';
+            } elseif (empty($ExternalSchType)) {
+                return response()->json(['Error' => 1, "Message" => "Please select external type"]);
+            }
+
+            $existing = ScholarshipNew::where('sch_name', $ScholarshipName)->first();
+
+            if ($existing) {
+                return response()->json(['Error' => 1, "Message" => "Scholarship already exists."]);
+            }
+            
+            $scholarship->update([
+                'sch_name' => $ScholarshipName,
+                'sch_type' => $ScholarshipType,
+                'ext_type' => $ExternalSchType
+            ]);
+
+            return response()->json(['Error' => 0, "Message" => "$ScholarshipName updated successfully."]);
+
         } catch (\Exception $e) {
-            return response()->json(['Error' => 1, 'Message' => 'Failed to update scholarship.'], 400);
+            return response()->json(['Error' => 1, "Message" => "An error occurred: " . $e->getMessage()], 400);
+        }
+    }
+
+    public function delete($encryptedId)
+    {
+        try {
+            $id = Crypt::decryptString($encryptedId);
+
+            $scholarship = ScholarshipNew::findOrFail($id);
+            $scholarship->delete(); 
+
+            return response()->json(['Error' => 0, 'Message' => 'Scholarship deleted successfully.']);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return response()->json(['Error' => 1, 'Message' => 'Invalid ID.'], 400);
+        } catch (\Exception $e) {
+            return response()->json(['Error' => 1, 'Message' => 'Error deleting scholarship: ' . $e->getMessage()], 400);
         }
     }
 }
