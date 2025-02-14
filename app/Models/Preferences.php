@@ -20,9 +20,7 @@ class Preferences extends Model
         'id','DefaultName', 'DefaultValue'
     ];
 
-    public function setConnection($campus){
-      $this->connection = strtolower($campus);
-
+    public function __construct(){
+      $this->connection = strtolower(session('campus'));
   }
-
 }

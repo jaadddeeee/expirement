@@ -3,13 +3,14 @@
 <!-- <script src="{{ asset(mix('assets/vendor/libs/popper/popper.js')) }}"></script> -->
 <script src="{{ asset(mix('assets/vendor/js/bootstrap.js')) }}"></script>
 <script src="{{ asset(mix('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js')) }}"></script>
-<script src="{{ asset(mix('assets/vendor/js/menu.js'))}}"></script>
+<script src="{{ asset(mix('assets/vendor/js/menu.js')) }}"></script>
 @yield('vendor-script')
 <!-- END: Page Vendor JS-->
 <!-- BEGIN: Theme JS-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset(mix('assets/js/main.js')) }}"></script>
 <script src="{{ asset('storage/js/globalsearch.js?id=20241225') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <!-- END: Theme JS-->
 <!-- Pricing Modal JS-->
 @stack('pricing-script')

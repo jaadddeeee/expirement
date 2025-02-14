@@ -16,73 +16,26 @@
     </nav>
 
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 flex-grow-1">{{ $pageTitle }}</h5>
-        </div>
-
-        <div class="container">
+        <div class="container mt-4">
             <div class="row">
                 <div class="col-md-6 mb-3 d-flex align-items-center">
-                    <label for="pageSize" class="me-2 mb-0">Show</label>
-                    <select id="pageSize" class="form-select" style="width: auto; display: inline-block;">
-                        <option value="10">10</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                    <label class="ms-2 mb-0">entries</label>
+                    <h5 class="mb-0 flex-grow-1">{{ $pageTitle }}</h5>
                 </div>
                 <div class="col-md-6 mb-3 d-flex justify-content-end align-items-center">
                     <label for="searchInput" class="me-2 mb-0">Search</label>
-                    <input class="form-control" type="search" placeholder="Search Student ID or Student Name"
-                        id="searchInput" style="max-width: 300px;" />
+                    <input class="form-control" type="search" placeholder="Search Employee ID or Employee Name"
+                        id="search" style="max-width: 300px;" value="{{ request('search') }}" />
                 </div>
             </div>
         </div>
-        <div class="table-responsive mb-4">
 
-            <table class="table table-striped datatable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Employee ID</th>
-                        <th>Employee NAME</th>
-                        <th>SEX</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @php $id = 1; @endphp
-                    @foreach ($employee as $employees)
-                        <tr>
-                            <td>{{ $id++ }}</td>
-                            <td>{{ $employees->AgencyNumber ? $employees->AgencyNumber : 'N/A' }}</td>
-                            <td>
-                                {{ $employees->FirstName }}
-                                {{ $employees->MiddleName ? Str::substr($employees->MiddleName, 0, 1) . '.' : '' }}
-                                {{ $employees->LastName }}
-                                {{-- {{ $students->Suffix ? $students->Suffix . '.' : '' }} --}}
-                            </td>
-                            <td>{{ $employees->Sex ? Str::substr(AES::decrypt($employees->Sex), 0, 1) : 'N/A' }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                        data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item d-flex align-items-center"
-                                            href="{{ route('emp_process-id', ['emid' => Crypt::encryptString($employees->StudentNo)]) }}">
-                                            <i class="bx bxs-id-card me-2"></i>
-                                            <span>Process ID</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <div id="employee-table" class="table-responsive mb-4">
+            @include('_partials.employeeid.employee-table')
         </div>
     </div>
 
+@endsection
+
+@section('page-script')
+    @include('slsu.employeeid.js')
 @endsection

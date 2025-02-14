@@ -14,9 +14,20 @@ class EmployeeIDController extends Controller
 {
     public function index(Request $request)
     {
-        $employee = EmployeeID::on('hrmis')->get();
-
         $pageTitle = "Employee ID";
+
+        $query = $request->get('search');
+
+        $employee = EmployeeID::on('hrmis')->when($query, function ($queryBuilder) use ($query) {
+            return $queryBuilder->where('AgencyNumber', 'like', '%' . $query . '%')
+                                ->orWhere('FirstName', 'like', '%' . $query . '%')
+                                ->orWhere('LastName', 'like', '%' . $query . '%');
+        })
+        ->paginate(10);
+
+        if ($request->ajax()) {
+            return view('_partials.employeeid.employee-table', compact('employee'))->render();
+        }
 
         return view('slsu.employeeid.index', [
             'pageTitle' => $pageTitle,

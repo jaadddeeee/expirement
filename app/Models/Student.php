@@ -9,6 +9,11 @@ class Student extends Model
     protected $connection;
 
     protected $table = "students";
+    
+    protected $primaryKey = 'StudentNo'; // Set the actual primary key
+    public $incrementing = false; // If 'StudentNo' is not an auto-incrementing integer
+    protected $keyType = 'string'; // Change to 'int' if it's an integer
+
 
     public $timestamps = false;
     /**
@@ -16,8 +21,7 @@ class Student extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'id','StudentNo', 'LastName', 'FirstName','MiddleName','Disability','ContactNo','email'
+    protected $fillable = ['StudentNo', 'LastName', 'FirstName','MiddleName','Disability','ContactNo','email', 'Picture'
     ];
 
     public function __construct(){

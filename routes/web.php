@@ -484,18 +484,22 @@ Route::group(['prefix' => 'registrar', 'middleware' => ['auth', 'registrar']], f
 //Student ID
 Route::group(['prefix' => 'school-id', 'middleware' => ['auth', 'stuid']], function () use ($controller_path) {
   Route::get('/student-list', $controller_path . '\SLSU\StudentIdController@index')->name('student-list');
+  Route::get('/student-search', $controller_path . '\SLSU\StudentIdController@search')->name('student-search');
   Route::get('/process-id', $controller_path . '\SLSU\StudentIdController@getprocessid')->name('process-id');
-  Route::post('/print-preview', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('print-preview');
-  Route::get('print', $controller_path. '\SLSU\StudentIdController@print')->name('print');
+  Route::post('/update', $controller_path . '\SLSU\StudentIdController@update')->name('update');
+  Route::get('/print-preview', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('print-preview');
+  Route::post('/remove-background', $controller_path . '\SLSU\StudentIdController@removeBackground');
+  Route::post('print', $controller_path. '\SLSU\StudentIdController@print')->name('print');
 
 });
 
-//Student ID
+//Employee ID
 Route::group(['prefix' => 'employee', 'middleware' => ['auth', 'emid']], function () use ($controller_path) {
-  Route::get('/employee-list', $controller_path . '\SLSU\EmployeeIDController@index');
+  Route::get('/employee-list', $controller_path . '\SLSU\EmployeeIDController@index')->name('employee-list');
+  Route::get('/employee-search', $controller_path . '\SLSU\EmployeeIDController@search')->name('employee-search');
   Route::get('/process-id', $controller_path . '\SLSU\EmployeeIDController@getprocessid')->name('emp_process-id');
   Route::post('/print-preview', $controller_path . '\SLSU\EmployeeIDController@getprintpreview')->name('emp_print-preview');
-  Route::get('/print', $controller_path. '\SLSU\EmployeeIDController@print')->name('emp_print');
+  Route::post('/print', $controller_path. '\SLSU\EmployeeIDController@print')->name('emp_print');
 
 });
 

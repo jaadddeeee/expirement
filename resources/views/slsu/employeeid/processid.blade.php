@@ -2,6 +2,7 @@
 
 @section('title', $pageTitle)
 
+
 @section('content')
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-style1">
@@ -16,6 +17,8 @@
             </li>
         </ol>
     </nav>
+
+
 
     <div class="card">
         <form action="{{ route('emp_print-preview', ['emid' => Crypt::encryptString($student->StudentNo)]) }}" method="POST"
@@ -35,7 +38,8 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <div class="image-container d-block border mx-auto"
-                                style="position: relative; overflow: hidden; width: 100%; height: 700px;">
+                                style="position: relative; overflow: hidden; width: 100%; height: 700px; background: url('path/to/eraser/background.png') center center no-repeat; background-size: cover;"
+                                id="profileContainer">
 
                                 @php
                                     $image = '';
@@ -46,10 +50,9 @@
                                     }
                                 @endphp
 
-                                <img src="{{ asset('images/' . $image) }}" id="previewProfile" alt="Profile Picture"
-                                    class="d-block mx-auto mb-3"
-                                    style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;">
-
+                                <img src="{{ asset($student->Picture->profile_picture ?? 'images/' . $image) }}"
+                                    id="previewProfile" alt="Profile Picture" class="d-block mx-auto mb-3"
+                                    style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: none;">
 
                                 <div class="zoom-controls" style="position: absolute; bottom: 10px; right: 10px;">
                                     <button type="button" class="btn btn-danger zoom-btn" id="zoomOutProfile">-</button>
@@ -58,15 +61,17 @@
                             </div>
                             <label for="profilePicture" class="form-label">Upload Profile Picture</label>
                             <input class="form-control" type="file" id="profilePicture" name="profilePicture"
-                                accept="image/*">
+                                accept="image/png, image/jpeg">
                         </div>
 
                         <div class="mb-3">
                             <div class="image-container d-block border mx-auto"
-                                style="position: relative; overflow: hidden; width: 100%; height: 100px;">
-                                <img src="{{ asset('images/signature.png') }}" id="previewSignature" src=""
-                                    alt="Signature" class="d-block mx-auto mb-3"
-                                    style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s;">
+                                style="position: relative; overflow: hidden; width: 100%; height: 100px; background: url('path/to/eraser/background.png') center center no-repeat; background-size: cover;"
+                                id="signatureContainer">
+                                <img src="{{ asset('images/signature.png') }}" id="previewSignature" alt="Signature"
+                                    class="d-block mx-auto mb-3"
+                                    style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s; display: none;">
+
                                 <div class="zoom-controls" style="position: absolute; bottom: 10px; right: 10px;">
                                     <button type="button" class="btn btn-danger zoom-btn" id="zoomOutSignature">-</button>
                                     <button type="button" class="btn btn-primary zoom-btn" id="zoomInSignature">+</button>
@@ -75,7 +80,6 @@
                             <label for="signature" class="form-label">Upload Signature</label>
                             <input class="form-control" type="file" id="signature" name="signature" accept="image/*">
                         </div>
-
 
                         @php
                             $semesters = GENERAL::Semesters();
@@ -193,7 +197,6 @@
             </div>
         </form>
     </div>
-
     <script>
         let zoomLevelProfile = 1;
         document.getElementById('zoomInProfile').addEventListener('click', function() {
@@ -219,22 +222,28 @@
             }
         });
 
+        // Profile Picture Preview with Eraser Background
         document.getElementById('profilePicture').addEventListener('change', function(event) {
             let reader = new FileReader();
             reader.onload = function(e) {
                 let img = document.getElementById('previewProfile');
                 img.src = e.target.result;
                 img.style.display = 'block';
+                // Remove eraser background once the image is loaded
+                document.getElementById('profileContainer').style.background = 'none';
             };
             reader.readAsDataURL(event.target.files[0]);
         });
 
+        // Signature Preview with Eraser Background
         document.getElementById('signature').addEventListener('change', function(event) {
             let reader = new FileReader();
             reader.onload = function(e) {
                 let img = document.getElementById('previewSignature');
                 img.src = e.target.result;
                 img.style.display = 'block';
+                // Remove eraser background once the signature is loaded
+                document.getElementById('signatureContainer').style.background = 'none';
             };
             reader.readAsDataURL(event.target.files[0]);
         });
