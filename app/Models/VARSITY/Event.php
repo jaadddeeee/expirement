@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\VARSITY;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Varsity extends Model
+
+class Event extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $connection;
 
@@ -19,9 +21,7 @@ class Varsity extends Model
      */
     protected $fillable = [
         'id',
-        'event',
-        'status',
-        'date'
+        'event'
     ];
 
     public function __construct(){

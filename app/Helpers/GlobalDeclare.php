@@ -118,6 +118,15 @@ class GlobalDeclare {
 
   }
 
+  public static function CoachType(){
+    $out = [
+      1 => ["Type" => "Main Coach"],
+      2 => ["Type" => "Assistant Coach"],
+    ];
+    return $out;
+
+  }
+
   public static function YearStanding(){
     $out = [
       1 => ['Short' => '1st Year', 'Long' => 'First Year'],

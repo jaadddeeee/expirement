@@ -576,5 +576,32 @@ Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tab
 Route::get('/scholar', $controller_path . '\SLSU\ScholarController@index')->name('scholar');
 
 //varsity
-Route::get('/varsity/event', $controller_path . '\SLSU\VarsityController@index')->name('varsity-event');
+Route::group(['prefix' => 'varsity', 'middleware' => ['auth','varsity']], function () use ($controller_path){
+  //Event
+  Route::get('/event', $controller_path . '\SLSU\VARSITY\EventController@index')->name('event');
+  Route::post('/save-event', $controller_path . '\SLSU\VARSITY\EventController@save');
+  Route::get('/edit-event/{id}', $controller_path . '\SLSU\VARSITY\EventController@edit')->name('events-edit');
+  Route::patch('/update-event', $controller_path . '\SLSU\VARSITY\EventController@update')->name('update-event');
+  //Coach
+  Route::get('/coach', $controller_path . '\SLSU\VARSITY\CoachController@index')->name('coaches');
+  Route::post('/employees-campus', $controller_path . '\SLSU\VARSITY\CoachController@emplist');
+  Route::post('/event-list', $controller_path . '\SLSU\VARSITY\CoachController@eventlist');
+  Route::post('/save-coach', $controller_path . '\SLSU\VARSITY\CoachController@save');
+  Route::post('/delete-coach', $controller_path . '\SLSU\VARSITY\CoachController@deleteCoach');
+  Route::get('/edit-coach/{id}', $controller_path . '\SLSU\VARSITY\CoachController@edit');
+  Route::post('/update-coach', $controller_path . '\SLSU\VARSITY\CoachController@update')->name('update-coach');
+  Route::get('/search-coach', $controller_path . '\SLSU\VARSITY\CoachController@search')->name('search-coach');
+  //Varsity
+  Route::get('/varsity', $controller_path . '\SLSU\VARSITY\VarsityController@index')->name('varsity');
+  Route::post('/student-campus', $controller_path . '\SLSU\VARSITY\VarsityController@studlist');
+  Route::post('/student-event-list', $controller_path . '\SLSU\VARSITY\VarsityController@eventlist');
+  Route::post('/save-varsity', $controller_path . '\SLSU\VARSITY\VarsityController@save');
+  Route::get('/edit-varsity/{id}', $controller_path . '\SLSU\VARSITY\VarsityController@edit');
+  Route::post('/update-varsity', $controller_path . '\SLSU\VARSITY\VarsityController@update')->name('update-varsity');
+  Route::post('/delete-varsity', $controller_path . '\SLSU\VARSITY\VarsityController@deleteVar');
+  Route::get('/search-varsity', $controller_path . '\SLSU\VARSITY\VarsityController@search')->name('search-varsity');
 
+});
+
+
+ 

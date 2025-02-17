@@ -35,22 +35,20 @@
               <table class="table table-sm table-hover datatable">
                   <thead>
                     <tr>
-                      <td class = "text-nowrap">#</td>
-                      <td class = "text-nowrap">Event</td>
-                      <td class = "text-nowrap text-end pe-5">Status</td>
-                      <td class = "text-nowrap" style = "width: 250px">Date</td>
+                      <td class = "text-nowrap w-25">#</td>
+                      <th class="text-nowrap">Event</th>
+                      <th class="text-nowrap text-end">Action</th>
                     </tr>
                   </thead>
                   <tbody> 
-                    @php
-                        $id = 1;
-                    @endphp
                     @foreach($events as $event)
                     <tr>    
-                      <td class = "text-nowrap">{{$id++}}</td>
+                      <td class = "text-nowrap">{{(isset($ctr)?++$ctr:$ctr=1)}}</td>
                       <td class = "text-nowrap">{{$event->event}}</td>
-                      <td class = "text-nowrap text-end pe-5">{{$event->status}}</td>
-                      <td class="text-nowrap">{{ date('F j, Y', strtotime($event->date)) }}</td>
+                      <td class = "text-nowrap text-end">
+                        <a href = "#" class="editEvent" data-id="{{Crypt::encryptstring($event->id)}}"><i class = 'bx bx-edit text-warning'></i></a>
+                        &nbsp;
+                      </td>
                     </tr>
                   @endforeach
                   </tbody>
@@ -61,6 +59,7 @@
   </div>
 </div>
 
+{{-- add modal --}}
 <div class="modal fade" id="modalEvent" tabindex="-1" aria-labelledby="eventModal" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -69,19 +68,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="frmEmployee">
+                <form id="frmAdd">
                   @csrf
-                  <input hidden type = "text" value = "" name = "hiddentID" id = "hiddentID">
+                  <div id="msg"></div>
                     <div class = "form-group">
-                        <label class = "text-dark" for = "FirstName">Event:</label>
-                        <select class = "form-control">
-                          <option></option>
-                          <option value = "Part Timer">COS Faculty</option>
-                        </select>
-                    </div>
-                    <div class = "form-group">
-                        <label class = "text-dark" for = "MiddleName">Date:</label>
-                        <input  type="date" class = "form-control" name="MiddleName" id="MiddleName">
+                      <input type="text" name = "event" id="event" class = "mb-4 form-control" placeholder = "Event">
                     </div>
                 </form>
             </div>
@@ -93,10 +84,36 @@
     </div>
 </div>
 
+{{-- update modal --}}
+<div class="modal fade" id="updateModalEvent" tabindex="-1" aria-labelledby="eventModal" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title h4 text-warning" id="eventModalLabel">Update Event</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <form id="frmUpdate">
+                @csrf
+                <div id="updatemsg"></div>
+                <input hidden type = "text" name = "hiddentID" id="hiddentID" value="">
+                  <div class = "form-group">
+                    <input type="text" name = "updateEvent" id="updateEvent" class = "mb-4 form-control" placeholder = "Event">
+                  </div>
+              </form>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-warning" id="btn-update">Update</button>
+          </div>
+      </div>
+  </div>
+</div>
+
 @endsection
 
 @section('page-script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{asset('storage/js/scholarship.js?id=20240418')}}"></script>
+@include('slsu.varsity.js')
 
 @endsection
