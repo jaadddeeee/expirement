@@ -116,6 +116,8 @@
                                         $image = 'images/face-male.jpg';
                                     } elseif ($student->Sex === 'Female') {
                                         $image = 'images/face-female.jpg';
+                                    } elseif ($decryptedSex === '') {
+                                        $image = 'images/user.png';
                                     }
                                 @endphp
 

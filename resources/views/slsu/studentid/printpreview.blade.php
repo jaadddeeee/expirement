@@ -44,21 +44,22 @@
                     background-size: cover; background-position: center;">
 
                         <div class="container" style="margin-top: 88px;">
-                            <h3 class=""
-                                style="font-family: 'Trajan Pro', sans-serif; font-size: 34px; color: rgb(0, 0, 0); position: relative; left: 190px;">
-                                Southern Leyte
-                            </h3>
+                            <div class="text-content" style="position: relative; left: 190px;">
+                                <h3
+                                    style="font-family: 'Trajan Pro', sans-serif; font-size: 34px; color: rgb(0, 0, 0); position: relative; left: 0;">
+                                    Southern Leyte
+                                </h3>
 
-                            <h3 class="d-flex justify-content-center"
-                                style="font-family: 'Trajan Pro', sans-serif; font-size: 28px; color: rgb(0, 0, 0); position: relative; left:18px; top: -20px;">
-                                State
-                                University
-                            </h3>
+                                <h3
+                                    style="font-family: 'Trajan Pro', sans-serif; font-size: 28px; color: rgb(0, 0, 0); position: relative; left: 0; top: -20px;">
+                                    State University
+                                </h3>
 
-                            <p class="d-flex justify-content-center"
-                                style="font-family: 'Poppins', sans-serif; font-size: 15px; position: relative; left: 75px; top: -38px; color: #000;">
-                                {{ $defaultValues['CampusString'] }} | {{ $defaultValues['SchoolAddress'] }}
-                            </p>
+                                <p
+                                    style="font-family: 'Poppins', sans-serif; font-size: 15px; position: relative; left: 0; top: -38px; color: #000;">
+                                    {{ $defaultValues['CampusString'] }} | {{ $defaultValues['SchoolAddress'] }}
+                                </p>
+                            </div>
 
                             @php
                                 if (!empty($student->Picture) && file_exists(public_path($student->Picture))) {

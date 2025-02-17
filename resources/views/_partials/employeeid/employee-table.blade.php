@@ -32,7 +32,7 @@
                             </button>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item d-flex align-items-center"
-                                    href="{{ route('emp_process-id', ['emid' => Crypt::encryptString($employees->StudentNo)]) }}">
+                                    href="{{ route('emp_process-id', ['emid' => Crypt::encryptString($employees->id)]) }}">
                                     <i class="bx bxs-id-card me-2"></i>
                                     <span>Process ID</span>
                                 </a>

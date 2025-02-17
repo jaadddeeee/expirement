@@ -486,7 +486,7 @@ Route::group(['prefix' => 'school-id', 'middleware' => ['auth', 'stuid']], funct
   Route::get('/student-list', $controller_path . '\SLSU\StudentIdController@index')->name('student-list');
   Route::get('/student-search', $controller_path . '\SLSU\StudentIdController@search')->name('student-search');
   Route::get('/process-id', $controller_path . '\SLSU\StudentIdController@getprocessid')->name('process-id');
-  Route::post('/update', $controller_path . '\SLSU\StudentIdController@update')->name('update');
+  Route::post('/update', $controller_path . '\SLSU\StudentIdController@update')->name('update-student');
   Route::get('/print-preview', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('print-preview');
   Route::post('/remove-background', $controller_path . '\SLSU\StudentIdController@removeBackground');
   Route::post('print', $controller_path. '\SLSU\StudentIdController@print')->name('print');
@@ -498,7 +498,8 @@ Route::group(['prefix' => 'employee', 'middleware' => ['auth', 'emid']], functio
   Route::get('/employee-list', $controller_path . '\SLSU\EmployeeIDController@index')->name('employee-list');
   Route::get('/employee-search', $controller_path . '\SLSU\EmployeeIDController@search')->name('employee-search');
   Route::get('/process-id', $controller_path . '\SLSU\EmployeeIDController@getprocessid')->name('emp_process-id');
-  Route::post('/print-preview', $controller_path . '\SLSU\EmployeeIDController@getprintpreview')->name('emp_print-preview');
+  Route::post('/update', $controller_path . '\SLSU\EmployeeIDController@update')->name('update-employee');
+  Route::get('/print-preview', $controller_path . '\SLSU\EmployeeIDController@getprintpreview')->name('emp_print-preview');
   Route::post('/print', $controller_path. '\SLSU\EmployeeIDController@print')->name('emp_print');
 
 });

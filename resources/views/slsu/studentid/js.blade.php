@@ -76,7 +76,7 @@
 
             setTimeout(() => {
                 $.ajax({
-                    url: "{{ route('update') }}",
+                    url: "{{ route('update-student') }}",
                     method: "POST",
                     data: formData,
                     contentType: false,

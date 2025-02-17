@@ -31,7 +31,7 @@ class StudentIdController extends Controller
 
 
         if ($request->ajax()) {
-            return view('_partials.studentid.student-table', compact('student'))->render();
+            return view('_partials.studentid.student-table', ['student' => $student])->render();
         }
 
         return view('slsu.studentid.index', [

@@ -14,6 +14,10 @@ class EmployeeID extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'id', 'profilephoto'
+    ];
+
     public function __construct(){
         $this->connection = strtolower(session('campus'));
     }
