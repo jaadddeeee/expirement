@@ -91,7 +91,9 @@ $('#search').on('input', function () {
         method: 'GET',
         data: { search: query },
         success: function (response) {
-            $('tbody').html(response.html);
+            setTimeout(function () {
+                $('tbody').html(response.html);
+            }, 1000);
         }
     });
 });
