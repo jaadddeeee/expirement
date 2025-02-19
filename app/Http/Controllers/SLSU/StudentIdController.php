@@ -9,7 +9,9 @@ use App\Models\Registration;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use App\Services\StudentId;
-
+use Intervention\Image\Facades\Image;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class StudentIdController extends Controller
 {
@@ -75,7 +77,7 @@ class StudentIdController extends Controller
     public function update(Request $request)
     {
         $decrypted_id = Crypt::decryptString($request->stuid);
-
+    
         $validated = $request->validate([
             'profilePicture' => 'nullable|image|mimes:jpeg,png,jpg',
             'signature' => 'nullable|image|mimes:jpeg,png,jpg',
@@ -89,9 +91,9 @@ class StudentIdController extends Controller
             'or_number' => 'required|string',
             'date_paid' => 'nullable|date',
         ]);
-
+    
         $campusConnection = DB::connection(strtolower(session('campus')));
-
+    
         $studentData = [
             'emer_name' => $validated['contact_name'],
             'emer_contact' => $validated['contact_number'],
@@ -99,7 +101,7 @@ class StudentIdController extends Controller
             'p_municipality' => $validated['municipality'],
             'p_province' => $validated['province'],
         ];
-
+    
         if ($request->hasFile('profilePicture')) {
             $image = $request->file('profilePicture');
             $filename = $decrypted_id . '.' . $image->getClientOriginalExtension();
@@ -107,40 +109,44 @@ class StudentIdController extends Controller
             $image->move(public_path('storage/student_id_picture'), $filename);
             $studentData['Picture'] = $imagePath;
         }
-
-        $campusConnection->table('students')->where('StudentNo', $decrypted_id)->update($studentData);
-
+    
+        $campusConnection->table('students')->updateOrInsert(
+            ['StudentNo' => $decrypted_id],
+            $studentData
+        );
+    
         if ($request->hasFile('signature')) {
             $signature = $request->file('signature');
             $signatureFilename = $decrypted_id . '.' . $signature->getClientOriginalExtension();
-            $signature->move(public_path('storage/student_id_signature'), $signatureFilename);
+    
+            $signatureImage = Image::make($signature);
+            $signatureImage->resize(279, 114);
+    
+            $signatureImage->save(public_path('storage/student_id_signature/' . $signatureFilename));
         }
-
-        $campusConnection->table('students2')->where('StudentNo', $decrypted_id)->update([
-            'BloodType' => $validated['blood_type'],
-            'Allergy' => $validated['allergy'],
-        ]);
-
-        $studentIDPayment = $campusConnection->table('stuid_payment')->where('StudentNo', $decrypted_id)->first();
-        $paymentData = [
-            'or_no' => $validated['or_number'],
-            'date_of_payment' => $validated['date_paid'],
-        ];
-
-        if ($studentIDPayment) {
-            $campusConnection->table('stuid_payment')->where('StudentNo', $decrypted_id)->update($paymentData);
-        } else {
-            $paymentData['StudentNo'] = $decrypted_id;
-            $campusConnection->table('stuid_payment')->insert($paymentData);
-        }
-
+    
+        $campusConnection->table('students2')->updateOrInsert(
+            ['StudentNo' => $decrypted_id],
+            [
+                'BloodType' => $validated['blood_type'],
+                'Allergy' => $validated['allergy'],
+            ]
+        );
+    
+        $campusConnection->table('stuid_payment')->updateOrInsert(
+            ['StudentNo' => $decrypted_id],
+            [
+                'or_no' => $validated['or_number'],
+                'date_of_payment' => $validated['date_paid'],
+            ]
+        );
+    
         return response()->json([
             'success' => true,
             'message' => 'Student ID updated successfully.',
             'encryptedStudentNo' => Crypt::encryptString($decrypted_id),
         ]);
     }
-
 
     public function getprintpreview(Request $request, StudentId $pdfService)
     {
@@ -185,15 +191,26 @@ class StudentIdController extends Controller
     public function print(Request $request)
     {
         $decrypted_id = Crypt::decryptString($request->stuid);
-
         $fileName = $decrypted_id . '.pdf';
-        $pdfPath = public_path('storage/student_id/'. $fileName);
-        $printerName = 'Evolis Primacy'; 
-
-        $command = "lp -d $printerName $pdfPath";
-        exec($command);
-
-        return response()->json(['message' => 'Printing started']);
-    }
+        $filePath = public_path('storage/student_id/' . $fileName);
+        
+        if (!file_exists($filePath)) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
     
+        // Printer Name - Make sure it matches exactly in Control Panel > Devices and Printers
+        $printerName = 'Evolis Primacy';
+    
+        // Use PowerShell to print the file
+        $command = 'powershell -Command "& {Start-Process -FilePath \'' . $filePath . '\' -Verb PrintTo -ArgumentList \'' . $printerName . '\'}"';
+    
+        $process = Process::fromShellCommandline($command);
+    
+        try {
+            $process->mustRun();
+            return response()->json(['success' => 'Print job sent successfully.']);
+        } catch (ProcessFailedException $exception) {
+            return response()->json(['error' => 'Printing failed', 'details' => $exception->getMessage()], 500);
+        }
+    }
 }

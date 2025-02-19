@@ -184,26 +184,25 @@
                         <div class="mb-3">
                             <label for="blood_type" class="form-label">BLOOD TYPE</label>
                             <input type="text" name="blood_type" id="blood_type" class="form-control"
-                                placeholder="Enter Blood Type"
-                                value="{{ $employee->BloodType ? $employee->BloodType : 'N/A' }}">
+                                placeholder="Enter Blood Type" value="{{ $employee->BloodType ?? '' }}">
                         </div>
 
                         <div class="mb-4">
                             <label for="allergy" class="form-label">Allergy/Allergies</label>
                             <input type="text" name="allergy" id="allergy" class="form-control"
-                                placeholder="Enter Allergy/Allergies" value="{{ $employee->Allergies ?? 'N/A' }}">
+                                placeholder="Enter Allergy/Allergies" value="{{ $employee->Allergies ?? 'None' }}">
                         </div>
 
                         <label class="form-label mb-3" style="color: #39DA8A; ">EMERGENCY CONTACT INFORMATION</label>
                         <div class="mb-3">
                             <label for="contact_name" class="form-label">Contact Name</label>
                             <input type="text" name="contact_name" id="contact_name" class="form-control"
-                                placeholder="Enter Contact Name" value="{{ $employee2->name ?? 'N/A' }}">
+                                placeholder="Enter Contact Name" value="{{ $employee2->name ?? '' }}">
                         </div>
                         <div class="mb-3">
                             <label for="contact_number" class="form-label">Contact Number</label>
                             <input type="contact" name="contact_number" id="contact_number" class="form-control"
-                                placeholder="Enter Contact Number" value="{{ $employee2->number ?? 'N/A' }}">
+                                placeholder="Enter Contact Number" value="{{ $employee2->number ?? '' }}">
                         </div>
 
                         <div class="row">
@@ -211,9 +210,9 @@
                             @php
                                 $addressParts = isset($employee2->address) ? explode(',', $employee2->address) : [];
 
-                                $barangay = isset($addressParts[0]) ? trim($addressParts[0]) : 'N/A';
-                                $municipality = isset($addressParts[1]) ? trim($addressParts[1]) : 'N/A';
-                                $province = isset($addressParts[2]) ? trim($addressParts[2]) : 'N/A';
+                                $barangay = isset($addressParts[0]) ? trim($addressParts[0]) : '';
+                                $municipality = isset($addressParts[1]) ? trim($addressParts[1]) : '';
+                                $province = isset($addressParts[2]) ? trim($addressParts[2]) : '';
 
                             @endphp
 

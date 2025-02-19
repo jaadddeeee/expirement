@@ -7,12 +7,19 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use GENERAL;
 use AES;
+use DB;
 
 class EmployeeID
 {
     public function generatePDF($decrypted_id, $employee, $employee2)
     {
         $pdf = new TCPDF('P', 'mm', array(54.86, 86.01), true, 'UTF-8', false);
+
+        $defaultValues = DB::connection(strtolower(session('campus')))
+        ->table('defaultvalue')
+        ->whereIn('DefaultName', ['CampusString', 'SchoolAddress', 'PresidentName', 'SchoolWebsite'])
+        ->pluck('DefaultValue', 'DefaultName');
+
     
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false);
@@ -21,16 +28,16 @@ class EmployeeID
         $pdf->Image(public_path('images/employee/front.png'), 0, 0, 54.86, 86.01, 'PNG');
     
         $pdf->SetFont('trajanpro', '', 7);
-        $pdf->SetXY(16.8, 8.2);
+        $pdf->SetXY(16.8, 7.2);
         $pdf->Cell(30, 5, 'Southern Leyte', 0, 0, 'L');
     
         $pdf->SetFont('trajanpro', '', 5.7);
-        $pdf->SetXY(16.9, 10.5);
+        $pdf->SetXY(16.9, 9.5);
         $pdf->Cell(30, 5, 'State University', 0, 0, 'L');
     
         $pdf->SetFont('poppins', '', 3.5);
-        $pdf->SetXY(17, 14);
-        $pdf->Cell(0, 1, 'Main Campus | San Roque, Sogod, Southern Leyte', 0, 0);
+        $pdf->SetXY(17, 13);
+        $pdf->Cell(0, 1, $defaultValues['CampusString'] . ' | ' . $defaultValues['SchoolAddress'], 0, 0);
     
         $imageWidth = 28;
         $imageHeight = 31.5;
@@ -64,7 +71,7 @@ class EmployeeID
         $yPosition = $topMargin; 
 
         
-        $signaturePath = 'storage/student_id_signature/' . $employee->AgencyNumber . '.png';
+        $signaturePath = 'storage/employee_id_signature/' . $employee->AgencyNumber . '.png';
 
         if (file_exists(public_path($signaturePath))) {
             $signature = $signaturePath;
@@ -215,9 +222,10 @@ class EmployeeID
         $pdf->SetXY(0, 72.3);
         $pdf->Cell(0, 5, 'University President', 0, 0, 'C');
 
-        $fileName = $decrypted_id . '.pdf';
-        $filePath = public_path('storage/student_id/' . $fileName);
+        $fileName = $employee->AgencyNumber . '.pdf';
+        $filePath = public_path('storage/employee_id/' . $fileName);
 
-        $pdf->Output($filePath, 'F'); 
-    }
+
+        $pdfContent = $pdf->Output($filePath, 'F'); 
+    }   
 }

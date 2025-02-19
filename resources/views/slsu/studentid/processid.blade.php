@@ -63,6 +63,16 @@
     .dot:nth-child(3) {
         animation-delay: 0.6s;
     }
+
+    @media (max-width: 768px) {
+        .image-container {
+            height: auto;
+        }
+
+        #previewProfile {
+            height: auto;
+        }
+    }
 </style>
 @section('content')
     <nav aria-label="breadcrumb">

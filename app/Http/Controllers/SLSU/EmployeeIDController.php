@@ -66,7 +66,7 @@ class EmployeeIDController extends Controller
     public function update(Request $request)
     {
         $decrypted_id = Crypt::decryptString($request->emid);
-
+    
         $validated = $request->validate([
             'profilePicture' => 'nullable|image|mimes:jpeg,png,jpg',
             'signature' => 'nullable|image|mimes:jpeg,png,jpg',
@@ -80,35 +80,42 @@ class EmployeeIDController extends Controller
             'or_number' => 'required|string',
             'date_paid' => 'nullable|date',
         ]);
-
+    
         $campusConnection = DB::connection('hrmis', strtolower(session('campus')));
-
+    
+        $employee = $campusConnection->table('employee')->where('id', $decrypted_id)->first();
+    
         $employeeData = [
             'BloodType' => $request->blood_type,
             'Allergies' => $request->allergy,
         ];
-
+    
         if ($request->hasFile('profilePicture')) {
             $image = $request->file('profilePicture');
-            $filename = $decrypted_id . '.' . $image->getClientOriginalExtension();
+            $filename = $employee->AgencyNumber . '.' . $image->getClientOriginalExtension();
             $imagePath = 'storage/employee_id_picture/' . $filename;
             $image->move(public_path('storage/employee_id_picture'), $filename);
             $employeeData['profilephoto'] = $imagePath;
         }
-
-        $campusConnection->table('employee')->where('id', $decrypted_id)->update($employeeData);    
-
+    
+        $campusConnection->table('employee')->updateOrInsert(
+            ['id' => $decrypted_id],
+            $employeeData
+        );
+    
         if ($request->hasFile('signature')) {
             $signature = $request->file('signature');
             $signatureFilename = $decrypted_id . '.' . $signature->getClientOriginalExtension();
-            $signature->move(public_path('storage/student_id_signature'), $signatureFilename);
+            $signature->move(public_path('storage/employee_id_signature'), $signatureFilename);
         }
-
-        // $campusConnection->table('emergencycontact')->where('empId', $decrypted_id)->update([
-        //     'address' => $validated['barangay'] . ', ' . $validated['municipality'] . ', ' . $validated['province'],
-        // ]);
-        
-
+    
+        $campusConnection->table('emergencycontact')->updateOrInsert(
+            ['empId' => $decrypted_id],
+            ['address' => $validated['barangay'] . ', ' . $validated['municipality'] . ', ' . $validated['province']],
+            ['number' => $validated['contact_number']],
+            ['name' => $validated['contact_name']]
+        );
+    
         return response()->json([
             'success' => true,
             'message' => 'Student ID updated successfully.',
