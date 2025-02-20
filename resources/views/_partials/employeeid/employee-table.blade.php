@@ -26,18 +26,10 @@
                     </td>
                     <td>{{ $employees->Sex ? Str::substr(AES::decrypt($employees->Sex), 0, 1) : 'N/A' }}</td>
                     <td>
-                        <div class="dropdown">
-                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                <i class="bx bx-dots-vertical-rounded"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item d-flex align-items-center"
-                                    href="{{ route('emp_process-id', ['emid' => Crypt::encryptString($employees->id)]) }}">
-                                    <i class="bx bxs-id-card me-2"></i>
-                                    <span>Process ID</span>
-                                </a>
-                            </div>
-                        </div>
+                        <a class="btn btn-transparent btn-sm"
+                            href="{{ route('emp_process-id', ['emid' => Crypt::encryptString($employees->id)]) }}">
+                            <i class="bx bxs-id-card me-2 text-primary fs-3"></i>
+                        </a>
                     </td>
                 </tr>
             @endforeach
@@ -45,7 +37,7 @@
     </tbody>
 </table>
 
-<div class="container">
+<div class="container mt-5">
     <div id="pagination" class="d-flex justify-content-end">
         {{ $employee->appends(request()->query())->links() }}
     </div>

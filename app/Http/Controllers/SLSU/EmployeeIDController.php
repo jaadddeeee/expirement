@@ -160,13 +160,39 @@ class EmployeeIDController extends Controller
     {
         $decrypted_id = Crypt::decryptString($request->emid);
 
-        $fileName = $decrypted_id . '.pdf';
-        $pdfPath = public_path('storage/student_id/'. $fileName);
-        $printerName = 'Evolis Primacy'; 
+        $employee = DB::connection('hrmis', strtolower(session('campus')))
+        ->table('employee')
+        ->where('id', $decrypted_id)
+        ->first();
 
-        $command = "lp -d $printerName $pdfPath";
-        exec($command);
+        if (!$employee) {
+            return response()->json(['error' => 'Employee not found'], 404);
+        }
 
-        return response()->json(['message' => 'Printing started']);
+        $agencynumber = $employee->AgencyNumber; 
+
+        $fileName = $agencynumber . '.pdf';
+        $filePath = public_path('storage/employee_id/' . $fileName);
+
+        if (!file_exists($filePath)) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+
+        $sumatraPath = '"C:\Program Files\SumatraPDF\SumatraPDF.exe"'; 
+        $printerName = "Evolis Primacy";
+
+        $command = "$sumatraPath -print-to \"$printerName\" -print-settings duplexshort \"$filePath\"";
+
+        exec($command, $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            return response()->json(['error' => 'Failed to print the file'], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'File sent to printer successfully',
+        ]);
     }
+
 }

@@ -489,7 +489,7 @@ Route::group(['prefix' => 'school-id', 'middleware' => ['auth', 'stuid']], funct
   Route::post('/update', $controller_path . '\SLSU\StudentIdController@update')->name('update-student');
   Route::get('/print-preview', $controller_path . '\SLSU\StudentIdController@getprintpreview')->name('print-preview');
   Route::post('/remove-background', $controller_path . '\SLSU\StudentIdController@removeBackground');
-  Route::post('print', $controller_path. '\SLSU\StudentIdController@print')->name('print');
+  Route::post('/print', $controller_path. '\SLSU\StudentIdController@print')->name('print');
 
 });
 

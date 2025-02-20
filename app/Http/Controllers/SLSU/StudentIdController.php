@@ -193,24 +193,22 @@ class StudentIdController extends Controller
         $decrypted_id = Crypt::decryptString($request->stuid);
         $fileName = $decrypted_id . '.pdf';
         $filePath = public_path('storage/student_id/' . $fileName);
-        
+
         if (!file_exists($filePath)) {
             return response()->json(['error' => 'File not found'], 404);
         }
-    
-        // Printer Name - Make sure it matches exactly in Control Panel > Devices and Printers
-        $printerName = 'Evolis Primacy';
-    
-        // Use PowerShell to print the file
-        $command = 'powershell -Command "& {Start-Process -FilePath \'' . $filePath . '\' -Verb PrintTo -ArgumentList \'' . $printerName . '\'}"';
-    
-        $process = Process::fromShellCommandline($command);
-    
-        try {
-            $process->mustRun();
-            return response()->json(['success' => 'Print job sent successfully.']);
-        } catch (ProcessFailedException $exception) {
-            return response()->json(['error' => 'Printing failed', 'details' => $exception->getMessage()], 500);
+
+        $sumatraPath = '"C:\Program Files\SumatraPDF\SumatraPDF.exe"'; 
+        $printerName = "Evolis Primacy";
+
+        $command = "$sumatraPath -print-to \"$printerName\" -print-settings duplexshort \"$filePath\"";
+
+        exec($command, $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            return response()->json(['error' => 'Failed to print the file'], 500);
         }
+
+        return response()->json(['success' => true, 'message' => 'File sent to printer successfully']);
     }
 }

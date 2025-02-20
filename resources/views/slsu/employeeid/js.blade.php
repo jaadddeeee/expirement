@@ -104,4 +104,33 @@
             }, delayTime);
         });
     });
+
+    $('#printButton').on('click', function(e) {
+        e.preventDefault();
+
+        var formData = $('#printForm').serialize();
+
+        $.ajax({
+            url: "{{ route('emp_print') }}",
+            method: "POST",
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: response.message
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error: ", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Something went wrong",
+                    text: xhr.responseJSON ? xhr.responseJSON.error :
+                        "An unexpected error occurred"
+                });
+            }
+        });
+    });
 </script>

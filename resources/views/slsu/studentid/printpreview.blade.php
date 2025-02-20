@@ -21,8 +21,7 @@
     </nav>
 
     <div class="card">
-        <form action="{{ route('print', ['stuid' => Crypt::encryptString($student->StudentNo)]) }}" method="POST"
-            target="_blank" enctype="multipart/form-data">
+        <form id="printForm" enctype="multipart/form-data">
             @csrf
 
             <div class="card-header">
@@ -240,7 +239,7 @@
             <div class="card-footer">
                 <div class="text-end">
                     <hr>
-                    <button type="submit" class="btn btn-primary mt-2 mb-2">
+                    <button id="printButton" type="submit" class="btn btn-primary mt-2 mb-2">
                         <i class='bx bxs-printer me-1'></i><span>Print</span>
                     </button>
                 </div>
@@ -248,4 +247,8 @@
         </form>
     </div>
 
+@endsection
+
+@section('page-script')
+    @include('slsu.studentid.js')
 @endsection

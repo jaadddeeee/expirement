@@ -112,7 +112,7 @@
     $('#printButton').on('click', function(e) {
         e.preventDefault();
 
-        var formData = new FormData($('#printForm')[0]);
+        var formData = $('#printForm').serialize();
 
         $.ajax({
             url: "{{ route('print') }}",
@@ -120,7 +120,10 @@
             data: formData,
             success: function(response) {
                 if (response.success) {
-                    // Handle success response if needed
+                    Swal.fire({
+                        icon: "success",
+                        title: response.message
+                    });
                 }
             },
             error: function(xhr, status, error) {
@@ -128,11 +131,9 @@
                 Swal.fire({
                     icon: "error",
                     title: "Something went wrong",
-                    text: xhr.responseText || error
+                    text: xhr.responseJSON ? xhr.responseJSON.error :
+                        "An unexpected error occurred"
                 });
-            },
-            complete: function() {
-                $("#loadingSpinner").fadeOut();
             }
         });
     });
