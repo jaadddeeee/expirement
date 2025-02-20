@@ -15,35 +15,38 @@ use Exception;
 
 class CoachController extends Controller
 {
-    public function index(){
-        $coaches = Coach::with('event')->whereNull('deleted_at')->paginate(10);
+    public function index(Request $request){
+        $query = Coach::whereNull('deleted_at')
+        ->orderBy('LastName','asc');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where(function ($q) use ($request) {
+                $q->where('LastName', 'LIKE', "%{$request->search}%")
+                  ->orWhere('FirstName', 'LIKE', "%{$request->search}%")
+                  ->orWhere('MiddleName', 'LIKE', "%{$request->search}%");
+            });
+        }
+
+        if ($request->has('filterCampus') && $request->filterCampus != '0') {
+            $query->where('Campus', $request->filterCampus);
+        }
+        
+        $coach = $query->paginate(10);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('_partials.coach-table', ['coaches' => $coach])->render()
+            ]);
+        }
 
         $pageTitle = "Manage Coaches";
         $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>';
         return view('slsu.varsity.coach',[
             'pageTitle' => $pageTitle,
             'headerAction' => $headerAction,
-            'coaches' => $coaches
+            'coaches' => $coach
             ]);
     }   
-
-    public function search(Request $request)
-    {
-        $str = $request->search;
-    
-        $coaches = Coach::with('event') // Ensure event relationship is loaded
-            ->whereNull('deleted_at')
-            ->where(function ($query) use ($str) {
-                $query->where("LastName", "LIKE", "%{$str}%")
-                      ->orWhere("FirstName", "LIKE", "%{$str}%")
-                      ->orWhere("MiddleName", "LIKE", "%{$str}%");
-            })
-            ->paginate(10); // Ensure pagination works
-    
-        return response()->json([
-            'html' => view('_partials.coach-table', compact('coaches'))->render()
-        ]);
-    } 
 
     public function emplist(Request $request){
         try {

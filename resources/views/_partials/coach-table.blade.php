@@ -1,5 +1,5 @@
 @foreach($coaches as $coach)
-<tr>    
+<tr class="varsity-row">    
   <td class = "text-nowrap">{{(isset($ctr)?++$ctr:$ctr=1)}}</td>
   <td class = "text-nowrap">{{utf8_decode(strtoupper($coach->LastName.', '.$coach->FirstName.(empty($coach->MiddleName)?"":" ".$coach->MiddleName[0])))}}</td>
   <td class = "text-nowrap">
@@ -19,8 +19,7 @@
 @endforeach
 
 @if ($coaches->isEmpty())
-    <tr>
-        <td colspan="5" class="text-center">No records found.</td>
-    </tr>
-    
+  <tr>
+    <td colspan="5" class="text-center table-warning  fw-bold rounded-pill">No records found</td>
+  </tr>
 @endif

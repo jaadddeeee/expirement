@@ -85,19 +85,26 @@ $(document).ready(function () {
 
 $('#search').on('input', function () {
     var query = $(this).val();
+    var filterCampus = $('#filterCampus').val();
 
     $.ajax({
-        url: '{{ route("search-varsity") }}',
+        url: '{{ route("varsity") }}',
         method: 'GET',
-        data: { search: query },
+        data: { search: query, filterCampus: filterCampus },
         success: function (response) {
             setTimeout(function () {
-                $('tbody').html(response.html);
+                $('#data').html(response.html);
+                
+                // Hide pagination if there are fewer results than per-page limit
+                if ($('#data').find('.varsity-row').length < 10) {
+                    $('.pagination').hide();
+                } else {
+                    $('.pagination').show();
+                }
             }, 1000);
         }
     });
 });
-
 
 $(document).on("click", "#btn-save", function(e){
     e.preventDefault();
@@ -156,8 +163,6 @@ $(document).on("click", "#btn-save", function(e){
     });
 });
 
-
-// Function to fetch all events
 function fetchEvents() {
     $.ajax({
         url: "/varsity/student-event-list",
@@ -230,7 +235,6 @@ function fetchEventsUP(selectedEventId = null) {
         },
     });
 }
-
 
 $(document).on("click", ".deleteVarsity", function(e){
     e.preventDefault();

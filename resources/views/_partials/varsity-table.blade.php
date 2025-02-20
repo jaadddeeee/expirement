@@ -1,6 +1,6 @@
 <!-- resources/views/partials/varsity-table.blade.php -->
 @foreach($varsities as $varsity)
-    <tr>    
+    <tr class="varsity-row">    
         <td class="text-nowrap">{{ (isset($ctr)?++$ctr:$ctr=1) }}</td>
         <td class="text-nowrap">
             {{ strtoupper($varsity->LastName . ', ' . $varsity->FirstName . (empty($varsity->MiddleName) ? '' : ' ' . $varsity->MiddleName[0] . '.')) }}
@@ -26,7 +26,6 @@
 
 @if ($varsities->isEmpty())
     <tr>
-        <td colspan="5" class="text-center">No records found.</td>
+        <td colspan="5" class="text-center table-warning  fw-bold rounded-pill">No records found</td>
     </tr>
-    
 @endif

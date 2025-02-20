@@ -80,16 +80,23 @@ $(document).ready(function() {
 
 $('#search').on('input', function () {
     var query = $(this).val();
+    var filterCampus = $('#filterCampus').val();
 
     $.ajax({
-        url: '{{ route("search-coach") }}',
+        url: '{{ route("coaches") }}',
         method: 'GET',
-        data: { search: query },
+        data: { search: query, filterCampus: filterCampus },
         success: function (response) {
-            setTimeout(function() {
-                $('tbody').html(response.html);
+            setTimeout(function () {
+                $('#data').html(response.html);
+                
+                // Hide pagination if there are fewer results than per-page limit
+                if ($('#data').find('.varsity-row').length < 10) {
+                    $('.pagination').hide();
+                } else {
+                    $('.pagination').show();
+                }
             }, 1000);
-            
         }
     });
 });

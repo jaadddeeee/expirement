@@ -591,6 +591,7 @@ Route::group(['prefix' => 'varsity', 'middleware' => ['auth','varsity']], functi
   Route::get('/edit-coach/{id}', $controller_path . '\SLSU\VARSITY\CoachController@edit');
   Route::post('/update-coach', $controller_path . '\SLSU\VARSITY\CoachController@update')->name('update-coach');
   Route::get('/search-coach', $controller_path . '\SLSU\VARSITY\CoachController@search')->name('search-coach');
+
   //Varsity
   Route::get('/varsity', $controller_path . '\SLSU\VARSITY\VarsityController@index')->name('varsity');
   Route::post('/student-campus', $controller_path . '\SLSU\VARSITY\VarsityController@studlist');

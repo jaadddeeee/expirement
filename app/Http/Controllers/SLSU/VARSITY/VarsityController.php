@@ -15,35 +15,39 @@ use Exception;
 
 class VarsityController extends Controller
 {
-    public function index(){
-        $varsity = Varsity::whereNull('deleted_at')->paginate(10);
-
+    public function index(Request $request)
+    {
+        $query = Varsity::whereNull('deleted_at')
+            ->orderBy('LastName', 'asc');
+    
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where(function ($q) use ($request) {
+                $q->where('LastName', 'LIKE', "%{$request->search}%")
+                  ->orWhere('FirstName', 'LIKE', "%{$request->search}%")
+                  ->orWhere('MiddleName', 'LIKE', "%{$request->search}%");
+            });
+        }
+    
+        if ($request->has('filterCampus') && $request->filterCampus != '0') {
+            $query->where('Campus', $request->filterCampus);
+        }
+    
+        $varsity = $query->paginate(10);
+    
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('_partials.varsity-table', ['varsities' => $varsity])->render()
+            ]);
+        }
+    
         $pageTitle = "Manage Varsity Student";
         $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>';
-        return view('slsu.varsity.varsity',[
+        return view('slsu.varsity.varsity', [
             'pageTitle' => $pageTitle,
             'headerAction' => $headerAction,
             'varsities' => $varsity
-            ]);
-    }
-
-    public function search(Request $request)
-    {
-        $str = $request->search;
-    
-        $varsities = Varsity::with('event') // Ensure event relationship is loaded
-            ->whereNull('deleted_at')
-            ->where(function ($query) use ($str) {
-                $query->where("LastName", "LIKE", "%{$str}%")
-                      ->orWhere("FirstName", "LIKE", "%{$str}%")
-                      ->orWhere("MiddleName", "LIKE", "%{$str}%");
-            })
-            ->paginate(10); // Ensure pagination works
-    
-        return response()->json([
-            'html' => view('_partials.varsity-table', compact('varsities'))->render()
         ]);
-    } 
+    }
 
     public function studlist(Request $request){
         try {
