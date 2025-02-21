@@ -1,4 +1,4 @@
-@foreach ($scholarships as $scholarship)
+@forelse ($scholarships as $scholarship)
     <tr>
         <td class="text-nowrap">{{ $loop->iteration }}</td>
         <td class="text-nowrap">{{ $scholarship->sch_name }}</td>
@@ -14,15 +14,29 @@
         </td>
         <td class="text-nowrap">
             <!-- Add Button Icon -->
-            <i class="fa fa-plus-circle text-success me-2" style="cursor: pointer;" title="Add"></i>
+            <i class="fa fa-plus-circle text-success me-2 addScholarView"
+                data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}"
+                data-scholarship-name="{{ $scholarship->sch_name }}" style="cursor: pointer;" title="Add"></i>
 
             <!-- Edit Button Icon -->
-            <i class="fa fa-edit text-warning me-2" style="cursor: pointer;"
-                onclick="editScholarship('{{ Crypt::encryptString($scholarship->id) }}')" title="Edit"></i>
+            <i class="fa fa-edit text-warning me-2 editScholarship"
+                data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" style="cursor: pointer;"
+                title="Edit"></i>
 
             <!-- Delete Button Icon -->
-            <i class="fa fa-trash text-danger" style="cursor: pointer;"
-                onclick="deleteScholarship('{{ Crypt::encryptString($scholarship->id) }}')" title="Delete"></i>
+            <i class="fa fa-trash text-danger deleteScholarship"
+                data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" style="cursor: pointer;"
+                title="Delete"></i>
         </td>
     </tr>
-@endforeach
+@empty
+    @if (isset($isSearch) && $isSearch)
+        <tr style="background-color:#033874; color: white;">
+            <td colspan="5" class="text-center">No scholarships found</td>
+        </tr>
+    @else
+        <tr style="background-color:#033874; color: white;">
+            <td colspan="5" class="text-center">No scholarships available</td>
+        </tr>
+    @endif
+@endforelse

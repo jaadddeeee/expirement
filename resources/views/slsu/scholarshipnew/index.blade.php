@@ -18,63 +18,69 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <div class="header-title">
-                        <h4 class="card-title">{{ $pageTitle ?? 'List' }}</h4>
-                    </div>
-                    <div class="card-action">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h3 class="card-title mb-0"> <strong style="color: #66a6ea;">{{ $pageTitle ?? 'List' }}</strong></h3>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <form class="d-flex align-items-center" id="filterForm" method="GET"
+                            action="{{ route('scholarships') }}">
+                            <input type="search" id="searchScholarship" name="search" class="form-control form-control-sm"
+                                placeholder="Search" style="width: 250px; min-width: 200px;">
+
+                            <select class="form-select form-select-sm ms-2" id="filterScholarshipType"
+                                name="scholarshipType">
+                                <option value="">Scholarship Types</option>
+                                @foreach (GENERAL::ScholarshipsNew() as $index => $sch)
+                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
+                                @endforeach
+                            </select>
+                            <select class="form-select form-select-sm ms-2" id="filterExternalType" name="externalType">
+                                <option value="">External Types</option>
+                                @foreach (GENERAL::ExternalSchType() as $index => $sch)
+                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
+                                @endforeach
+                            </select>
+                            <div>
+                                <button type="submit" class="btn btn-sm btn-warning ms-2 me-4 d-flex align-items-center"
+                                    id="filterButtonScholarships">
+                                    <i class="fa fa-filter me-1"></i> Filter
+                                </button>
+                            </div>
+                        </form>
+
+                        {{-- back button --}}
                         {!! $headerAction ?? '' !!}
-                        <a href = "#" class = "btn btn-sm btn-success" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasAddScholar" aria-controls="offcanvasBackdrop">New</a>
+
+                        {{-- add scholarship button --}}
+                        <a href="#" class="btn btn-sm btn-success" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasAddScholarship" aria-controls="offcanvasBackdrop"> <i
+                                class="fa fa-plus"></i> New</a>
                     </div>
                 </div>
+
                 <hr>
+
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-hover datatable">
-                            <thead>
+                            <thead style="background-color: #66a6ea; color: white;">
                                 <tr>
-                                    <td class="text-nowrap">#</td>
-                                    <td class="text-nowrap">Scholarship Name</td>
-                                    <td class="text-nowrap" style="width: 250px">Type</td>
-                                    <td class="text-nowrap" style="width: 250px">External Type</td>
-                                    <td class="text-nowrap" style="width: 150px">Actions</td>
+                                    <th class="text-nowrap" style="color: white;">#</th>
+                                    <th class="text-nowrap" style="color: white;">Scholarship Name</th>
+                                    <th class="text-nowrap" style="color: white;">Type</th>
+                                    <th class="text-nowrap" style="color: white;">External Type</th>
+                                    <th class="text-nowrap" style="color: white;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($scholarships as $scholarship)
-                                    <tr>
-                                        <td class="text-nowrap">{{ $loop->iteration }}</td>
-                                        <td class="text-nowrap">{{ $scholarship->sch_name }}</td>
-                                        <td class="text-nowrap">
-                                            {{ GENERAL::ScholarshipsNew()[$scholarship->sch_type]['Description'] ?? 'Unknown' }}
-                                        </td>
-                                        <td class="text-nowrap">
-                                            @if ($scholarship->sch_type == 1)
-                                                N/A
-                                            @else
-                                                {{ GENERAL::ExternalSchType()[$scholarship->ext_type]['Description'] ?? 'Unknown' }}
-                                            @endif
-                                        </td>
-                                        <td class="text-nowrap">
-                                            <!-- Add Button Icon -->
-                                            <i class="fa fa-plus-circle text-success me-2" style="cursor: pointer;"
-                                                title="Add"></i>
-
-                                            <!-- Edit Button Icon -->
-                                            <i class="fa fa-edit text-warning me-2" style="cursor: pointer;"
-                                                onclick="editScholarship('{{ Crypt::encryptString($scholarship->id) }}')"
-                                                title="Edit"></i>
-
-                                            <!-- Delete Button Icon -->
-                                            <i class="fa fa-trash text-danger" style="cursor: pointer;"
-                                                onclick="deleteScholarship('{{ Crypt::encryptString($scholarship->id) }}')"
-                                                title="Delete"></i>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                @include('_partials.scholarships-table')
                             </tbody>
                         </table>
+                        <!-- Pagination on Bottom Right -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <div class="pagination-sm">
+                                {{ $scholarships->links() }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -82,7 +88,8 @@
     </div>
 
     {{-- Saving new scholarship --}}
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddScholar" aria-labelledby="offcanvasBackdropLabel">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddScholarship"
+        aria-labelledby="offcanvasBackdropLabel">
         <div class="offcanvas-header">
             <h5 id="offcanvasBackdropLabel" class="offcanvas-title"><i class="fa fa-plus"></i> New Scholarship</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -113,14 +120,17 @@
                     </select>
                 </div>
 
-                <button class="mb-3 btn btn-primary" id="btnSaveScholar">Save</button>
-                <div id="msg"></div>
+                <button style="background-color: #66a6ea; color: white;" type="button" class="w-100 mb-3 btn mt-1"
+                    id="btnSaveScholarship">Save</button>
+
+                <div id="saveScholarshipMsg"></div>
             </div>
         </form>
     </div>
 
-    {{-- edit scholarship --}}
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasEditScholar" aria-labelledby="offcanvasBackdropLabel">
+    {{-- update scholarship --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasEditScholarship"
+        aria-labelledby="offcanvasBackdropLabel">
         <div class="offcanvas-header">
             <h5 id="offcanvasBackdropLabel" class="offcanvas-title"><i class="fa fa-edit"></i> Edit Scholarship</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -129,7 +139,7 @@
         <form id="frmEditScholarship">
             @csrf
             <div class="offcanvas-body my-auto mx-0 flex-grow-0">
-                <input hidden type="text" name="ScholarshipId" id="editScholarshipId">
+                <input hidden type="text" name="updateScholarshipID" id="id">
 
                 <label>Scholarship Name</label>
                 <input type="text" id="editScholarshipName" name="ScholarshipName" class="mb-4 form-control"
@@ -154,7 +164,9 @@
                     </select>
                 </div>
 
-                <button type="button" class="mb-3 btn btn-primary" id="btnUpdateScholar">Update</button>
+                <button style="background-color: #66a6ea; color: white;" type="button" class="w-100 mb-3 btn mt-1"
+                    id="btnUpdateScholarship">Update</button>
+
                 <div id="editMsg"></div>
             </div>
         </form>

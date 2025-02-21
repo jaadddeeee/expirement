@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 $controller_path = 'App\Http\Controllers';
 
-Route::get('linkstorage', function(){
+Route::get('linkstorage', function () {
   Artisan::call('storage:link');
 });
 
@@ -23,7 +24,7 @@ Route::get('linkstorage', function(){
 
 //super admin
 
-Route::group(['prefix' => 'super-admin','middleware' => ['super']], function () use ($controller_path){
+Route::group(['prefix' => 'super-admin', 'middleware' => ['super']], function () use ($controller_path) {
   Route::get('/preferences', $controller_path . '\SLSU\Super\SuperAdminController@preferences')->name('all-default-values');
   Route::get('/clearance', $controller_path . '\SLSU\Super\SuperAdminController@clearance')->name('all-clearance');
   Route::get('/users', $controller_path . '\SLSU\Super\SuperAdminController@users')->name('all-users');
@@ -40,19 +41,18 @@ Route::group(['prefix' => 'super-admin','middleware' => ['super']], function () 
 
   Route::get('/update-from-hrmis', $controller_path . '\SLSU\Super\SuperAdminController@importhrmis')->name('update-all-info');
   Route::post('/pro-import-hrmis', $controller_path . '\SLSU\Super\SuperAdminController@proimporthrmis');
-
 });
 
 //Admin
 
-Route::group(['prefix' => 'admin','middleware' => ['admin']], function () use ($controller_path){
+Route::group(['prefix' => 'admin', 'middleware' => ['admin']], function () use ($controller_path) {
   Route::get('/users', $controller_path . '\SLSU\Super\SuperAdminController@users')->name('admin-users');
   Route::post('/users', $controller_path . '\SLSU\Super\SuperAdminController@users')->name('all-users');
   Route::post('/save-permission', $controller_path . '\SLSU\Super\SuperAdminController@savepermission')->name('save-permission');
 });
 
 //search
-Route::group(['prefix' => 'search','middleware' => ['auth']], function () use ($controller_path){
+Route::group(['prefix' => 'search', 'middleware' => ['auth']], function () use ($controller_path) {
   Route::post('/or', $controller_path . '\SLSU\SearchController@or');
 
   Route::get('/global-search', $controller_path . '\SLSU\Super\GlobalSearchController@startsearch');
@@ -74,14 +74,14 @@ Route::post('/sem_year_gs', $controller_path . '\SLSU\HomeController@sem_year_gs
 Route::get('/whatsnew', $controller_path . '\SLSU\WhatsnewController@index')->name('whatsnew');
 // my
 
-Route::group(['prefix' => 'my','middleware' => ['auth']], function () use ($controller_path){
+Route::group(['prefix' => 'my', 'middleware' => ['auth']], function () use ($controller_path) {
   Route::get('/profile', $controller_path . '\SLSU\ProfileController@index')->name('my-profile');
   Route::get('/account', $controller_path . '\SLSU\ProfileController@account')->name('my-account');
   Route::post('/connect-info', $controller_path . '\SLSU\ProfileController@update')->name('update-account');
   Route::post('/update-account', $controller_path . '\SLSU\AccountController@update')->name('update-account');
 });
 
-Route::group(['prefix' => 'typeahead','middleware' => ['auth']], function () use ($controller_path){
+Route::group(['prefix' => 'typeahead', 'middleware' => ['auth']], function () use ($controller_path) {
   Route::get('/search', $controller_path . '\SLSU\TypeAheadController@search');
   Route::get('/fees', $controller_path . '\SLSU\TypeAheadController@fees');
   Route::get('/sch', $controller_path . '\SLSU\TypeAheadController@sch');
@@ -89,11 +89,11 @@ Route::group(['prefix' => 'typeahead','middleware' => ['auth']], function () use
 });
 
 // authentication
-Route::group(['prefix' => 'all', 'middleware' => ['auth']], function () use ($controller_path){
-    Route::post('department-campus', $controller_path . '\SLSU\DepartmentController@list');
+Route::group(['prefix' => 'all', 'middleware' => ['auth']], function () use ($controller_path) {
+  Route::post('department-campus', $controller_path . '\SLSU\DepartmentController@list');
 });
 
-Route::group(['prefix' => 'auth'], function () use ($controller_path){
+Route::group(['prefix' => 'auth'], function () use ($controller_path) {
   Route::get('/login-basic', $controller_path . '\authentications\LoginBasic@index')->name('login');
   Route::get('/login-basic-admin', $controller_path . '\authentications\LoginBasic@indexadmin');
   Route::get('/logout', $controller_path . '\authentications\LoginBasic@destroy')->name('logout');
@@ -103,12 +103,12 @@ Route::group(['prefix' => 'auth'], function () use ($controller_path){
 });
 
 //Scholarship
-Route::group(['prefix' => 'scholarship', 'middleware' => ['auth','scholarship']], function () use ($controller_path){
+Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarship']], function () use ($controller_path) {
   Route::get('/set-up/type', $controller_path . '\SLSU\ScholarshipNewController@type');
 });
 
 //TES
-Route::group(['prefix' => 'tes', 'middleware' => ['auth','tes']], function () use ($controller_path){
+Route::group(['prefix' => 'tes', 'middleware' => ['auth', 'tes']], function () use ($controller_path) {
   Route::get('/', $controller_path . '\SLSU\TESController@index');
   Route::post('/search', $controller_path . '\SLSU\TESController@search');
   Route::get('/search', $controller_path . '\SLSU\TESController@search')->name('one-tes');
@@ -118,7 +118,7 @@ Route::group(['prefix' => 'tes', 'middleware' => ['auth','tes']], function () us
 });
 
 //NSTP
-Route::group(['prefix' => 'nstp', 'middleware' => ['auth','nstp']], function () use ($controller_path){
+Route::group(['prefix' => 'nstp', 'middleware' => ['auth', 'nstp']], function () use ($controller_path) {
   Route::get('/with-serial', $controller_path . '\SLSU\NSTPController@withserial')->name('with-serial');
   Route::get('/with-no-serial', $controller_path . '\SLSU\NSTPController@withnoserial')->name('with-no-serial');
   Route::post('/search-no-serial', $controller_path . '\SLSU\NSTPController@searchnoserial')->name('searchnoserial');
@@ -129,7 +129,7 @@ Route::group(['prefix' => 'nstp', 'middleware' => ['auth','nstp']], function () 
 });
 
 //CHED Report
-Route::group(['prefix' => 'ched/report', 'middleware' => ['auth','registrar']], function () use ($controller_path){
+Route::group(['prefix' => 'ched/report', 'middleware' => ['auth', 'registrar']], function () use ($controller_path) {
   Route::get('/graduation-list', $controller_path . '\SLSU\CHEDReportController@graduationlist');
   Route::post('graduation-list-dates', $controller_path . '\SLSU\CHEDReportController@graduationdatelist');
   Route::post('/graduation-list', $controller_path . '\SLSU\CHEDReportController@graduationlist');
@@ -137,9 +137,9 @@ Route::group(['prefix' => 'ched/report', 'middleware' => ['auth','registrar']], 
 });
 
 //Registrar
-Route::group(['prefix' => 'registrar', 'middleware' => ['auth','registrar']], function () use ($controller_path){
+Route::group(['prefix' => 'registrar', 'middleware' => ['auth', 'registrar']], function () use ($controller_path) {
 
-  Route::group(['prefix' => 'report'], function () use ($controller_path){
+  Route::group(['prefix' => 'report'], function () use ($controller_path) {
     Route::get('/arta', $controller_path . '\SLSU\RegistrarController@arta')->name('arta');
     Route::get('/unencoded', $controller_path . '\SLSU\RegistrarController@unencoded')->name('unencoded');
     Route::post('/pro-unencoded', $controller_path . '\SLSU\RegistrarController@prounencoded');
@@ -148,46 +148,44 @@ Route::group(['prefix' => 'registrar', 'middleware' => ['auth','registrar']], fu
     Route::post('/pro-arta', $controller_path . '\SLSU\RegistrarController@proarta');
   });
 
-  Route::group(['prefix' => 'pdf'], function () use ($controller_path){
+  Route::group(['prefix' => 'pdf'], function () use ($controller_path) {
     Route::get('/generate-orf-assessment', $controller_path . '\SLSU\Report\ReportController@orfassessment')->name('generate-orf-assessment');
     Route::get('/generate-route-slip', $controller_path . '\SLSU\Report\ReportController@routeslip')->name('generate-route-slip');
     Route::get('/generate-data-privacy', $controller_path . '\SLSU\Report\ReportController@dataprivacy')->name('generate-data-privacy');
     Route::get('/enrolment-form', $controller_path . '\SLSU\Report\ReportController@enrolmentform')->name('enrolment-form');
-
   });
 
-    //Enrolment
-    Route::get('/enrolment', $controller_path . '\SLSU\EnrolmentController@regenrolment')->name('step4list');
-    Route::post('/enrolment-list', $controller_path . '\SLSU\EnrolmentController@regenrolmentlist')->name('step4list-pro');
-    // Route::get('/validate', $controller_path . '\SLSU\EnrolmentController@validateenrolment')->name('validate');
-    Route::post('/validate-pro', $controller_path . '\SLSU\EnrolmentController@validatepro');
-    Route::post('/withdraw', $controller_path . '\SLSU\EnrolmentController@withdraw');
+  //Enrolment
+  Route::get('/enrolment', $controller_path . '\SLSU\EnrolmentController@regenrolment')->name('step4list');
+  Route::post('/enrolment-list', $controller_path . '\SLSU\EnrolmentController@regenrolmentlist')->name('step4list-pro');
+  // Route::get('/validate', $controller_path . '\SLSU\EnrolmentController@validateenrolment')->name('validate');
+  Route::post('/validate-pro', $controller_path . '\SLSU\EnrolmentController@validatepro');
+  Route::post('/withdraw', $controller_path . '\SLSU\EnrolmentController@withdraw');
 
 
-    Route::group(['prefix' => 'certificate'], function () use ($controller_path){
+  Route::group(['prefix' => 'certificate'], function () use ($controller_path) {
     Route::get('/', $controller_path . '\SLSU\RegistrarController@certificates')->name('certificates');
   });
 
-  Route::group(['prefix' => 'tracker'], function () use ($controller_path){
+  Route::group(['prefix' => 'tracker'], function () use ($controller_path) {
     Route::get('/gradesheet', $controller_path . '\SLSU\TrackerController@listgradesheet');
     Route::post('/search-gradesheet', $controller_path . '\SLSU\TrackerController@searchgradesheet');
     Route::post('/accept-gradesheet', $controller_path . '\SLSU\TrackerController@acceptgradesheet');
     Route::get('/list-no-submit-gradesheets', $controller_path . '\SLSU\TrackerController@nosubmitgradesheet')->name('list-no-submit-gradesheets');
   });
-
 });
 
 //UISA
-Route::group(['prefix' => 'uisa', 'middleware' => ['auth','uisa']], function () use ($controller_path){
+Route::group(['prefix' => 'uisa', 'middleware' => ['auth', 'uisa']], function () use ($controller_path) {
   Route::get('/requested-subject', $controller_path . '\SLSU\UISAController@requestedsubject')->name('requestedsubject');
-  Route::post('/search-cc',$controller_path . '\SLSU\UISAController@prorequestedsubject');
-  Route::post('/search-student',$controller_path . '\SLSU\UISAController@searchstudent');
-  Route::post('/requested-save',$controller_path . '\SLSU\UISAController@saverequestedsubject');
-  Route::post('/requested-delete',$controller_path . '\SLSU\UISAController@deleterequestedsubject');
+  Route::post('/search-cc', $controller_path . '\SLSU\UISAController@prorequestedsubject');
+  Route::post('/search-student', $controller_path . '\SLSU\UISAController@searchstudent');
+  Route::post('/requested-save', $controller_path . '\SLSU\UISAController@saverequestedsubject');
+  Route::post('/requested-delete', $controller_path . '\SLSU\UISAController@deleterequestedsubject');
 });
 
 //ENROLMENT
-Route::group(['prefix' => 'enrol', 'middleware' => ['auth','enrol']], function () use ($controller_path){
+Route::group(['prefix' => 'enrol', 'middleware' => ['auth', 'enrol']], function () use ($controller_path) {
   Route::post('/save', $controller_path . '\SLSU\EnrolmentController@save');
   Route::post('/student-status', $controller_path . '\SLSU\EnrolmentController@studentstatus');
   Route::post('/cart', $controller_path . '\SLSU\EnrolmentController@cart');
@@ -202,27 +200,26 @@ Route::group(['prefix' => 'enrol', 'middleware' => ['auth','enrol']], function (
   Route::post('/pro-add-subject', $controller_path . '\SLSU\EnrolmentController@proaddsubject');
   Route::post('/pro-drop-subject', $controller_path . '\SLSU\EnrolmentController@prodropsubject');
   Route::post('/pro-modify-subject', $controller_path . '\SLSU\EnrolmentController@promodifysubject');
-
 });
 
 //Department
-Route::group(['prefix' => 'department', 'middleware' => ['auth','department']], function () use ($controller_path){
+Route::group(['prefix' => 'department', 'middleware' => ['auth', 'department']], function () use ($controller_path) {
 
-  Route::group(['prefix' => 'report'], function () use ($controller_path){
+  Route::group(['prefix' => 'report'], function () use ($controller_path) {
     Route::get('/pre-reg-survey', $controller_path . '\SLSU\DepartmentController@preregsurvey');
   });
 
-  Route::group(['prefix' => 'certificate'], function () use ($controller_path){
+  Route::group(['prefix' => 'certificate'], function () use ($controller_path) {
     Route::get('/', $controller_path . '\SLSU\RegistrarController@certificates')->name('certificates');
   });
 
-  Route::group(['prefix' => 'employee'], function () use ($controller_path){
+  Route::group(['prefix' => 'employee'], function () use ($controller_path) {
     Route::get('/', $controller_path . '\SLSU\DepartmentController@employee');
     Route::post('/delete', $controller_path . '\SLSU\DepartmentController@destroyemp');
     Route::get('/edit/{id}', $controller_path . '\SLSU\DepartmentController@edit');
   });
 
-  Route::group(['prefix' => 'student'], function () use ($controller_path){
+  Route::group(['prefix' => 'student'], function () use ($controller_path) {
     Route::get('/one', $controller_path . '\SLSU\StudentController@onestudent')->name('view-one-student');
   });
 
@@ -238,13 +235,11 @@ Route::group(['prefix' => 'department', 'middleware' => ['auth','department']], 
   Route::get('/enrolment', $controller_path . '\SLSU\DepartmentController@enrolment')->name('step1lists');
   Route::post('/enrolment', $controller_path . '\SLSU\DepartmentController@enrolment');
   Route::get('/view-enrolment', $controller_path . '\SLSU\DepartmentController@proenrolment')->name('pro-enrolment');
-
-
 });
 
 
 //Survey Super
-Route::group(['prefix' => 'surveys', 'middleware' => ['auth','super']], function () use ($controller_path){
+Route::group(['prefix' => 'surveys', 'middleware' => ['auth', 'super']], function () use ($controller_path) {
   Route::get('/', $controller_path . '\SLSU\SurveyController@index')->name('all-surveys');
   Route::post('/', $controller_path . '\SLSU\SurveyController@dataonly');
   Route::post('/save', $controller_path . '\SLSU\SurveyController@store');
@@ -252,13 +247,12 @@ Route::group(['prefix' => 'surveys', 'middleware' => ['auth','super']], function
   Route::get('/results', $controller_path . '\SLSU\SurveyController@results')->name('results-survey');
 
   Route::post('/saveq', $controller_path . '\SLSU\SurveyController@storequestion');
-
 });
 
 //Faculty Evaluation Super
-Route::group(['prefix' => 'faculty-evaluation', 'middleware' => ['auth']], function () use ($controller_path){
+Route::group(['prefix' => 'faculty-evaluation', 'middleware' => ['auth']], function () use ($controller_path) {
 
-  Route::group(['middleware' => ['super']], function () use ($controller_path){
+  Route::group(['middleware' => ['super']], function () use ($controller_path) {
     Route::get('/', $controller_path . '\SLSU\FacultyEvaluationController@index')->name('faculty-evaluation-index');
     Route::get('/one', $controller_path . '\SLSU\FacultyEvaluationController@one')->name('faculty-evaluation-one');
     Route::get('/analytics', $controller_path . '\SLSU\FacultyEvaluationController@analytics')->name('faculty-evaluation-analytics');
@@ -268,7 +262,7 @@ Route::group(['prefix' => 'faculty-evaluation', 'middleware' => ['auth']], funct
     Route::get('/pro-export-pdf', $controller_path . '\SLSU\Report\ReportController@afespdf')->name('afes-pro-export-pdf');
   });
 
-  Route::group(['middleware' => ['afes']], function () use ($controller_path){
+  Route::group(['middleware' => ['afes']], function () use ($controller_path) {
     Route::get('/all', $controller_path . '\SLSU\FacultyEvaluationController@allresults')->name('faculty-evaluation-all');
     Route::get('/all-pro', $controller_path . '\SLSU\FacultyEvaluationController@allresults')->name('faculty-evaluation-all');
     Route::post('/all-pro', $controller_path . '\SLSU\FacultyEvaluationController@allresults')->name('pro-all-evaluation');
@@ -278,7 +272,7 @@ Route::group(['prefix' => 'faculty-evaluation', 'middleware' => ['auth']], funct
 
 //AR Super
 
-Route::group(['prefix' => 'accounts-receivable', 'middleware' => ['auth','super']], function () use ($controller_path){
+Route::group(['prefix' => 'accounts-receivable', 'middleware' => ['auth', 'super']], function () use ($controller_path) {
   Route::get('/', $controller_path . '\SLSU\ARController@index')->name('accounts-receivable');
   Route::post('/generate', $controller_path . '\SLSU\ARController@generate');
   Route::get('/tuition-fee', $controller_path . '\SLSU\ARController@paymenttuition')->name('tuition-payments');
@@ -286,24 +280,23 @@ Route::group(['prefix' => 'accounts-receivable', 'middleware' => ['auth','super'
 });
 
 
-Route::group(['prefix' => 'recognition', 'middleware' => ['auth','department']], function () use ($controller_path){
+Route::group(['prefix' => 'recognition', 'middleware' => ['auth', 'department']], function () use ($controller_path) {
   Route::get('/latin-honors', $controller_path . '\SLSU\HonorController@latinhonors');
   Route::post('/pro-latin', $controller_path . '\SLSU\HonorController@prolatinhonors');
 
   Route::get('/deans-list', $controller_path . '\SLSU\HonorController@deanslist');
   Route::post('/pro-dean-list', $controller_path . '\SLSU\HonorController@prodeanslist');
-
 });
 
 //OSAS
-Route::group(['prefix' => 'osas', 'middleware' => ['auth','osas']], function () use ($controller_path){
-  Route::group(['prefix' => 'certificate'], function () use ($controller_path){
+Route::group(['prefix' => 'osas', 'middleware' => ['auth', 'osas']], function () use ($controller_path) {
+  Route::group(['prefix' => 'certificate'], function () use ($controller_path) {
     Route::get('/', $controller_path . '\SLSU\OSASController@certificates')->name('certificates');
   });
 });
 
 //teacher
-Route::group(['prefix' => 'teacher', 'middleware' => ['auth','teacher']], function () use ($controller_path){
+Route::group(['prefix' => 'teacher', 'middleware' => ['auth', 'teacher']], function () use ($controller_path) {
   Route::get('/my-class', $controller_path . '\SLSU\TeacherController@index')->name('my-class');
   Route::get('/one-student', $controller_path . '\SLSU\TeacherController@onestudent')->name('onestudent');
   Route::post('/view-my-class', $controller_path . '\SLSU\TeacherController@view')->name('view-my-class');
@@ -320,14 +313,14 @@ Route::group(['prefix' => 'teacher', 'middleware' => ['auth','teacher']], functi
 });
 
 //clearance accounts
-Route::group(['prefix' => 'clearance', 'middleware' => ['auth','admin']], function () use ($controller_path){
+Route::group(['prefix' => 'clearance', 'middleware' => ['auth', 'admin']], function () use ($controller_path) {
   Route::get('/student', $controller_path . '\SLSU\ClearanceController@student')->name('clearance.student');
   Route::post('/student-save', $controller_path . '\SLSU\ClearanceController@studentsave');
   Route::post('/student-delete', $controller_path . '\SLSU\ClearanceController@studentdelete');
 });
 
 //clearance department
-Route::group(['prefix' => 'clearance', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'clearance', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
   Route::get('/', $controller_path . '\SLSU\ClearanceController@index')->name('manage');
   Route::get('/autocomplete', $controller_path . '\SLSU\ClearanceController@search')->name('autocomplete');
 
@@ -340,25 +333,24 @@ Route::group(['prefix' => 'clearance', 'middleware' => ['auth','clearance']], fu
 });
 
 //cashier
-Route::group(['prefix' => 'cashier', 'middleware' => ['auth','cashier']], function () use ($controller_path){
-    Route::group(['prefix' => 'set-up'], function () use ($controller_path){
-        Route::get('/scholarships', $controller_path . '\SLSU\ScholarshipController@index')->name('scholarships');
-        Route::post('/save-scholarship', $controller_path . '\SLSU\ScholarshipController@save');
-    });
+Route::group(['prefix' => 'cashier', 'middleware' => ['auth', 'cashier']], function () use ($controller_path) {
+  Route::group(['prefix' => 'set-up'], function () use ($controller_path) {
+    Route::get('/scholarships', $controller_path . '\SLSU\ScholarshipController@index')->name('scholarships');
+    Route::post('/save-scholarship', $controller_path . '\SLSU\ScholarshipController@save');
+  });
 
-    Route::get('/payment', $controller_path . '\SLSU\CashierController@index');
-    Route::post('/search-payment', $controller_path . '\SLSU\CashierController@searchpayment');
-    Route::post('/search-general-fees', $controller_path . '\SLSU\CashierController@searchgenfee');
-    Route::post('/add-fee', $controller_path . '\SLSU\CashierController@savefee');
-    Route::post('/delete-fee', $controller_path . '\SLSU\CashierController@deletefee');
-    Route::post('/get-record', $controller_path . '\SLSU\CashierController@getrecord');
-    Route::post('/update-scholarship', $controller_path . '\SLSU\CashierController@updatescholar');
-
+  Route::get('/payment', $controller_path . '\SLSU\CashierController@index');
+  Route::post('/search-payment', $controller_path . '\SLSU\CashierController@searchpayment');
+  Route::post('/search-general-fees', $controller_path . '\SLSU\CashierController@searchgenfee');
+  Route::post('/add-fee', $controller_path . '\SLSU\CashierController@savefee');
+  Route::post('/delete-fee', $controller_path . '\SLSU\CashierController@deletefee');
+  Route::post('/get-record', $controller_path . '\SLSU\CashierController@getrecord');
+  Route::post('/update-scholarship', $controller_path . '\SLSU\CashierController@updatescholar');
 });
 
 
 //clearance library
-Route::group(['prefix' => 'library', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'library', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\LibraryController@search');
 
@@ -371,7 +363,7 @@ Route::group(['prefix' => 'library', 'middleware' => ['auth','clearance']], func
 });
 
 //clearance DORM Boy
-Route::group(['prefix' => 'dormb', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'dormb', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\DORMBController@search');
 
@@ -384,7 +376,7 @@ Route::group(['prefix' => 'dormb', 'middleware' => ['auth','clearance']], functi
 });
 
 //clearance DORM Girl
-Route::group(['prefix' => 'dormg', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'dormg', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\DORMGController@search');
 
@@ -397,7 +389,7 @@ Route::group(['prefix' => 'dormg', 'middleware' => ['auth','clearance']], functi
 });
 
 //clearance Guidance
-Route::group(['prefix' => 'guidance', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'guidance', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\GuidanceController@search');
 
@@ -410,7 +402,7 @@ Route::group(['prefix' => 'guidance', 'middleware' => ['auth','clearance']], fun
 });
 
 //clearance Clinic
-Route::group(['prefix' => 'clinic', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'clinic', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\ClinicController@search');
 
@@ -423,7 +415,7 @@ Route::group(['prefix' => 'clinic', 'middleware' => ['auth','clearance']], funct
 });
 
 //clearance osas
-Route::group(['prefix' => 'osas', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'osas', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\OSASController@search');
 
@@ -436,7 +428,7 @@ Route::group(['prefix' => 'osas', 'middleware' => ['auth','clearance']], functio
 });
 
 //clearance registrar
-Route::group(['prefix' => 'registrar', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'registrar', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\RegistrarController@search');
 
@@ -449,7 +441,7 @@ Route::group(['prefix' => 'registrar', 'middleware' => ['auth','clearance']], fu
 });
 
 //clearance bargo
-Route::group(['prefix' => 'bargo', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'bargo', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\BARGOController@search');
 
@@ -462,7 +454,7 @@ Route::group(['prefix' => 'bargo', 'middleware' => ['auth','clearance']], functi
 });
 
 //clearance mis
-Route::group(['prefix' => 'mis', 'middleware' => ['auth','clearance']], function () use ($controller_path){
+Route::group(['prefix' => 'mis', 'middleware' => ['auth', 'clearance']], function () use ($controller_path) {
 
   Route::get('/autocomplete', $controller_path . '\SLSU\MISController@search');
 
@@ -476,38 +468,38 @@ Route::group(['prefix' => 'mis', 'middleware' => ['auth','clearance']], function
 
 
 //grade
-Route::group(['prefix' => 'grade', 'middleware' => ['auth','teacher']], function () use ($controller_path){
+Route::group(['prefix' => 'grade', 'middleware' => ['auth', 'teacher']], function () use ($controller_path) {
   Route::post('/save', $controller_path . '\SLSU\GradesController@save')->name('save-grades');
   Route::post('/bulk', $controller_path . '\SLSU\GradesController@upload')->name('save-grades');
 });
 
 //export
-Route::group(['prefix' => 'teacher', 'middleware' => ['auth','teacher']], function () use ($controller_path){
+Route::group(['prefix' => 'teacher', 'middleware' => ['auth', 'teacher']], function () use ($controller_path) {
   Route::get('/class-record', $controller_path . '\SLSU\ExportController@classrecord')->name('classrecord');
 });
 
-Route::group(['prefix' => 'registrar', 'middleware' => ['auth','registrar']], function () use ($controller_path){
+Route::group(['prefix' => 'registrar', 'middleware' => ['auth', 'registrar']], function () use ($controller_path) {
   Route::get('/qfin67', $controller_path . '\SLSU\ExportController@qfin67')->name('qfin67');
 });
 
 
 
 //SMS
-Route::group(['prefix' => 'sms', 'middleware' => ['auth']], function () use ($controller_path){
+Route::group(['prefix' => 'sms', 'middleware' => ['auth']], function () use ($controller_path) {
   Route::post('/bulk', $controller_path . '\SLSU\SMSController@bulksms')->name('bulksms');
   Route::post('/one', $controller_path . '\SLSU\SMSController@onesms')->name('onesms');
 });
 
 
 //Report
-Route::group(['prefix' => 'report', 'middleware' => ['auth']], function () use ($controller_path){
+Route::group(['prefix' => 'report', 'middleware' => ['auth']], function () use ($controller_path) {
   Route::post('/gradesheet', $controller_path . '\SLSU\Report\ReportController@gradesheet')->name('gradesheet');
   Route::post('/workload', $controller_path . '\SLSU\Report\ReportController@workload')->name('gradesheet');
   Route::post('/certificate', $controller_path . '\SLSU\Report\ReportController@certificate');
   Route::get('/qfin65', $controller_path . '\SLSU\Report\ReportController@qfin65')->name('report-qfin65');
 
-  Route::group(['middleware' => ['enrol']], function () use ($controller_path){
-  //count
+  Route::group(['middleware' => ['enrol']], function () use ($controller_path) {
+    //count
     Route::get('/count', $controller_path . '\SLSU\Report\ReportController@count')->name('enrolment-count');
     Route::post('/count', $controller_path . '\SLSU\Report\ReportController@count')->name('enrolment-count');
   });
@@ -572,18 +564,22 @@ Route::get('/form/layouts-horizontal', $controller_path . '\form_layouts\Horizon
 Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tables-basic');
 
 // scholarship new
-Route::group(['prefix' => 'scholarship-new', 'middleware' => ['auth', 'scholarshipnew']], function () use ($controller_path){
+Route::group(['prefix' => 'scholarship-new', 'middleware' => ['auth', 'scholarshipnew']], function () use ($controller_path) {
+  // scholarships | DONE
   Route::get('/scholarships', $controller_path . '\SLSU\ScholarshipNController@index')->name('scholarships');
+  Route::get('/search-scholarship', $controller_path . '\SLSU\ScholarshipNController@search')->name('search-scholarship');
   Route::get('/fetch-scholarships', $controller_path . '\SLSU\ScholarshipNController@fetchScholarships')->name('fetch-scholarships');
   Route::post('/save-scholarship', $controller_path . '\SLSU\ScholarshipNController@save');
   Route::get('/edit-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@edit')->name('edit-scholarship');
-  Route::put('/update-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@update');
-  Route::delete('/delete-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@delete');
+  Route::put('/update-scholarship/', $controller_path . '\SLSU\ScholarshipNController@update')->name('update-scholarship');
+  Route::delete('/delete-scholarship/', $controller_path . '\SLSU\ScholarshipNController@delete')->name('delete-scholarship');
+  
+  // scholar
+  Route::get('/add-scholar-view', $controller_path . '\SLSU\ScholarshipNController@addScholarView')->name('add-scholar-view');
+  Route::get('/search-student', $controller_path . '\SLSU\ScholarshipNController@searchStudent')->name('search-student');
+  Route::get('/search-scholar/', $controller_path . '\SLSU\ScholarshipNController@searchScholar')->name('search-scholar');
+  Route::post('/add-scholar', $controller_path . '\SLSU\ScholarshipNController@addScholar');
+  Route::get('/edit-scholar/{id}', $controller_path . '\SLSU\ScholarshipNController@editScholar')->name('edit-scholar');
+  Route::put('/update-scholar/', $controller_path . '\SLSU\ScholarshipNController@updateScholar')->name('update-scholar');
+  Route::delete('/delete-scholar/', $controller_path . '\SLSU\ScholarshipNController@deleteScholar')->name('delete-scholar');
 });
-
-
-
-
-
-
-

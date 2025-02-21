@@ -11,8 +11,12 @@ class ScholarshipNew extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = "scholarship_new";
+    protected $connection;
+
+    protected $table = "sch_scholarships";
+    
     protected $dates = ['deleted_at'];
+    
     public $timestamps = false;
 
     protected $fillable = [
@@ -22,4 +26,10 @@ class ScholarshipNew extends Model
     public function __construct(){
         $this->connection = strtolower(session('campus'));
     }
+
+    public function scholars()
+    {
+        return $this->hasMany(Scholar::class, 'scholarship_id');
+    }
+
 }

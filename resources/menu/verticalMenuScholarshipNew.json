@@ -1,19 +1,13 @@
 {
     "menu": [
         {
-            "menuHeader": "Scholarship"
+            "menuHeader": "Manage Scholarship"
         },
         {
             "url": "scholarship-new/scholarships",
-            "name": "Scholarships",
+            "name": "Scholarship",
             "icon": "menu-icon tf-icons bx bxs-graduation",
             "slug": "scholarships"
-        },
-        {
-            "url": "/scholars",
-            "name": "Scholars",
-            "icon": "menu-icon tf-icons bx bxs-graduation",
-            "slug": "scholars"
         }
     ]
 }
