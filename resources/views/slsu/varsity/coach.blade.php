@@ -89,12 +89,12 @@
                     <div class = "form-group">
                       <div class="col-auto">
                         <label class="form-label">Campus <span class = 'text-danger'>*</span></label>
-                        {{-- <select name="Campus" id="Campus" class="form-select">
+                        <select name="Campus" id="Campus" class="form-select">
                           <option value="0">Select Campus</option>
                             @foreach(GENERAL::Campuses() as $index => $campus)
                               <option value="{{$index}}" <?=$index==$campus?"Selected":""?>>{{$campus['Campus']}}</option>
                             @endforeach
-                        </select> --}}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -160,12 +160,12 @@
                 <div class = "form-group">
                   <div class="col-auto">
                     <label class="form-label">Campus</label>
-                    {{-- <select name="updateCampus" id="updateCampus" class="form-control" disabled>
+                    <select name="updateCampus" id="updateCampus" class="form-control" disabled>
                       <option value="0"></option>
                         @foreach(GENERAL::Campuses() as $index => $campus)
                           <option value="{{$campus['ID']}}">{{$campus['Campus']}}</option>
                         @endforeach
-                    </select> --}}
+                    </select>
                   </div>
                 </div>
               </div>

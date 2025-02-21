@@ -151,7 +151,6 @@ class CoachController extends Controller
             if (!empty($middleName)) {
                 $formattedName .= ", {$middleName}";
             }
-            
 
             // Check for duplicate entry
             $existingCoach = Coach::where("FirstName", $firstName)
@@ -168,14 +167,25 @@ class CoachController extends Controller
                 ->where('LastName', $lastName)
                 ->first();
 
+            // Check if the event already has a main coach in the same campus
+            $mainCoachExists = Coach::where('CoachEvent', $event)
+            ->where('CoachType', $ct)
+            ->where('Campus', $campus)
+            ->whereNull('deleted_at')
+            ->exists();
+
             if ($existingCoach && $existingCoach->deleted_at !== null)
                 return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Coach does not exist")]);
 
             if (!$employees) 
-            return response()->json(['Error' => 1, "Message" => \GENERAL::Error("This employee is not exist in this campus")]);
+                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("This employee is not exist in this campus")]);
 
             if ($existingCoach) 
                 return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Duplicate entry detected for this coach")]);
+
+            if ($mainCoachExists && $ct == 1) {
+                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("This event already has a main coach")]);
+            }
 
             // Save coach details
             $data = [
