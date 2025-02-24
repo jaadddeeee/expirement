@@ -113,8 +113,6 @@ $('#search').on('input', function () {
     });
 });
 
-
-
 $(document).on("click", "#btn-save", function(e){
     e.preventDefault();
     $.ajax({
@@ -384,4 +382,4 @@ $(document).on("hidden.bs.modal", "#updateModalVar" , function(){
 });
 
 
-    </script>
+</script>

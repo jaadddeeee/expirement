@@ -41,7 +41,7 @@ class CoachController extends Controller
 
         $pageTitle = "Manage Coaches";
         $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>';
-        return view('slsu.varsity.coach',[
+        return view('slsu.varsity.VAR_coach.coach',[
             'pageTitle' => $pageTitle,
             'headerAction' => $headerAction,
             'coaches' => $coach
@@ -50,7 +50,17 @@ class CoachController extends Controller
 
     public function emplist(Request $request){
         try {
-            $campus = $request->id;
+
+            $campus = session('campus');
+
+            if (auth()->user()->AllowSuper == 1){
+                if (empty($request->id)){
+                    throw new Exception('Select campus');
+                }
+
+                $campus = $request->id;
+            }
+            
 
             //1 - SG
             //2 - MCC

@@ -15,7 +15,7 @@ class EventController extends Controller
 
         $pageTitle = "Manage Event";
         $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>';
-        return view('slsu.varsity.event',[
+        return view('slsu.varsity.VAR_event.event',[
             'pageTitle' => $pageTitle,
             'headerAction' => $headerAction,
             'events' => $events
