@@ -265,6 +265,15 @@ class CoachController extends Controller
 
             if ($ch->CoachType == $ct && $ch->CoachEvent == $event) 
                 return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Invalid, No changes detected.")]);
+
+            $mainCoachExists = Coach::where('CoachEvent', $ch->CoachEvent)
+            ->where('CoachType', $ch->CoachType)
+            ->where('Campus', $ch->Campus)
+            ->whereNull('deleted_at')
+            ->exists();
+
+            if ($mainCoachExists && $ct == 1) 
+                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("This event already has a main coach")]);
             
             // Update coach details
             $ch->CoachType = $ct;

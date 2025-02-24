@@ -91,7 +91,7 @@ $('#search').on('input', function () {
                 $('#data').html(response.html);
                 
                 // Hide pagination if there are fewer results than per-page limit
-                if ($('#data').find('.varsity-row').length < 10) {
+                if ($('#data').find('.coaches-row').length < 10) {
                     $('.pagination').hide();
                 } else {
                     $('.pagination').show();

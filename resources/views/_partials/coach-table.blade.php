@@ -1,5 +1,5 @@
 @foreach($coaches as $coach)
-<tr class="varsity-row">    
+<tr class="coaches-row">    
   <td class = "text-nowrap">{{(isset($ctr)?++$ctr:$ctr=1)}}</td>
   <td class = "text-nowrap">{{utf8_decode(strtoupper($coach->LastName.', '.$coach->FirstName.(empty($coach->MiddleName)?"":" ".$coach->MiddleName[0])))}}</td>
   <td class = "text-nowrap">

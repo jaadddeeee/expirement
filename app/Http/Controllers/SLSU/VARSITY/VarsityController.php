@@ -27,6 +27,14 @@ class VarsityController extends Controller
                   ->orWhere('MiddleName', 'LIKE', "%{$request->search}%");
             });
         }
+
+        if ($request->has('filterSchoolYear') && $request->filterSchoolYear != '0') {
+            $query->where('SchoolYear', $request->filterSchoolYear);
+        }
+
+        if ($request->has('filterSemester') && $request->filterSemester != '0') {
+            $query->where('Semester', $request->filterSemester);
+        }
     
         if ($request->has('filterCampus') && $request->filterCampus != '0') {
             $query->where('Campus', $request->filterCampus);

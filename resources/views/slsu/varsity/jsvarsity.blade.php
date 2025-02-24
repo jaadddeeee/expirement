@@ -86,11 +86,18 @@ $(document).ready(function () {
 $('#search').on('input', function () {
     var query = $(this).val();
     var filterCampus = $('#filterCampus').val();
+    var filterSchoolYear = $('#filterSchoolYear').val();
+    var filterSemester = $('#filterSemester').val();
 
     $.ajax({
         url: '{{ route("varsity") }}',
         method: 'GET',
-        data: { search: query, filterCampus: filterCampus },
+        data: { 
+            search: query, 
+            filterCampus: filterCampus,
+            filterSchoolYear: filterSchoolYear,
+            filterSemester: filterSemester
+        },
         success: function (response) {
             setTimeout(function () {
                 $('#data').html(response.html);
@@ -105,6 +112,8 @@ $('#search').on('input', function () {
         }
     });
 });
+
+
 
 $(document).on("click", "#btn-save", function(e){
     e.preventDefault();

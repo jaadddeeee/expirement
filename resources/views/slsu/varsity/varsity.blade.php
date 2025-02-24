@@ -28,6 +28,18 @@
             <form method="GET" action="{{ route('varsity') }}">
               <div class="d-flex align-items-center gap-2">
                 <input type="search" name="search" id="search" class="form-control form-control-sm" placeholder="Search" value="{{ request('search') }}">
+                <select class="form-select form-select-sm w-auto" name="filterSchoolYear" id="filterSchoolYear">
+                  <option value="0">Select SchoolYear</option>
+                  @foreach(GENERAL::SchoolYears() as $index => $sy)
+                      <option value="{{$sy}}" {{ request('filterSchoolYear') == $sy ? 'selected' : '' }}>{{$sy}}</option>
+                  @endforeach
+              </select>
+              <select class="form-select form-select-sm w-auto" name="filterSemester" id="filterSemester">
+                  <option value="0">Select Semester</option>
+                  @foreach(GENERAL::Semesters() as $index => $sem)
+                      <option value="{{$index}}" {{ request('filterSemester') == $index ? 'selected' : '' }}>{{$sem['Long']}}</option>
+                  @endforeach
+              </select>
                 <select name="filterCampus" id="filterCampus" class="form-select form-select-sm w-auto">
                   <option value="0">Select campus</option>
                   @foreach(GENERAL::Campuses() as $campus)
