@@ -143,9 +143,21 @@
                             <div class="image-container d-block border mx-auto"
                                 style="position: relative; overflow: hidden; width: 100%; height: 100px; background: url('path/to/eraser/background.png') center center no-repeat; background-size: cover;"
                                 id="signatureContainer">
-                                <img src="{{ asset('images/signature.png') }}" id="previewSignature" alt="Signature"
+
+                                @php
+                                    $signaturePath =
+                                        'storage/employee_id_signature/' . $employee->AgencyNumber . '.png';
+
+                                    if (file_exists(public_path($signaturePath))) {
+                                        $signature = $signaturePath;
+                                    } else {
+                                        $signature = 'images/signature.png';
+                                    }
+                                @endphp
+
+                                <img src="{{ asset($signature) }}" id="previewSignature" alt="Signature"
                                     class="d-block mx-auto mb-3"
-                                    style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s; display: none;">
+                                    style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s;">
 
                                 <div class="crop-controls" style="position: absolute; bottom: 10px; right: 10px;">
                                     <button type="button" class="btn btn-primary crop-btn d-flex align-items-center"
@@ -177,7 +189,14 @@
 
                         <div class="mb-3">
                             <label for="position" class="form-label">Position</label>
-                            <h4>N/A</h4>
+                            <select name="position" id="position" class="form-select" required>
+                                <option disabled selected>Select Position</option>
+                                <option value="COS Faculty">COS Faculty</option>
+                                <option value="COS Staff">COS Staff</option>
+                                <option value="Faculty">Faculty</option>
+                                <option value="Staff">Staff</option>
+                                <option value="University President">University President</option>
+                            </select>
                         </div>
 
                         <label class="form-label mb-3" style="color: #39DA8A; ">PERSONAL INFORMATION</label>
@@ -197,12 +216,12 @@
                         <div class="mb-3">
                             <label for="contact_name" class="form-label">Contact Name</label>
                             <input type="text" name="contact_name" id="contact_name" class="form-control"
-                                placeholder="Enter Contact Name" value="{{ $employee2->name ?? '' }}">
+                                placeholder="Enter Contact Name" value="{{ $employee2->name ?? 'N/A' }}">
                         </div>
                         <div class="mb-3">
                             <label for="contact_number" class="form-label">Contact Number</label>
                             <input type="contact" name="contact_number" id="contact_number" class="form-control"
-                                placeholder="Enter Contact Number" value="{{ $employee2->number ?? '' }}">
+                                placeholder="Enter Contact Number" value="{{ $employee2->number ?? 'N/A' }}">
                         </div>
 
                         <div class="row">
@@ -238,7 +257,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="or_number" class="form-label">OR No.</label>
                                 <input type="text" name="or_number" id="or_number" class="form-control"
-                                    placeholder="Enter OR Number">
+                                    placeholder="Enter OR Number" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="date_paid" class="form-label">Date Paid</label>

@@ -22,28 +22,28 @@ class StudentId
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false);
 
-        // Page 1: Front of the ID card
+        // Page A: Front of the ID card
         $pdf->AddPage();
         $pdf->Image(public_path('images/student/front.png'), 0, 0, 54.86, 86.01, 'PNG');
 
-        $pdf->SetFont('trajanpro', '', 7);
+        $pdf->SetFont('trajanpro', '', 8.5);
         $pdf->SetXY(16.8, 8.2);
         $pdf->Cell(30, 5, 'Southern Leyte', 0, 0, 'L');
 
-        $pdf->SetFont('trajanpro', '', 5.7);
+        $pdf->SetFont('trajanpro', '', 7);
         $pdf->SetXY(16.9, 10.5);
         $pdf->Cell(30, 5, 'State University', 0, 0, 'L');
 
-        $pdf->SetFont('poppins', '', 3.5);
-        $pdf->SetXY(17, 14);
+        $pdf->SetFont('poppins', '', 3.8);
+        $pdf->SetXY(17, 14.1);
         $pdf->Cell(0, 1, $defaultValues['CampusString'] . ' | ' . $defaultValues['SchoolAddress'], 0, 0);
 
-        $imageWidth = 28;
-        $imageHeight = 28;
+        $imageWidth = 29;
+        $imageHeight = 29;
         $xPosition = (54.86 - $imageWidth) / 2;
         $yPosition = 18;
 
-        $pdf->SetLineWidth(0.2);
+        $pdf->SetLineWidth(0.3  );
         $pdf->Rect($xPosition, $yPosition, $imageWidth, $imageHeight);
 
         if (!empty($student->Picture)) {
@@ -56,10 +56,10 @@ class StudentId
 
         $pdf->Image(public_path($image), $xPosition, $yPosition, $imageWidth, $imageHeight, '', '', '', true, 300, '', false, false, 0, false, false, false);
 
-        $imageWidth = 26.92;
-        $imageHeight = 7.72;
+        $imageWidth = 28.92;
+        $imageHeight = 6.80;
         $xPosition = (54.86 - $imageWidth) / 2;
-        $topMargin = 46.5;
+        $topMargin = 47.7;
         $yPosition = $topMargin;
 
         $signaturePath = 'storage/student_id_signature/' . $student->StudentNo . '.png';
@@ -80,11 +80,11 @@ class StudentId
         $pdf->SetXY($xPosition, 53);
         $pdf->Cell($textWidth, 1, $studentName, 0, 0, 'C');
 
-        $pdf->SetFont('poppins', '', 5.8);
+        $pdf->SetFont('poppins', '', 6);
         $pdf->SetXY(0, 58);
         $pdf->Cell(0, 1, $student->Course, 0, 0, 'C');
 
-        $pdf->SetFont('poppins', 'B', 5.8);
+        $pdf->SetFont('poppins', 'B', 6);
         $pdf->SetXY(0, 60.8);
         $pdf->Cell(0, 1, $student->major, 0, 0, 'C');
 
@@ -125,26 +125,28 @@ class StudentId
         $pdf->SetXY($x + -0.1, $y + 4.5);
         $pdf->Cell(0, 1, $schoolYearLabel . ' - ' . $semesterShort, 0, 0);
 
+        $school_website = $defaultValues['SchoolWebsite'];
+
         $pdf->SetTextColor(255, 255, 255);
         $pdf->SetFont('poppins', '', 6);
         $pdf->SetXY(0, 81);
-        $pdf->Cell(0, 1, 'www.southernleytestateu.edu.ph', 0, 0, 'C');
+        $pdf->Cell(0, 1, $school_website, 0, 0, 'C');
 
         // Page 2: Back of the ID card
         $pdf->AddPage();
         $pdf->Image(public_path('images/student/back.png'), 0, 0, 54.86, 86.01, 'PNG');
 
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 4);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 4);
         $pdf->Cell(30, 5, 'This is to certify that the bearer, whose', 0, 0);
 
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 6.6);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 6.6);
         $pdf->Cell(30, 5, 'name and photo appear in front is a', 0, 0);
 
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 9.6);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 9.6);
         $pdf->Cell(30, 5, 'bonafide student of SLSU.', 0, 0);
 
         $pageWidth = $pdf->getPageWidth();
@@ -158,50 +160,50 @@ class StudentId
         $pdf->Image(public_path($image), $xPosition, $yPosition, $imageWidth, $imageHeight, '', '', '', true, 300, '', false, false, 0, false, false, false);
         $pdf->SetAlpha(1);
 
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 17.2);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 17.2);
         $pdf->Cell(30, 5, 'In case of emergency,', 0, 0);
 
         $emer_name = strtoupper($student->emer_name);
-        $pdf->SetFont('poppins', 'B', 6);
-        $pdf->SetXY(6, 20.9);
+        $pdf->SetFont('poppins', 'B', 6.1);
+        $pdf->SetXY(5.4, 20.9);
         $pdf->Cell(30, 5, $emer_name, 0, 0);
 
         $contact = $student->emer_contact;
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 23.6);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 23.6);
         $pdf->Cell(30, 5, $contact, 0, 0);
 
         $address = $student->p_street . ', ' . $student->p_municipality . ', ' . $student->p_province;
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 26.3);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 26.3);
         $pdf->Cell(30, 5, $address, 0, 0);
 
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 32.5);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 32.5);
         $pdf->Cell(30, 5, 'Allergy/ies:', 0, 0);
 
         $allergy = $student2->Allergy;
-        $pdf->SetFont('poppins', 'B', 6);
-        $pdf->SetXY(6, 35.3);
+        $pdf->SetFont('poppins', 'B', 6.1);
+        $pdf->SetXY(5.4, 35.3);
         $pdf->Cell(30, 5, $allergy, 0, 0);
 
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 41.5);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 41.5);
         $pdf->Cell(30, 5, 'Blood Type:', 0, 0);
 
         $blood_type = $student2->BloodType;
-        $pdf->SetFont('poppins', 'B', 6);
-        $pdf->SetXY(6, 44.3);
+        $pdf->SetFont('poppins', 'B', 6.1);
+        $pdf->SetXY(5.4, 44.3);
         $pdf->Cell(30, 5, $blood_type, 0, 0);
 
-        $pdf->SetFont('poppins', '', 6);
-        $pdf->SetXY(6, 50.5);
+        $pdf->SetFont('poppins', '', 6.1);
+        $pdf->SetXY(5.4, 50.5);
         $pdf->Cell(30, 5, 'Date Issued:', 0, 0);
 
         $date_issued = Carbon::now()->format('l, d F Y');
-        $pdf->SetFont('poppins', 'B', 6);
-        $pdf->SetXY(6, 53.3);
+        $pdf->SetFont('poppins', 'B', 6.1);
+        $pdf->SetXY(5.4, 53.3);
         $pdf->Cell(30, 5, $date_issued, 0, 0);
 
         $pageWidth = $pdf->getPageWidth();

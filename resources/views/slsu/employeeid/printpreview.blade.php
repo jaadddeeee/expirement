@@ -78,13 +78,13 @@
                                     style="width: 330px; height: 380px; border: 0.5px solid #000;">
                             </div>
 
-                            <div class="profile-box" style="text-align: center; position: relative; top: 30px;">
-                                <img src="{{ asset('images/signature.png') }}" alt="Profile Picture"
-                                    style="width: 320px; height: 85px;">
+                            <div class="profile-box" style="text-align: center; margin-top: 30px;">
+                                <img src="{{ file_exists(public_path('storage/employee_id_signature/' . $employee->AgencyNumber . '.png')) ? asset('storage/employee_id_signature/' . $employee->AgencyNumber . '.png') : asset('images/signature.png') }}"
+                                    alt="Profile Picture" style="width: 320px; height: 85px;">
                             </div>
 
                             <p class="d-flex justify-content-center"
-                                style="font-family: 'Poppins', sans-serif; font-size: 50px; position: relative; top: 10px; color: #000; font-weight: bold; text-decoration: underline;">
+                                style="font-family: 'Poppins', sans-serif; font-size: 50px; position: relative; top: -17px; color: #000; font-weight: bold; text-decoration: underline;">
                                 <span style="position: relative; top: 5px;">
                                     {{ strtoupper($employee->FirstName) }}
                                     {{ strtoupper(Str::substr($employee->MiddleName, 0, 1) . '.') }}
@@ -93,8 +93,8 @@
                             </p>
 
                             <p class="d-flex justify-content-center"
-                                style="font-family: 'Poppins', sans-serif; font-size: 35px; position: relative; top: -15px; color: #000;">
-                                Staff
+                                style="font-family: 'Poppins', sans-serif; font-size: 35px; position: relative; top: -40px; color: #000;">
+                                {{ $position }}
                             </p>
 
                             <p class="d-flex justify-content-center"
@@ -105,18 +105,18 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <p class="text-uppercase mt-2"
-                                        style="font-family: 'Poppins', sans-serif; font-size: 26px; position: relative; top: -10px; color: #ffffff;">
+                                        style="font-family: 'Poppins', sans-serif; font-size: 26px; position: relative; top: -35px; color: #ffffff;">
                                         Employee No.
                                     </p>
                                     <p class="text-uppercase mt-4"
-                                        style="font-family: 'Poppins', sans-serif; font-size: 52px; position: relative; top: -50.5px; color: #ffffff; font-weight: bold;">
+                                        style="font-family: 'Poppins', sans-serif; font-size: 52px; position: relative; top: -75.5px; color: #ffffff; font-weight: bold;">
                                         {{ $employee->AgencyNumber ? $employee->AgencyNumber : 'N/A' }}
                                     </p>
                                 </div>
 
                                 <p class="d-flex justify-content-center"
-                                    style="font-family: 'Poppins', sans-serif; font-size: 19px; position: relative;  top: -60px; color: #000000;">
-                                    www.southernleytestateu.edu.ph
+                                    style="font-family: 'Poppins', sans-serif; font-size: 25px; position: relative;  top: -85px; color: #000000;">
+                                    {{ $defaultValues['SchoolWebsite'] }}
                                 </p>
                             </div>
                         </div>
@@ -144,7 +144,7 @@
                             Southern Leyte State University.
                         </p>
 
-                        <div class="profile-box" style="text-align: center; margin-top: 24px; margin-left: 360px;">
+                        <div class="profile-box" style="text-align: center; margin-top: 24px; margin-left: 385px;">
                             <img src="{{ asset($image) }}" alt="Profile Picture"
                                 style="width: 120px; height: 120px; opacity: 0.5;">
                         </div>
@@ -156,7 +156,7 @@
 
                         <p
                             style="font-family: 'Poppins', sans-serif; font-size: 23px; font-weight: bold; position: relative; top: -60px ; left: 90px ; color: #000000; margin-bottom: -2px;">
-                            {{ $employee2->name ?? 'N/A' }}
+                            {{ strtoupper($employee2->name ?? 'N/A') }}
                         </p>
 
                         <p
@@ -166,7 +166,7 @@
 
                         <p
                             style="font-family: 'Poppins', sans-serif; font-size: 23px; font-weight: bold; position: relative; top: -57.5px ; left: 90px ; color: #000000; margin-bottom: -2px;">
-                            {{ $employee2->contact ?? 'N/A' }}
+                            {{ $employee2->number ?? 'N/A' }}
                         </p>
 
                         <p
@@ -210,7 +210,7 @@
                         </div>
 
                         <p class="text-center"
-                            style="font-family: 'Poppins', sans-serif; font-size: 20px; position: relative; top: 40px;  color: #000000; margin-bottom: -2px;">
+                            style="font-family: 'Poppins', sans-serif; font-size: 22px; position: relative; top: 40px;  color: #000000; margin-bottom: -2px;">
                             University President
                         </p>
                     </div>

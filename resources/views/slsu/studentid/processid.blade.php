@@ -286,7 +286,7 @@
             <div class="card-footer">
                 <div class="text-end">
                     <hr>
-                    <button id="processButton" type="submit" class="btn btn-primary mt-2 mb-2"><i
+                    <button type="submit" id="processButton" class="btn btn-primary mt-2 mb-2"><i
                             class='bx bx-search-alt-2 me-1'></i><span>Print
                             Preview</span></button>
                 </div>

@@ -198,17 +198,24 @@ class StudentIdController extends Controller
             return response()->json(['error' => 'File not found'], 404);
         }
 
-        $sumatraPath = '"C:\Program Files\SumatraPDF\SumatraPDF.exe"'; 
-        $printerName = "Evolis Primacy";
+        $fileUrl = asset('storage/student_id/' . $fileName);
 
-        $command = "$sumatraPath -print-to \"$printerName\" -print-settings duplexshort \"$filePath\"";
+        $student = DB::connection(strtolower(session('campus')))
+            ->table('students')
+            ->where('StudentNo', $decrypted_id)
+            ->first();
 
-        exec($command, $output, $returnVar);
+        DB::connection(strtolower(session('campus')))
+        ->table('prints_log')->insert([
+            'student_id' => $decrypted_id,
+            'student_name' => $student->FirstName . ' '. $student->MiddleName . '. '. $student->LastName, 
+            'printed_at' => now(),
+            'file_name' => $fileName,
+        ]);
 
-        if ($returnVar !== 0) {
-            return response()->json(['error' => 'Failed to print the file'], 500);
-        }
-
-        return response()->json(['success' => true, 'message' => 'File sent to printer successfully']);
+        return response()->json([
+            'success' => true,
+            'file_url' => $fileUrl
+        ]);
     }
 }

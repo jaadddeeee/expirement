@@ -502,6 +502,12 @@ Route::group(['prefix' => 'employee', 'middleware' => ['auth', 'emid']], functio
   Route::get('/print-preview', $controller_path . '\SLSU\EmployeeIDController@getprintpreview')->name('emp_print-preview');
   Route::post('/print', $controller_path. '\SLSU\EmployeeIDController@print')->name('emp_print');
 
+  Route::get('/print-pdf', function (Request $request) {
+    $file = $request->query('file');
+    return view('print_pdf', compact('file'));
+  })->name('print.pdf');
+
+
 });
 
 //SMS

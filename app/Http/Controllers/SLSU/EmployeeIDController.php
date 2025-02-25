@@ -79,12 +79,13 @@ class EmployeeIDController extends Controller
             'province' => 'nullable|string',
             'or_number' => 'required|string',
             'date_paid' => 'nullable|date',
+            'position' => 'required'
         ]);
     
         $campusConnection = DB::connection('hrmis', strtolower(session('campus')));
     
         $employee = $campusConnection->table('employee')->where('id', $decrypted_id)->first();
-    
+
         $employeeData = [
             'BloodType' => $request->blood_type,
             'Allergies' => $request->allergy,
@@ -104,16 +105,29 @@ class EmployeeIDController extends Controller
         );
     
         if ($request->hasFile('signature')) {
+
             $signature = $request->file('signature');
-            $signatureFilename = $decrypted_id . '.' . $signature->getClientOriginalExtension();
+            $signatureFilename = $employee->AgencyNumber . '.' . $signature->getClientOriginalExtension();
             $signature->move(public_path('storage/employee_id_signature'), $signatureFilename);
         }
     
+        $emergencyContactData = [
+            'address' => $validated['barangay'] . ', ' . $validated['municipality'] . ', ' . $validated['province'],
+            'name' => $validated['contact_name'],
+            'number' => $validated['contact_number'],
+        ];
+
         $campusConnection->table('emergencycontact')->updateOrInsert(
             ['empId' => $decrypted_id],
-            ['address' => $validated['barangay'] . ', ' . $validated['municipality'] . ', ' . $validated['province']],
-            ['number' => $validated['contact_number']],
-            ['name' => $validated['contact_name']]
+            $emergencyContactData  
+        );
+
+        $campusConnection->table('emid_payment')->updateOrInsert(
+            ['EmployeeNo' => $employee->AgencyNumber],
+            [
+                'or_no' => $validated['or_number'],
+                'date_of_payment' => $validated['date_paid'],
+            ]
         );
     
         return response()->json([
@@ -127,50 +141,52 @@ class EmployeeIDController extends Controller
     {
         $decrypted_id = Crypt::decryptString($request->emid);
 
+        $position = $request->get('position');
+
         $defaultValues = DB::connection(strtolower(session('campus')))
-        ->table('defaultvalue')
-        ->whereIn('DefaultName', ['CampusString', 'SchoolAddress', 'PresidentName', 'SchoolWebsite'])
-        ->pluck('DefaultValue', 'DefaultName');
+            ->table('defaultvalue')
+            ->whereIn('DefaultName', ['CampusString', 'SchoolAddress', 'PresidentName', 'SchoolWebsite'])
+            ->pluck('DefaultValue', 'DefaultName');
 
         $employee = DB::connection('hrmis', strtolower(session('campus')))
-        ->table('employee')
-        ->where('id', $decrypted_id)
-        ->first();
+            ->table('employee')
+            ->where('id', $decrypted_id)
+            ->first();
 
         $employee2 = DB::connection('hrmis', strtolower(session('campus')))
-        ->table('emergencycontact')
-        ->where('empId', $decrypted_id)
-        ->first();
+            ->table('emergencycontact')
+            ->where('empId', $decrypted_id)
+            ->first();
 
         $pageTitle = "Preview Process ID";
-        $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button"><i class="bx bx-chevron-left me-1" ></i><span>Back</span></a>';
+        $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button"><i class="bx bx-chevron-left me-1"></i><span>Back</span></a>';
 
-        $pdfService->generatePDF($decrypted_id, $employee, $employee2);
-         
+        $pdfService->generatePDF($decrypted_id, $employee, $employee2, $position);
+
         return view('slsu.employeeid.printpreview', [
             'pageTitle' => $pageTitle,
             'headerAction' => $headerAction,
             'employee' =>  $employee,
             'employee2' =>  $employee2,
             'defaultValues' => $defaultValues,
+            'position' => $position
         ]);
-    }   
+    }
 
     public function print(Request $request)
     {
         $decrypted_id = Crypt::decryptString($request->emid);
 
         $employee = DB::connection('hrmis', strtolower(session('campus')))
-        ->table('employee')
-        ->where('id', $decrypted_id)
-        ->first();
+            ->table('employee')
+            ->where('id', $decrypted_id)
+            ->first();
 
         if (!$employee) {
             return response()->json(['error' => 'Employee not found'], 404);
         }
 
-        $agencynumber = $employee->AgencyNumber; 
-
+        $agencynumber = $employee->AgencyNumber;
         $fileName = $agencynumber . '.pdf';
         $filePath = public_path('storage/employee_id/' . $fileName);
 
@@ -178,21 +194,20 @@ class EmployeeIDController extends Controller
             return response()->json(['error' => 'File not found'], 404);
         }
 
-        $sumatraPath = '"C:\Program Files\SumatraPDF\SumatraPDF.exe"'; 
-        $printerName = "Evolis Primacy";
+        $fileUrl = asset('storage/employee_id/' . $fileName);
 
-        $command = "$sumatraPath -print-to \"$printerName\" -print-settings duplexshort \"$filePath\"";
 
-        exec($command, $output, $returnVar);
-
-        if ($returnVar !== 0) {
-            return response()->json(['error' => 'Failed to print the file'], 500);
-        }
+        DB::connection('hrmis', strtolower(session('campus')))
+        ->table('prints_log')->insert([
+            'employee_id' => $decrypted_id,
+            'employee_name' => $employee->FirstName . ', '. $employee->MiddleName . '. '. $employee->LastName, 
+            'printed_at' => now(),
+            'file_name' => $fileName,
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'File sent to printer successfully',
+            'file_url' => $fileUrl
         ]);
     }
-
 }

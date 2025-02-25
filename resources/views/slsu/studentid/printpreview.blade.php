@@ -37,7 +37,7 @@
 
                 <input type="hidden" name="stuid" id="stuid" value="{{ Crypt::encryptString($student->StudentNo) }}">
 
-                <div class="d-flex justify-content-center gap-4">
+                <div class="d-flex flex-column flex-md-row justify-content-center gap-4">
                     <div class="border"
                         style="width: 50%; height: 1000px; background-image: url('{{ asset('images/student/front.png') }}'); 
                     background-size: cover; background-position: center;">
@@ -72,8 +72,9 @@
 
                             <div class="profile-box" style="text-align: center; margin-top: -30px;">
                                 <img src="{{ asset($image) }}" alt="Profile Picture"
-                                    style="width: 330px; height: 350px; border: 0.5px solid #000;">
+                                    style="width: 350px; height: 350px; border: 0.3px solid #000;">
                             </div>
+
                             <div class="profile-box" style="text-align: center; margin-top: 5px;">
                                 <img src="{{ file_exists(public_path('storage/student_id_signature/' . $student->StudentNo . '.png')) ? asset('storage/student_id_signature/' . $student->StudentNo . '.png') : asset('images/signature.png') }}"
                                     alt="Profile Picture" style="width: 320px; height: 85px;">

@@ -1,3 +1,8 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"
+    integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <script>
     $.ajaxSetup({
         headers: {
@@ -65,6 +70,11 @@
             formData.append('croppedSignature', lastCroppedSignatureSrc);
         }
 
+        var selectedPosition = $('#position').val() || 'Default Position';
+
+        // Remove previous error messages
+        $(".error-message").remove();
+
         measureInternetSpeed(function(speed) {
             var delayTime = getLoadingDelay(speed);
 
@@ -85,17 +95,37 @@
                             let redirectUrl =
                                 "{{ route('emp_print-preview', ['emid' => '__EMPLOYEE_NO__']) }}"
                                 .replace('__EMPLOYEE_NO__', response
-                                    .encryptedEmployeeID);
+                                    .encryptedEmployeeID) +
+                                "&position=" + encodeURIComponent(selectedPosition);
+
                             window.location.href = redirectUrl;
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error("Error: ", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Something went wrong",
-                            text: xhr.responseText || error
-                        });
+                        $("#loadingSpinner").fadeOut();
+
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            $.each(errors, function(key, messages) {
+                                let inputField = $(`[name="${key}"]`);
+                                inputField.after(
+                                    `<span class="error-message text-danger">${messages[0]}</span>`
+                                );
+                            });
+
+                            swal({
+                                icon: "warning",
+                                title: "Validation Error",
+                                text: "Please check the highlighted fields and try again."
+                            });
+
+                        } else {
+                            swal({
+                                icon: "error",
+                                title: "Something went wrong",
+                                text: xhr.responseText || error
+                            });
+                        }
                     },
                     complete: function() {
                         $("#loadingSpinner").fadeOut();
@@ -105,32 +135,100 @@
         });
     });
 
+
     $('#printButton').on('click', function(e) {
         e.preventDefault();
 
         var formData = $('#printForm').serialize();
 
-        $.ajax({
-            url: "{{ route('emp_print') }}",
-            method: "POST",
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: "success",
-                        title: response.message
-                    });
+        swal({
+            title: "Processing...",
+            text: "Generating the print file. Please wait.",
+            content: {
+                element: "div",
+                attributes: {
+                    innerHTML: '<div style="text-align: center;"><i class="fa fa-spinner fa-spin" style="font-size:24px;"></i></div>'
                 }
             },
-            error: function(xhr, status, error) {
-                console.error("Error: ", error);
-                Swal.fire({
-                    icon: "error",
-                    title: "Something went wrong",
-                    text: xhr.responseJSON ? xhr.responseJSON.error :
-                        "An unexpected error occurred"
-                });
-            }
+            buttons: false,
+            closeOnClickOutside: false,
+            closeOnEsc: false
         });
+
+        setTimeout(function() {
+            $.ajax({
+                url: "{{ route('emp_print') }}",
+                method: "POST",
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        swal.close();
+
+                        let iframe = document.createElement('iframe');
+                        iframe.style.position = 'absolute';
+                        iframe.style.width = '0px';
+                        iframe.style.height = '0px';
+                        iframe.style.border = 'none';
+                        iframe.src = response.file_url;
+
+                        document.body.appendChild(iframe);
+
+                        iframe.onload = function() {
+                            swal({
+                                title: "Ready to Print?",
+                                text: "Do you want to proceed with printing?",
+                                icon: "info",
+                                buttons: ["Cancel", "Yes, Print"]
+                            }).then((willPrint) => {
+                                if (willPrint) {
+                                    let printWindow = iframe.contentWindow;
+                                    printWindow.focus();
+
+                                    let beforePrint = function() {
+                                        console.log("Printing started...");
+                                    };
+
+                                    let afterPrint = function() {
+                                        swal("Printing Canceled",
+                                            "You canceled the printing process.",
+                                            "warning");
+                                    };
+
+                                    if ('matchMedia' in printWindow) {
+                                        let mediaQueryList = printWindow
+                                            .matchMedia('print');
+                                        mediaQueryList.addEventListener(
+                                            'change',
+                                            function(mql) {
+                                                if (!mql.matches) {
+                                                    afterPrint();
+                                                }
+                                            });
+                                    }
+
+                                    printWindow.onafterprint = afterPrint;
+                                    printWindow.onbeforeprint = beforePrint;
+
+                                    printWindow.print();
+                                } else {
+                                    iframe.remove();
+                                    swal("Printing Canceled",
+                                        "You canceled the printing process.",
+                                        "warning");
+                                }
+                            });
+                        };
+                    }
+                },
+                error: function(xhr, status, error) {
+                    swal({
+                        icon: "error",
+                        title: "Something went wrong",
+                        text: xhr.responseJSON ? xhr.responseJSON.error :
+                            "An unexpected error occurred"
+                    });
+                }
+            });
+        }, 3000);
     });
 </script>
