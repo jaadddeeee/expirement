@@ -4,227 +4,240 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-
-    function measureInternetSpeed(callback) {
-        var startTime, endTime;
-        var image = new Image();
-        var imageSize = 50000;
-
-        image.onload = function() {
-            endTime = new Date().getTime();
-            var duration = (endTime - startTime) / 1000;
-            var speed = imageSize / duration / 1024;
-            callback(speed);
-        };
-
-        image.onerror = function() {
-            callback(100);
-        };
-
-        startTime = new Date().getTime();
-        image.src = "https://www.google.com/images/phd/px.gif?t=" + startTime;
-    }
-
-    function getLoadingDelay(speed) {
-        if (speed > 500) return 500;
-        if (speed > 200) return 1000;
-        return 2000;
-    }
-
-    $('#search').on('input', function() {
-        var searchQuery = $(this).val();
-
-        $.ajax({
-            url: "{{ route('student-list') }}",
-            method: "GET",
-            data: {
-                search: searchQuery
-            },
-            beforeSend: function() {
-                $("#loadingSpinner").show();
-            },
-            success: function(response) {
-                $('#student-table').html(response);
-
-                if (searchQuery) {
-                    window.history.pushState(null, '', "{{ route('student-list') }}?search=" +
-                        searchQuery);
-                } else {
-                    window.history.pushState(null, '', "{{ route('student-list') }}");
-                }
+    $(document).ready(function() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-    });
 
-    $('#processButton').on('click', function(e) {
-        e.preventDefault();
+        function measureInternetSpeed(callback) {
+            var startTime, endTime;
+            var image = new Image();
+            var imageSize = 50000;
 
-        var formData = new FormData($('#processIdForm')[0]);
+            image.onload = function() {
+                endTime = new Date().getTime();
+                var duration = (endTime - startTime) / 1000;
+                var speed = imageSize / duration / 1024;
+                callback(speed);
+            };
 
-        if (lastCroppedProfileSrc) {
-            formData.append('croppedProfile', lastCroppedProfileSrc);
+            image.onerror = function() {
+                callback(100);
+            };
+
+            startTime = new Date().getTime();
+            image.src = "https://www.google.com/images/phd/px.gif?t=" + startTime;
         }
-        if (lastCroppedSignatureSrc) {
-            formData.append('croppedSignature', lastCroppedSignatureSrc);
+
+        function getLoadingDelay(speed) {
+            if (speed > 500) return 500;
+            if (speed > 200) return 1000;
+            return 2000;
         }
 
-        measureInternetSpeed(function(speed) {
-            var delayTime = getLoadingDelay(speed);
+        $('#search').on('input', function() {
+            var searchQuery = $(this).val();
 
-            $("#loadingSpinner").fadeIn();
+            $.ajax({
+                url: "{{ route('student-list') }}",
+                method: "GET",
+                data: {
+                    search: searchQuery
+                },
+                beforeSend: function() {
+                    $("#loadingSpinner").show();
+                },
+                success: function(response) {
+                    $('#student-table').html(response);
 
-            setTimeout(() => {
+                    if (searchQuery) {
+                        window.history.pushState(null, '',
+                            "{{ route('student-list') }}?search=" +
+                            searchQuery);
+                    } else {
+                        window.history.pushState(null, '', "{{ route('student-list') }}");
+                    }
+                }
+            });
+        });
+
+        $('#processButton').on('click', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData($('#processIdForm')[0]);
+
+            if (lastCroppedProfileSrc) {
+                formData.append('croppedProfile', lastCroppedProfileSrc);
+            }
+            if (lastCroppedSignatureSrc) {
+                formData.append('croppedSignature', lastCroppedSignatureSrc);
+            }
+
+            measureInternetSpeed(function(speed) {
+                var delayTime = getLoadingDelay(speed);
+
+                $("#loadingSpinner").fadeIn();
+
+                setTimeout(() => {
+                    $.ajax({
+                        url: "{{ route('update-student') }}",
+                        method: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: function() {
+                            $("#loadingSpinner").show();
+                            $(".error-message").remove();
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                let redirectUrl =
+                                    "{{ route('print-preview', ['stuid' => '__STUDENT_NO__']) }}"
+                                    .replace('__STUDENT_NO__', response
+                                        .encryptedStudentNo);
+                                window.location.href = redirectUrl;
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            $("#loadingSpinner").fadeOut();
+
+                            if (xhr.status === 422) {
+                                let errors = xhr.responseJSON.errors;
+                                $.each(errors, function(key, messages) {
+                                    let inputField = $(
+                                        `[name="${key}"]`);
+                                    inputField.after(
+                                        `<span class="error-message text-danger">${messages[0]}</span>`
+                                    );
+                                });
+
+                                swal({
+                                    icon: "warning",
+                                    title: "Validation Error",
+                                    text: "Please check the highlighted fields and try again."
+                                });
+                            } else {
+                                swal({
+                                    icon: "error",
+                                    title: "Something went wrong",
+                                    text: xhr.responseText || error
+                                });
+                            }
+                        },
+                        complete: function() {
+                            $("#loadingSpinner").fadeOut();
+                        }
+                    });
+                }, delayTime);
+            });
+        });
+
+        $('#printButton').on('click', function(e) {
+            e.preventDefault();
+
+            var formData = $('#printForm').serialize();
+
+            swal({
+                title: "Processing...",
+                text: "Generating the print file. Please wait.",
+                content: {
+                    element: "div",
+                    attributes: {
+                        innerHTML: '<div style="text-align: center;"><i class="fa fa-spinner fa-spin" style="font-size:24px;"></i></div>'
+                    }
+                },
+                buttons: false,
+                closeOnClickOutside: false,
+                closeOnEsc: false
+            });
+
+            setTimeout(function() {
                 $.ajax({
-                    url: "{{ route('update-student') }}",
+                    url: "{{ route('print') }}",
                     method: "POST",
                     data: formData,
-                    contentType: false,
-                    processData: false,
-                    beforeSend: function() {
-                        $("#loadingSpinner").show();
-                        $(".error-message").remove();
-                    },
                     success: function(response) {
                         if (response.success) {
-                            let redirectUrl =
-                                "{{ route('print-preview', ['stuid' => '__STUDENT_NO__']) }}"
-                                .replace('__STUDENT_NO__', response
-                                    .encryptedStudentNo);
-                            window.location.href = redirectUrl;
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        $("#loadingSpinner").fadeOut();
+                            swal.close();
 
-                        if (xhr.status === 422) {
-                            let errors = xhr.responseJSON.errors;
-                            $.each(errors, function(key, messages) {
-                                let inputField = $(`[name="${key}"]`);
-                                inputField.after(
-                                    `<span class="error-message text-danger">${messages[0]}</span>`
-                                );
-                            });
+                            let iframe = document.createElement('iframe');
+                            iframe.style.position = 'absolute';
+                            iframe.style.width = '0px';
+                            iframe.style.height = '0px';
+                            iframe.style.border = 'none';
+                            iframe.src = response.file_url;
 
-                            swal({
-                                icon: "warning",
-                                title: "Validation Error",
-                                text: "Please check the highlighted fields and try again."
-                            });
-                        } else {
-                            swal({
-                                icon: "error",
-                                title: "Something went wrong",
-                                text: xhr.responseText || error
-                            });
-                        }
-                    },
-                    complete: function() {
-                        $("#loadingSpinner").fadeOut();
-                    }
-                });
-            }, delayTime);
-        });
-    });
+                            document.body.appendChild(iframe);
 
-    $('#printButton').on('click', function(e) {
-        e.preventDefault();
+                            iframe.onload = function() {
+                                swal({
+                                    title: "Ready to Print?",
+                                    text: "Do you want to proceed with printing?",
+                                    icon: "info",
+                                    buttons: ["Cancel", "Yes, Print"]
+                                }).then((willPrint) => {
+                                    if (willPrint) {
+                                        let printWindow = iframe
+                                            .contentWindow;
+                                        printWindow.focus();
 
-        var formData = $('#printForm').serialize();
+                                        let beforePrint = function() {
+                                            console.log(
+                                                "Printing started..."
+                                            );
+                                        };
 
-        swal({
-            title: "Processing...",
-            text: "Generating the print file. Please wait.",
-            content: {
-                element: "div",
-                attributes: {
-                    innerHTML: '<div style="text-align: center;"><i class="fa fa-spinner fa-spin" style="font-size:24px;"></i></div>'
-                }
-            },
-            buttons: false,
-            closeOnClickOutside: false,
-            closeOnEsc: false
-        });
+                                        let afterPrint = function() {
+                                            swal("Printing Canceled",
+                                                "You canceled the printing process.",
+                                                "warning");
+                                        };
 
-        setTimeout(function() {
-            $.ajax({
-                url: "{{ route('print') }}",
-                method: "POST",
-                data: formData,
-                success: function(response) {
-                    if (response.success) {
-                        swal.close();
+                                        if ('matchMedia' in
+                                            printWindow) {
+                                            let mediaQueryList =
+                                                printWindow
+                                                .matchMedia('print');
+                                            mediaQueryList
+                                                .addEventListener(
+                                                    'change',
+                                                    function(mql) {
+                                                        if (!mql
+                                                            .matches) {
+                                                            afterPrint
+                                                                ();
+                                                        }
+                                                    });
+                                        }
 
-                        let iframe = document.createElement('iframe');
-                        iframe.style.position = 'absolute';
-                        iframe.style.width = '0px';
-                        iframe.style.height = '0px';
-                        iframe.style.border = 'none';
-                        iframe.src = response.file_url;
+                                        printWindow.onafterprint =
+                                            afterPrint;
+                                        printWindow.onbeforeprint =
+                                            beforePrint;
 
-                        document.body.appendChild(iframe);
-
-                        iframe.onload = function() {
-                            swal({
-                                title: "Ready to Print?",
-                                text: "Do you want to proceed with printing?",
-                                icon: "info",
-                                buttons: ["Cancel", "Yes, Print"]
-                            }).then((willPrint) => {
-                                if (willPrint) {
-                                    let printWindow = iframe.contentWindow;
-                                    printWindow.focus();
-
-                                    let beforePrint = function() {
-                                        console.log("Printing started...");
-                                    };
-
-                                    let afterPrint = function() {
+                                        printWindow.print();
+                                    } else {
+                                        iframe.remove();
                                         swal("Printing Canceled",
                                             "You canceled the printing process.",
                                             "warning");
-                                    };
-
-                                    if ('matchMedia' in printWindow) {
-                                        let mediaQueryList = printWindow
-                                            .matchMedia('print');
-                                        mediaQueryList.addEventListener(
-                                            'change',
-                                            function(mql) {
-                                                if (!mql.matches) {
-                                                    afterPrint();
-                                                }
-                                            });
                                     }
-
-                                    printWindow.onafterprint = afterPrint;
-                                    printWindow.onbeforeprint = beforePrint;
-
-                                    printWindow.print();
-                                } else {
-                                    iframe.remove();
-                                    swal("Printing Canceled",
-                                        "You canceled the printing process.",
-                                        "warning");
-                                }
-                            });
-                        };
+                                });
+                            };
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        swal({
+                            icon: "error",
+                            title: "Something went wrong",
+                            text: xhr.responseJSON ? xhr.responseJSON
+                                .error : "An unexpected error occurred"
+                        });
                     }
-                },
-                error: function(xhr, status, error) {
-                    swal({
-                        icon: "error",
-                        title: "Something went wrong",
-                        text: xhr.responseJSON ? xhr.responseJSON.error :
-                            "An unexpected error occurred"
-                    });
-                }
-            });
-        }, 3000);
+                });
+            }, 3000);
+        });
     });
 </script>
