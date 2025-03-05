@@ -9,6 +9,7 @@ use App\Models\Registration;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use App\Services\EmployeeID;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeIDController extends Controller
 {
@@ -201,6 +202,7 @@ class EmployeeIDController extends Controller
         ->table('prints_log')->insert([
             'employee_id' => $decrypted_id,
             'employee_name' => $employee->FirstName . ', '. $employee->MiddleName . '. '. $employee->LastName, 
+            'printed_by' => Auth::user()->UserName,
             'printed_at' => now(),
             'file_name' => $fileName,
         ]);

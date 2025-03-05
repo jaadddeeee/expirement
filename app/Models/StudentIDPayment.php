@@ -12,7 +12,7 @@ class StudentIDPayment extends Model
     protected $table = "stuid_payment";
 
     protected $fillable = [
-        'id', 'StudentNo', 'or_no', 'date_of_payment', 'Picture'
+        'id', 'StudentNo', 'or_no', 'date_of_payment', 'free_tuition'
     ];
 
     public function __construct(){

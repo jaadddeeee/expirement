@@ -12,6 +12,7 @@ use App\Services\StudentId;
 use Intervention\Image\Facades\Image;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Illuminate\Support\Facades\Auth;
 
 class StudentIdController extends Controller
 {
@@ -78,7 +79,11 @@ class StudentIdController extends Controller
     {
         $decrypted_id = Crypt::decryptString($request->stuid);
     
-        $validated = $request->validate([
+        // Determine if the student is a first-year student
+        $isFirstYear = $request->input('is_first_year', false);
+    
+        // Set validation rules
+        $rules = [
             'profilePicture' => 'nullable|image|mimes:jpeg,png,jpg',
             'signature' => 'nullable|image|mimes:jpeg,png,jpg',
             'blood_type' => 'nullable|string',
@@ -88,9 +93,20 @@ class StudentIdController extends Controller
             'barangay' => 'nullable|string',
             'municipality' => 'nullable|string',
             'province' => 'nullable|string',
-            'or_number' => 'required|string',
-            'date_paid' => 'nullable|date',
-        ]);
+            'is_first_year' => 'nullable|boolean',
+        ];
+    
+        // Add OR No. and Date Paid validation rules if not a first-year student
+        if (!$isFirstYear) {
+            $rules['or_number'] = 'required|string';
+            $rules['date_paid'] = 'required|date';
+        } else {
+            $rules['or_number'] = 'nullable|string';
+            $rules['date_paid'] = 'nullable|date';
+        }
+    
+        // Validate the request
+        $validated = $request->validate($rules);
     
         $campusConnection = DB::connection(strtolower(session('campus')));
     
@@ -133,12 +149,19 @@ class StudentIdController extends Controller
             ]
         );
     
+        $paymentData = [
+            'StudentNo' => $decrypted_id,
+            'free_tuition' => $validated['is_first_year'],
+        ];
+    
+        if (!$validated['is_first_year']) {
+            $paymentData['or_no'] = $validated['or_number'];
+            $paymentData['date_of_payment'] = $validated['date_paid'];
+        }
+    
         $campusConnection->table('stuid_payment')->updateOrInsert(
             ['StudentNo' => $decrypted_id],
-            [
-                'or_no' => $validated['or_number'],
-                'date_of_payment' => $validated['date_paid'],
-            ]
+            $paymentData
         );
     
         return response()->json([
@@ -209,6 +232,7 @@ class StudentIdController extends Controller
         ->table('prints_log')->insert([
             'student_id' => $decrypted_id,
             'student_name' => $student->FirstName . ' '. $student->MiddleName . '. '. $student->LastName, 
+            'printed_by' => Auth::user()->UserName,
             'printed_at' => now(),
             'file_name' => $fileName,
         ]);

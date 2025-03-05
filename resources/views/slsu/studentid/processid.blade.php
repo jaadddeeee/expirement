@@ -278,8 +278,11 @@
                                 <input type="date" name="date_paid" id="date_paid" class="form-control"
                                     value="{{ now()->toDateString() }}">
                             </div>
+                            <div class="col-md-12">
+                                <input type="checkbox" class="form-check-input" name="is_first_year" id="is_first_year">
+                                <label for="is_first_year" class="form-label">For First Year Student</label>
+                            </div>
                         </div>
-
                     </div>
                 </div>
             </div>

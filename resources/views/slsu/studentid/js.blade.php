@@ -63,6 +63,16 @@
             });
         });
 
+        $('#is_first_year').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#or_number').prop('disabled', true);
+                $('#date_paid').prop('disabled', true);
+            } else {
+                $('#or_number').prop('disabled', false);
+                $('#date_paid').prop('disabled', false);
+            }
+        });
+
         $('#processButton').on('click', function(e) {
             e.preventDefault();
 
@@ -73,6 +83,13 @@
             }
             if (lastCroppedSignatureSrc) {
                 formData.append('croppedSignature', lastCroppedSignatureSrc);
+            }
+
+            // Check if the first-year student checkbox is checked
+            if ($('#is_first_year').is(':checked')) {
+                formData.append('is_first_year', '1');
+            } else {
+                formData.append('is_first_year', '0');
             }
 
             measureInternetSpeed(function(speed) {
