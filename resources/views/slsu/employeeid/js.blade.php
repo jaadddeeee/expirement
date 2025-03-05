@@ -11,12 +11,6 @@
             }
         });
 
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
         function measureInternetSpeed(callback) {
             var startTime, endTime;
             var image = new Image();
@@ -79,7 +73,6 @@
 
             var selectedPosition = $('#position').val() || 'Default Position';
 
-            // Remove previous error messages
             $(".error-message").remove();
 
             measureInternetSpeed(function(speed) {
