@@ -5,6 +5,7 @@ namespace App\Models\VARSITY;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Student;
 
 
 class Varsity extends Model
@@ -21,18 +22,20 @@ class Varsity extends Model
      */
     protected $fillable = [
         'id',
-        'FirstName',
-        'MiddleName',
-        'LastName',
+        'StudentNo',
         'VarsityEvent',
         'SchoolYear',
         'Semester',
-        'Campus',
     ];
 
     public function event()
     {
-        return $this->belongsTo(Event::class, 'VarsityEvent'); // Assuming 'coach_event' is the foreign key
+        return $this->belongsTo(Event::class, 'VarsityEvent','id');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'StudentNo', 'StudentNo');
     }
 
     public function __construct(){

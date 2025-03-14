@@ -1,0 +1,11 @@
+{
+    "menu": [
+        {
+            "name": "SCUAA",
+            "url": "/varsity/scuaa",
+            "icon": "menu-icon tf-icons bx bx-medal",
+            "slug": "scuaa"
+            
+        }
+    ] 
+}

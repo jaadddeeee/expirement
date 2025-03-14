@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\SLSU\VARSITY;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;    
-use App\Models\VARSITY\Event;
+use Illuminate\Http\Request;
 use App\Models\VARSITY\Varsity;
+use App\Models\VARSITY\Event;
+use App\Models\VARSITY\ListVarsity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Crypt;
-use GENERAL;
+use Illuminate\Support\Facades\Crypt;
 use Exception;
 
 
@@ -17,15 +17,27 @@ class VarsityController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Varsity::whereNull('deleted_at')
-            ->orderBy('LastName', 'asc');
-    
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where(function ($q) use ($request) {
-                $q->where('LastName', 'LIKE', "%{$request->search}%")
-                  ->orWhere('FirstName', 'LIKE', "%{$request->search}%")
-                  ->orWhere('MiddleName', 'LIKE', "%{$request->search}%");
-            });
+
+        $campus = auth()->user()->AllowSuper == 1 ? ($request->filterCampus ?? "SG") : session('campus');
+
+        $query = DB::connection(strtolower($campus))
+            ->table('var_varsity')
+            ->leftjoin('var_event', 'var_varsity.VarsityEvent', '=', 'var_event.id')
+            ->leftjoin('students', 'var_varsity.StudentNo', '=', 'students.StudentNo')
+            ->whereNull('var_varsity.deleted_at')
+            ->orderBy('students.LastName', 'asc')
+            ->select(
+                'var_varsity.SchoolYear',
+                'var_varsity.Semester',
+                'var_varsity.StudentNo',
+                'students.FirstName as FirstName',
+                'students.MiddleName as MiddleName',
+                'students.LastName as LastName',
+                'var_event.event as event_name'
+            );
+
+        if ($request->has('filterEvent') && $request->filterEvent != '0') {
+            $query->where('VarsityEvent', $request->filterEvent);
         }
 
         if ($request->has('filterSchoolYear') && $request->filterSchoolYear != '0') {
@@ -35,63 +47,58 @@ class VarsityController extends Controller
         if ($request->has('filterSemester') && $request->filterSemester != '0') {
             $query->where('Semester', $request->filterSemester);
         }
-    
-        if ($request->has('filterCampus') && $request->filterCampus != '0') {
-            $query->where('Campus', $request->filterCampus);
+
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where(function ($q) use ($request) {
+                $q->where('students.LastName', 'LIKE', "%{$request->search}%")
+                    ->orWhere('students.FirstName', 'LIKE', "%{$request->search}%")
+                    ->orWhere('students.MiddleName', 'LIKE', "%{$request->search}%");
+            });
         }
-    
+
         $varsity = $query->paginate(10);
-    
+
+        $events = DB::connection(strtolower($campus))
+            ->table('var_event')
+            ->select('id', 'event')
+            ->orderby('event')
+            ->get() ?? throw new Exception('No events found');
+
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('_partials.varsity-table', ['varsities' => $varsity])->render()
+                'html' => view('_partials.var_student-table', ['varsities' => $varsity])->render()
             ]);
         }
-    
+
         $pageTitle = "Manage Varsity Student";
         $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>';
         return view('slsu.varsity.VAR_student.student', [
             'pageTitle' => $pageTitle,
             'headerAction' => $headerAction,
-            'varsities' => $varsity
+            'varsities' => $varsity,
+            'Campus' => $campus,
+            'Events' => $events
         ]);
     }
 
-    public function studlist(Request $request){
+    public function studlist(Request $request)
+    {
         try {
-            $campus = session('campus');
 
-            if (auth()->user()->AllowSuper == 1){
-                if (empty($request->id)){
-                    throw new Exception('Select campus');
-                }
-
-                $campus = $request->id;
-            }
-
-            //1 - SG
-            //2 - MCC
-            //3 = TO
-            //4 - BN
-            //5 - SJ    
-            //6 - HN
+            $campus = auth()->user()->AllowSuper == 1 ? ($request->id ?? throw new Exception('Select Campus')) : session('campus');
 
             $students = DB::connection(strtolower($campus))
                 ->table('students')
                 ->orderBy('FirstName')
                 ->orderBy('LastName')
-                ->get();
-    
-            if (count($students) <= 0) {
-                throw new Exception('No student found.');
-            }
+                ->get() ?? throw new Exception('No student found.');
 
             $students = $students->map(function ($student) {
                 return [
-                    'id' => Crypt::encryptString($student->StudentNo), 
+                    'id' => Crypt::encryptString($student->StudentNo),
                     'LastName' => $student->LastName,
-                    'FirstName' => $student->FirstName,   
-                    'MiddleName' => $student->MiddleName,  
+                    'FirstName' => $student->FirstName,
+                    'MiddleName' => $student->MiddleName,
                 ];
             });
 
@@ -101,26 +108,95 @@ class VarsityController extends Controller
         }
     }
 
-    public function eventlist(){
+    public function eventlist(Request $request)
+    {
+
         try {
+            $campus = auth()->user()->AllowSuper == 1 ? ($request->id ?? throw new Exception('Select campus')) : session('campus');
+
             // Fetch all events
-            $events = Event::select('id', 'event') 
-                ->orderBy('event')
-                ->get();
-    
-            if ($events->isEmpty()) {
-                return response()->json(['message' => 'No events found.'], 200);
-            }
-    
+            $events = DB::connection(strtolower($campus))
+                ->table('var_event')
+                ->select('id', 'event')
+                ->orderby('event')
+                ->get() ?? throw new Exception('No events found');
+
             // Encrypt event IDs before sending
             $events = $events->map(function ($event) {
                 return [
-                    'id' => Crypt::encryptString($event->id), 
+                    'id' => Crypt::encryptString($event->id),
                     'event' => $event->event,
                 ];
             });
-    
-            return response()->json($events); 
+
+            return response()->json($events);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function saveSelectedVarsities(Request $request)
+    {
+        try {
+            $campus = auth()->user()->AllowSuper == 1 ? ($request->campus ?? throw new Exception('Select Campus')) : session('campus');
+
+            // Retrieve the selected varsity IDs from the request
+            $selectedVarsities = $request->input('selectedVarsities', []);
+
+            if (empty($selectedVarsities)) {
+                throw new Exception('No varsity selected.');
+            }
+
+            foreach ($selectedVarsities as $varsityId) {
+                // Find the varsity student and school year using a join query
+                $varsity = DB::connection(strtolower($campus))
+                    ->table('var_varsity')
+                    ->join('var_event', 'var_varsity.VarsityEvent', '=', 'var_event.id')
+                    ->join('students', 'var_varsity.StudentNo', '=', 'students.StudentNo')
+                    ->where('var_varsity.StudentNo', $varsityId)
+                    ->select('var_varsity.*',
+                        'students.FirstName as FirstName',
+                        'students.MiddleName as MiddleName',
+                        'students.LastName as LastName',
+                        )
+                    ->first() ?? throw new Exception('Varsity student not found.');
+
+                // Get the total participants allowed for the event
+                $event = Event::where('id', $varsity->VarsityEvent)
+                ->select('totalAtlhetes')
+                ->first();
+
+            if (!$event) {
+                throw new Exception('Event not found.');
+            }
+
+            // Count the number of existing varsity students for the event
+            $existingVarsityCount = Varsity::where('VarsityEvent', $varsity->VarsityEvent)->count();
+
+            // Check if adding the new varsity student would exceed the total participants
+            if ($existingVarsityCount >= $event->totalAtlhetes) {
+                throw new Exception($event->event . ' event has reached the maximum number of participants.');
+            }
+
+            // Check if the varsity student already exists for the current school year
+            $exists = ListVarsity::where([
+                'StudentNo' => $varsity->StudentNo,
+                'SchoolYear' => date('Y'),
+            ])->exists();
+
+            if ($exists) {
+                throw new Exception("Varsity already exists for this school year.");
+            }
+
+            // Save the varsity to the var_list table
+            ListVarsity::create([
+                'StudentNo' => $varsity->StudentNo,
+                'SchoolYear' => date('Y'),
+                'Event' => $varsity->VarsityEvent,
+            ]);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Selected varsity students successfully stored.']);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
@@ -129,147 +205,92 @@ class VarsityController extends Controller
     public function save(Request $request)
     {
         try {
-            $campus = $request->Campus; 
-            $stud = $request->Stud;
-            $ev = $request->Event;
-            $sy = $request->SchoolYear;
-            $sem = $request->Semester;
+            $campus = auth()->user()->AllowSuper == 1 ? ($request->Campus ?? throw new Exception('Select campus')) : session('campus');
 
-            // dd($camCode);
+            $studentNo = Crypt::decryptString($request->StudentNo) ?? throw new Exception('Please select student'); // Decrypt student number
+            $eventId = Crypt::decryptString($request->Event ?: throw new Exception("Please select event"));
+            $sy = $request->SchoolYear ?? throw new Exception("Please select school year");
+            $sem = $request->Semester ?? throw new Exception("Please select semester");
 
-            // Validate inputs
-            if (empty($campus))
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Invalid Campus")]);
-            if (empty($stud))
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Please select student")]);
-            if (empty($ev))
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Please select event")]);
-            if (empty($sy))
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Please select school year")]);
-            if (empty($sem))
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Please select semester")]);
+            $event = DB::connection(strtolower($campus))
+                ->table('var_event')
+                ->where('id', $eventId)
+                ->first() ?? throw new Exception("Event not found.");
 
-            $eventId = Crypt::decryptString($ev);
-
-            $event = Event::find($eventId);
-
-
-            // Split using comma separator
-            $studentParts = explode(",", $stud);
-
-            // Trim spaces from each part
-            $lastName = trim($studentParts[0]); 
-            $firstName = trim($studentParts[1]); 
-            $middleName = isset($studentParts[2]) ? trim($studentParts[2]) : null; 
-
-            // Format output with comma if middle name exists
-            $formattedName = "{$lastName}, {$firstName}";
-            if (!empty($middleName)) {
-                $formattedName .= ", {$middleName}";
-            }
-
-
-            $campusCode = [
-                "SG" => 1,
-                "MCC" => 2,
-                "TO" => 3,
-                "BN" => 4,
-                "SJ" => 5,
-                "HN" => 6
-            ];
-
-            $camCode = $campusCode[$campus];
-
-            // Check for duplicate entry
-            $existingStud = Varsity::where("FirstName", $firstName)
-                ->where("MiddleName", $middleName)
-                ->where("LastName", $lastName)
-                ->first();
-
-            $studentExists = DB::connection(strtolower($campus))
+            // Validate student existence
+            $student = DB::connection(strtolower($campus))
                 ->table('students')
-                ->where("FirstName", $firstName)
-                ->where("MiddleName", $middleName)
-                ->where("LastName", $lastName)
-                ->first();
+                ->where([
+                    'StudentNo' => $studentNo,
+                ])
+                ->first() ?? throw new Exception("This student does not exist in this campus");
 
-            if (!$studentExists) 
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("This student is not exist in this campus")]);
+            // Validate duplicate entry
+            DB::connection(strtolower($campus))
+                ->table('var_varsity')
+                ->where([
+                    'StudentNo' => $studentNo,
+                ])
+                ->exists() && throw new Exception("Duplicate entry detected for this Student");
 
-            if ($existingStud) 
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Duplicate entry detected for this Student")]);
+            $gender = $student->Sex;
+            $eventGender = str_contains(strtolower($event->event), ' men') ? 'M' : (str_contains(strtolower($event->event), ' women') ? 'F' : null);
 
-
-            // Retrieve Student Gender
-            $gender = $studentExists->Sex ?? null;
-
-            // Retrieve Event Category
-            $eventCategory = strtolower($event->event);
-            $eventGender = null;
-
-            // Determine the event's gender category
-            if (strpos($eventCategory, ' men') !== false) { 
-                $eventGender = 'M'; 
-            } elseif (strpos($eventCategory, ' women') !== false) { 
-                $eventGender = 'F'; 
+            if ($eventGender && $eventGender !== $gender) {
+                throw new Exception("Student's gender does not match the event category.");
             }
 
-            // Validate Gender and Event Category
-            if (($eventGender === 'M' && $gender !== 'M') || 
-                ($eventGender === 'F' && $gender !== 'F')) 
-                return response()->json([
-                    'Error' => 1, 
-                    "Message" => \GENERAL::Error("Student's gender does not match the event category.")
+            // Insert into var_varsity
+
+            $inserted = Varsity::on(strtolower($campus))
+                ->create([
+                    'StudentNo' => $studentNo,
+                    'VarsityEvent' => $eventId,
+                    'SchoolYear' => $sy,
+                    'Semester' => $sem,
                 ]);
-            
 
-            // Save coach details
-            $data = [
-                'FirstName' => $firstName,
-                'MiddleName' => $middleName,
-                'LastName' => $lastName,
-                'VarsityEvent' => $eventId,
-                'SchoolYear'=> $sy,
-                'Semester' => $sem,
-                'Campus' => $camCode
-            ];
-
-            // dd($data);
-
-            $insertedStudent = Varsity::create($data);
-
-            if ($insertedStudent) {
-                return response()->json(['Error' => 0, "Message" => \GENERAL::success("Varsity student successfully added.")]);
-            }
-
-            return response()->json(['Error' => 1, "Message" => "Failed to insert student."]);
-
-        } catch (\Exception $e) {
-            return response()->json(['Error' => 1, "Message" => $e->getMessage()], 400);
+            return response()->json(['Error' => 0, "Message" => "Varsity student successfully added."]);
+        } catch (DecryptException) {
+            return response()->json(['Error' => \GENERAL::Error("Invalid encrypted ID.")], 400);
+        } catch (Exception $e) {
+            return response()->json(['Error' => \GENERAL::Error($e->getMessage())], 400);
         }
     }
 
-     public function edit(Request $request)
+    public function edit(Request $request)
     {
         try {
-            $id = Crypt::decryptString($request->id); 
-    
-            // Ensure the correct relationship
-            $editVarsity = Varsity::with('event')->findOrFail($id);
-    
+            $id = Crypt::decryptString($request->id);
+            $campus = auth()->user()->AllowSuper == 1 ? ($request->campus ?: throw new Exception('Select Campus')) : session('campus');
+
+            $editVarsity = DB::connection(strtolower($campus))
+                ->table('var_varsity')
+                ->leftjoin('var_event', 'var_varsity.VarsityEvent', '=', 'var_event.id')
+                ->leftjoin('students', 'var_varsity.StudentNo', '=', 'students.StudentNo')
+                ->where('var_varsity.StudentNo', $id)
+                ->select('var_varsity.SchoolYear',
+                    'var_varsity.Semester',
+                    'var_varsity.StudentNo',
+                    'students.FirstName as FirstName',
+                    'students.MiddleName as MiddleName',
+                    'students.LastName as LastName',
+                    'var_event.event as event'
+                )
+                ->first() ?? throw new Exception('Record not found.');
+
             return response()->json([
-                'id' => $editVarsity->id,
-                'campus' => $editVarsity->Campus,
+                'id' => $editVarsity->StudentNo,
+                'campus' => $campus,
                 'stud' => trim($editVarsity->LastName . ', ' . $editVarsity->FirstName . ($editVarsity->MiddleName ? ', ' . $editVarsity->MiddleName : '')),
-                'event' => $editVarsity->event ? $editVarsity->event->event : null, // Return event ID instead of name
+                'event' => $editVarsity->event,
                 'sy' => $editVarsity->SchoolYear,
                 'sem' => $editVarsity->Semester,
             ]);
-    
         } catch (DecryptException $e) {
-            return response()->json(['errors' => 'Invalid request.'], 400);
-        } catch (\Exception $e) {
-            return response()->json(['errors' => $e->getMessage()], 400);
+            return response()->json(['errors' => \GENERAL::Error('Invalid request.')], 400);
+        } catch (Exception $e) {
+            return response()->json(['Error' =>  \GENERAL::Error($e->getMessage())], 400);
         }
     }
 
@@ -277,105 +298,87 @@ class VarsityController extends Controller
     {
         try {
             $decryptedId = Crypt::decryptString($request->hiddentID);
-            $var = Varsity::find($decryptedId);
+            $campus = auth()->user()->AllowSuper ? ($request->id ?: throw new Exception('Select campus')) : session('campus');
 
-            $campus = $request->updateCampus;
-            $sy = $request->updateSY;
-            $sem = $request->updateSem;
-            $ev = $request->updateEvent;
+            // Get the varsity base on campus
+            $var = DB::connection(strtolower($campus))
+                ->table('var_varsity')
+                ->join('var_event', 'var_varsity.VarsityEvent', '=', 'var_event.id')
+                ->join('students', 'var_varsity.StudentNo', '=', 'students.StudentNo')
+                ->where('var_varsity.StudentNo', $decryptedId)
+                ->select('var_varsity.SchoolYear',
+                    'var_varsity.Semester',
+                    'var_varsity.VarsityEvent',
+                    'var_varsity.StudentNo',
+                    'students.FirstName as FirstName',
+                    'students.MiddleName as MiddleName',
+                    'students.LastName as LastName',
+                )
+                ->first() ?? throw new Exception("Varsity record not found.");
+            //Validation for each info
+            $sy = $request->updateSY ?? throw new Exception("Please select school year");
+            $sem = $request->updateSem ?? throw new Exception("Please select semester");
+            $eventId = Crypt::decryptString($request->updateEvent ?: throw new Exception("Please select event"));
 
-            // Validate inputs
-            if (!$sy) 
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Please select school year")]);
-            if (!$sem) 
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Please select semester")]);
-            if (empty($ev) || $ev == "0") 
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Please select event")]);
-            
-            $eventId = Crypt::decryptString($ev);
+            //Get event base on campus
+            $event = DB::connection(strtolower($campus))
+                ->table('var_event')
+                ->where('id', $eventId)
+                ->first() ?? throw new Exception("Event not found.");
 
-            $event = Event::find($eventId);
+            $student = DB::connection(strtolower($campus))
+                ->table('students')
+                ->where([
+                    'FirstName' => $var->FirstName,
+                    'MiddleName' => $var->MiddleName,
+                    'LastName' => $var->LastName,
+                ])
+                ->first() ?? throw new Exception("Student does not exist in this campus");
 
-            $campusCode = [
-                1 => "SG",
-                2 => "MCC",
-                3 => "TO",
-                4 => "BN",
-                5 => "SJ",
-                6 => "HN"
-            ];
+            $gender = $student->Sex;
+            $eventGender = str_contains(strtolower($event->event), ' men') ? 'M' : (str_contains(strtolower($event->event), ' women') ? 'F' : null);
 
-            $camCode = $campusCode[$var->Campus];
-
-            $studentExists = DB::connection(strtolower($camCode))
-            ->table('students')
-            ->first();
-
-            // Retrieve Student Gender
-            $gender = $studentExists->Sex ?? null;
-
-            // Retrieve Event Category
-            $eventCategory = strtolower($event->event);
-            $eventGender = null;
-
-            // Determine the event's gender category
-            if (strpos($eventCategory, ' men') !== false) { 
-                $eventGender = 'M'; 
-            } elseif (strpos($eventCategory, ' women') !== false) { 
-                $eventGender = 'F'; 
+            if ($eventGender && $eventGender !== $gender) {
+                throw new Exception("Student's gender does not match the event category.");
             }
 
-            // Validate Gender and Event Category
-            if (($eventGender === 'M' && $gender !== 'M') || 
-                ($eventGender === 'F' && $gender !== 'F')) {
-                return response()->json([
-                    'Error' => 1, 
-                    "Message" => \GENERAL::Error("Student's gender does not match the event category.")
-                ]);
-            }
-
-            // Check if there are no changes
             if ($var->SchoolYear == $sy && $var->Semester == $sem && $var->VarsityEvent == $eventId) {
-                return response()->json(['Error' => 1, "Message" => \GENERAL::Error("Invalid, No changes detected.")]);
+                throw new Exception("Invalid, No changes detected.");
             }
+            
+            Varsity::on(strtolower($campus))
+                ->where('StudentNo', $decryptedId)
+                ->update([
+                    'SchoolYear' => $sy,
+                    'Semester' => $sem,
+                    'VarsityEvent' => $eventId,
+                ]);
 
-            // Update coach details
-            $var->SchoolYear = $sy;
-            $var->Semester = $sem;
-            $var->VarsityEvent = $eventId;
-            $updated = $var->save(); // Save the changes
-  
-            if ($updated) {
-                return response()->json(['Error' => 0, "Message" => \GENERAL::Success("Varsity successfully updated")]);
-            }
-        } catch (DecryptException $e) {
-            return response()->json(['Error' => 1, "Message" => "Invalid encrypted ID."], 400);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['Error' => 1, "Message" => "Coach not found."], 404);
+            return response()->json(['Error' => 0, "Message" => 'Varsity successfully updated.']);
+        } catch (DecryptException) {
+            return response()->json(['Error' => \GENERAL::Error("Invalid encrypted ID.")], 400);
         } catch (Exception $e) {
-            return response()->json(['Error' => 1, "Message" => $e->getMessage()], 500);
+            return response()->json(['Error' => \GENERAL::Error($e->getMessage())], 400);
         }
     }
 
-    public function deleteVar(Request $request){
-        try{
-          $id = Crypt::decryptstring($request->id);
-  
-          $one = Varsity::find($id);
-          if (empty($one))
-            throw new Exception("Varsity not found.");
-  
-          $data = [
-            'deleted_at' => now()
-          ];
-          $del = Varsity::where("id", $id)
-            ->update($data);
-          if (!$del)
-          throw new Exception("Unable to delete varsity.");
-        }catch(Exception $e){
-          return response()->json(['errors' => $e->getMessage()], 400);
-        }catch(DecryptException $e){
-          return response()->json(['errors' => $e->getMessage()], 400);
+    public function deleteVar(Request $request)
+    {
+        try {
+            $campus = auth()->user()->AllowSuper == 1 ? ($request->campus ?? throw new Exception('Select Campus')) : session('campus');
+
+            $id = Crypt::decryptString($request->id);
+
+            // Find the Varsity record, delete record
+            $varsity = Varsity::on(strtolower($campus))
+                ->where('StudentNo', $id)
+                ->update(['deleted_at' => now()]);
+
+            return response()->json(['success' => true, 'message' => 'Varsity successfully deleted.']);
+        } catch (DecryptException) {
+            return response()->json(['error' => General::Error('Invalid encrypted ID.')], 400);
+        } catch (Exception $e) {
+            return response()->json(['error' => General::Error($e->getMessage())], 400);
         }
-      }
+    }
 }

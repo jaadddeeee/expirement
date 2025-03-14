@@ -35,3 +35,14 @@
 
 </html>
 @include('slsu/modals/search')
+
+<style>
+  .swal2-container {
+    z-index: 9999 !important;
+  }
+
+  .swal2-popup {
+    z-index: 10000 !important;
+  }
+
+</style>

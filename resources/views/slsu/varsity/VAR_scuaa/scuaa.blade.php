@@ -11,7 +11,7 @@
                 <a href="{{ route('home') }}">Home</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="javascript:void(0);">{{ $pageTitle }}</a>
+                <a href="javascript:void(0);">{{ $page }}</a>
             </li>
         </ol>
     </nav>
@@ -22,9 +22,10 @@
                 <div class="card-header d-flex justify-content-between pb-1">
                     <div class="header-title">
                         <h4 class="card-title">{{ $pageTitle ?? 'List' }}</h4>
+                        <h5 class="card-title">{{ $title ?? 'List' }}</h5>
                     </div>
                     <div class="card-action d-flex align-items-center gap-2">
-                        <form method="GET" action="/varsity/varsity">
+                        <form method="GET" action="/varsity/scuaa">
                             @csrf
                             <div class="d-flex align-items-center gap-2">
                                 <input type="search" name="search" id="search" class="form-control form-control-sm"
@@ -46,67 +47,42 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <select class="form-select form-select-sm w-auto" name="filterSemester" id="filterSemester">
-                                    <option value="0">Select Semester</option>
-                                    @foreach (GENERAL::Semesters() as $index => $sem)
-                                        <option value="{{ $index }}"
-                                            {{ request('filterSemester') == $index ? 'selected' : '' }}>
-                                            {{ $sem['Long'] }}</option>
-                                    @endforeach
-                                </select>
-                                @if (auth()->user()->AllowSuper == 1)
-                                    <select name="filterCampus" id="filterCampus" class="form-select form-select-sm w-auto">
-                                        <option value="0">Select campus</option>
-                                        @foreach (GENERAL::Campuses() as $index => $campus)
-                                            <option value="{{ $index }}" <?= $index == $Campus ? 'Selected' : '' ?>>
-                                                {{ $campus['Campus'] }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                @endif
                                 <button type="submit" class="btn btn-warning btn-sm" id="btn-filter"><i
                                         class='bx bxs-filter-alt'></i></button>
                             </div>
                             <div class="d-flex mt-1 gap-2 justify-content-end">
                                 {!! $headerAction ?? '' !!}
-                                <a href="#" class="btn btn-sm btn-success" data-bs-toggle="modal"
-                                    data-bs-target="#modalVarsity" aria-controls="offcanvasBackdrop">Add Varsity</a>
                             </div>
                         </form>
                     </div>
                 </div>
-                @if (session('campus') == 'SG')
-                    <div class="d-flex justify-content-start container-xxl gap-2">
-                        <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" id="btn-list">Add SCUAA</a>
-                    </div>
-                @endif
-
+                <div class="d-flex justify-content-start container-xxl gap-2">
+                    <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#scuaaModal"
+                        id="btn-list"><i class='bx bx-cog'></i>Set SCUAA</a>
+                    <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalList"
+                        id="btn-list"><i class='bx bx-cog'></i>Set Event</a>
+                </div>
                 <hr>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm table-hover datatable">
                             <thead>
                                 <tr>
-                                    @if (session('campus') == 'SG')
-                                        <td class="text-nowrap "><input class="form-check-input" type="checkbox"
-                                                id="select-all"></td>
-                                    @else
-                                        <td class="text-nowrap">#</td>
-                                    @endif
+                                    <td class = "text-nowrap">#</td>
                                     <th class="text-nowrap">Varsity Name</th>
                                     <th class="text-nowrap">Varsity Event</th>
-                                    <th class="text-nowrap">SY/Sem</th>
+                                    <th class="text-nowrap">SchoolYear</th>
                                     <th class="text-nowrap">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="data">
-                                @include('_partials.var_student-table')
+                                @include('_partials.scuaa-table')
                             </tbody>
                         </table>
                         <div class="d-flex justify-content-end mt-2">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination pagination-sm">
-                                    {{ $varsities->appends(request()->query())->links() }}
+                                    {{ $Lists->appends(request()->query())->links() }}
                                 </ul>
                             </nav>
                         </div>
@@ -116,14 +92,12 @@
         </div>
     </div>
 
-    @include('slsu.varsity.VAR_student.modal_student')
+    @include('slsu.varsity.VAR_scuaa.modal_scuaa')
 
 @endsection
 
 @section('page-script')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @include('slsu.varsity.VAR_student.js')
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    @include('slsu.varsity.VAR_scuaa.js')
 
 @endsection

@@ -1,5 +1,5 @@
 {{-- add modal --}}
-<div class="modal fade" id="modalVarsity" tabindex="-1" aria-labelledby="coachModal" aria-hidden="true"
+{{-- <div class="modal fade" id="modalVarsity" tabindex="-1" aria-labelledby="coachModal" aria-hidden="true"
     style="display: none;">
     <div class="modal-dialog modal-m">
         <div class="modal-content">
@@ -30,14 +30,12 @@
                     @endif
                     <div class="row all mt-2">
                         <div class="form-group">
-                            <div class="col-auto position-relative">
+                            <div class="col-auto">
                                 <label class="form-label">Student</label>
-                                <!-- Student Input Field -->
-                                <input type="text" name="Stud" id="Stud" class="form-control"
+                                <input type="text" name="Stud" id="Stud" class="form-select"
                                     placeholder="Enter student name">
-                                <input type="hidden" name="StudentNo" id="StudentNo">
-                                <div id="StudentDropdown" class="dropdown-menu position-absolute w-100 shadow bg-white"
-                                    style="display: none; z-index: 1050; max-height: 200px; overflow-y: auto; border: 1px; border-radius: 5px;">
+                                <div id="StudentDropdown" class="dropdown-menu w-80 shadow bg-white"
+                                    style="display: none; position: absolute; z-index: 1000; max-height: 200px; overflow-y: auto;">
                                     <ul id="StudentList" class="list-group list-group-flush"></ul>
                                 </div>
                             </div>
@@ -87,15 +85,15 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
-{{-- update modal --}}
-<div class="modal fade border" id="updateModalVar" tabindex="-1" aria-labelledby="eventModal" aria-hidden="true"
+{{-- add scuaa --}}
+<div class="modal fade border" id="scuaaModal" tabindex="-1" aria-labelledby="eventModal" aria-hidden="true"
     style="display: none;">
     <div class="modal-dialog modal-m">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title h4 text-warning" id="eventModalLabel">Update Varsity</h5>
+                <h5 class="modal-title h4" id="eventModalLabel">SCUAA Settings</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -103,63 +101,27 @@
                     @csrf
                     <div class="text-center p-1" id="updatemsg"></div>
                     <input hidden type = "text" name = "hiddentID" id="hiddentID" value="">
-                    @if (auth()->user()->AllowSuper == 1)
-                        <div class="row mt-1">
-                            <div class = "form-group">
-                                <div class="col-auto">
-                                    <label class="form-label">Campus</label>
-                                    <select name="updateCampus" id="updateCampus" class="form-control" disabled>
-                                        <option value="0"></option>
-                                        @foreach (GENERAL::Campuses() as $index => $campus)
-                                            <option value="{{ $index }}">{{ $campus['Campus'] }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                    <div class="row mt-2">
-                        <div class="form-group">
+                    <div class="row mt-1">
+                        <div class = "form-group">
                             <div class="col-auto">
-                                <label class="form-label">Student</label>
-                                <!-- Employee Input Field -->
-                                <input type="text" name="updateStud" id="updateStud" class="form-control"
-                                    readonly>
+                                <label class="form-label">Title:</label>
+                                <input type="text" name="title" id="title" class="form-control">
                             </div>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="form-group">
                             <div class="col-auto">
-                                <label class="form-label">Event</label>
-                                <select name="updateEvent" id="updateEvent" class="form-select">
-                                </select>
+                                <label class="form-label">Location:</label>
+                                <input type="text" name="location" id="location" class="form-control">
                             </div>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="form-group">
                             <div class="col-auto">
-                                <label class="form-label">School Year</label>
-                                <select name="updateSY" id="updateSY" class="form-select">
-                                    <option value="0"></option>
-                                    @foreach (GENERAL::SchoolYears() as $index => $sy)
-                                        <option value="{{ $sy }}">{{ $sy }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label for="Description" class="form-label">Semester:</label>
-                                <select class = "form-select" name = "updateSem" id = "updateSem">
-                                    <option value="0"></option>
-                                    @foreach (GENERAL::Semesters() as $index => $sem)
-                                        <option value="{{ $index }}">{{ $sem['Long'] }}</option>
-                                    @endforeach
-                                </select>
+                                <label class="form-label">Date:</label>
+                                <input type="date" name="date" id="date" class="form-control flatpickr-validation flatpickr-input active">
                             </div>
                         </div>
                     </div>
@@ -167,71 +129,35 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-warning" id="btn-update">Update Coach</button>
+                <button type="button" class="btn btn-success" id="btn-update">Save</button>
             </div>
         </div>
     </div>
 </div>
 
-{{-- add List --}}
+{{-- add Event --}}
 <div class="modal fade" id="modalList" tabindex="-1" aria-labelledby="listModal" aria-hidden="true"
     style="display: none;">
-    <div class="modal-dialog modal-m">
+    <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title h4" id="eventModalLabel">Add SCUAA</h5>
+                <h5 class="modal-title h4" id="eventModalLabel">SCUAA Event Settings</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="frmAdd">
+                <form id="frmSet">
                     @csrf
                     <div class="text-center p-1" id="msg"></div>
-                    <div class="row mt-1  ">
-                        <div class = "form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Campus <span class = 'text-danger'>*</span></label>
-                                <select name="Campus" id="Campus" class="form-select">
-                                    <option value="0">Select Campus</option>
-                                    @foreach (GENERAL::Campuses() as $index => $campus)
-                                        <option value="{{ $index }}"
-                                            <?= $index == $campus ? 'Selected' : '' ?>>{{ $campus['Campus'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    </div>
                     <div class="row all mt-2">
                         <div class="form-group">
                             <div class="col-auto">
-                                <label class="form-label">Student</label>
-                                <!-- Employee Input Field -->
-                                <input type="text" name="Stud" id="Stud" class="form-select"
-                                    placeholder="Enter student name">
-                                <div id="StudentDropdown" class="dropdown-menu w-80 shadow bg-white"
-                                    style="display: none; position: absolute; z-index: 1000; max-height: 200px; overflow-y: auto;">
-                                    <ul id="StudentList" class="list-group list-group-flush"></ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Event</label>
-                                <select name="Event" id="Event" class="form-select">
+                                <label class="form-label">Event:</label>
+                                <select name="filterEvent" id="filterEvent" class="form-select">
                                     <option value="0">Select Event</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label for="Description" class="form-label">School Year:</label>
-                                <select class = "form-select" name = "SchoolYear" id = "SchoolYear">
-                                    <option value="0"></option>
-                                    @foreach (GENERAL::SchoolYears() as $index => $sy)
-                                        <option value="{{ $sy }}">{{ $sy }}</option>
+                                    @foreach ($Events as $Event)
+                                        <option value="{{ $Event->id }}"
+                                            {{ request('filterEvent') == $Event ? 'selected' : '' }}>{{ $Event->event }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -240,13 +166,9 @@
                     <div class="row all mt-2">
                         <div class="form-group">
                             <div class="col-auto">
-                                <label for="Description" class="form-label">Semester:</label>
-                                <select class = "form-select" name = "Semester" id = "Semester">
-                                    <option value="0"></option>
-                                    @foreach (GENERAL::Semesters() as $index => $sem)
-                                        <option value="{{ $index }}">{{ $sem['Long'] }}</option>
-                                    @endforeach
-                                </select>
+                                <label for="Description" class="form-label">Total Participant:</label>
+                                <input type="number" name="totalPart" id="totalPart" class="form-control"
+                                    placeholder="Enter number of participants">
                             </div>
                         </div>
                     </div>

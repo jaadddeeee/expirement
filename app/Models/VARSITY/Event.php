@@ -21,8 +21,14 @@ class Event extends Model
      */
     protected $fillable = [
         'id',
-        'event'
+        'event',
+        'totalAtlhetes'
     ];
+
+    public function varsities()
+    {
+        return $this->hasMany(Varsity::class, 'VarsityEvent');
+    }
 
     public function __construct(){
         $this->connection = strtolower(session('campus'));

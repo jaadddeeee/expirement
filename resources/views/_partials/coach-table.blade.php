@@ -6,7 +6,7 @@
       {{ isset(GENERAL::CoachType()[$coach->CoachType]) ? GENERAL::CoachType()[$coach->CoachType]['Type'] : 'N/A' }}
   </td>
   <td class="text-nowrap">
-    {{ $coach->event->event}}
+    {{ $coach->event_name}}
 </td>
   <td class = "text-nowrap text-end">
     <a href = "#" class="editCoach" cid="{{Crypt::encryptstring($coach->id)}}"><i class = 'bx bx-edit text-warning'></i></a>
