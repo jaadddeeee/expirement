@@ -93,30 +93,23 @@ class ScuaaController extends Controller
         ]);
     }
     
-
-    public function setScuaa(Request $request)
+    public function setEvent(Request $request)
     {
         try {
-            $campus = auth()->user()->AllowSuper == 1 ? ($request->id ?? "SG") : session('campus');
             $total = $request->totalPart;
             $event = $request->filterEvent;
     
             // Count VarsityStudent records in var_scuaa that are linked to var_varsity by ID
-            $varsityCount = DB::connection(strtolower($campus))
-                ->table('var_scuaa')
-                ->join('var_varsity', 'var_scuaa.VarsityStudent', '=', 'var_varsity.id')
-                ->where('var_varsity.VarsityEvent', $event)
-                ->count();
-    
+            $EventCount = ListVarsity::where('Event', $event)->count();
+            
             // Only update if the count does not match the total athletes
-            if ($varsityCount != $total) {
-                Event::on(strtolower($campus))
-                ->where('id', $event)
+            if ($EventCount < $total) {
+                Event::where('id', $event)
                 ->update(['totalAtlhetes' => $total]);
                 return response()->json(['success' => true, 'message' => 'Total athletes has been set successfully.']);
             }
     
-            return response()->json(['Error' => \GENERAL::Error("You can't decrease the total athletes, Total Athletes " . $varsityCount)], 400);
+            return response()->json(['Error' => \GENERAL::Error("You can't decrease the total athletes, Total Athletes " . $EventCount)], 400);
         } catch (DecryptException) {
             return response()->json(['Error' => \GENERAL::Error("Invalid encrypted ID.")], 400);
         } catch (Exception $e) {
@@ -124,46 +117,46 @@ class ScuaaController extends Controller
         }
     }    
 
-    // public function eventlist(Request $request)
-    // {
-    //     // try {
-    //     //     // Fetch all events
-    //     //     $events = Event::all() ?? throw new Exception('No events found');
+    public function setScuaa(Request $request)
+    {
+        // try {
+        //     // Fetch all events
+        //     $events = Event::all() ?? throw new Exception('No events found');
 
-    //     //     // Encrypt event IDs before sending
-    //     //     $events = $events->map(function ($event) {
-    //     //         return [
-    //     //             'id' => Crypt::encryptString($event->id),
-    //     //             'event' => $event->event,
-    //     //         ];
-    //     //     });
+        //     // Encrypt event IDs before sending
+        //     $events = $events->map(function ($event) {
+        //         return [
+        //             'id' => Crypt::encryptString($event->id),
+        //             'event' => $event->event,
+        //         ];
+        //     });
 
-    //     //     return response()->json($events);
-    //     // } catch (Exception $e) {
-    //     //     return response()->json(['error' => $e->getMessage()], 400);
-    //     // }
+        //     return response()->json($events);
+        // } catch (Exception $e) {
+        //     return response()->json(['error' => $e->getMessage()], 400);
+        // }
 
-    //     try {
-    //         // dd($request->id);
-    //         $campus = auth()->user()->AllowSuper == 1 ? ($request->id ?? throw new Exception('Select campus')) : session('campus');
-    //         // Fetch all events
-    //         $events = DB::connection(strtolower($campus))
-    //             ->table('var_event')
-    //             ->select('id', 'event')
-    //             ->orderby('event')
-    //             ->get() ?? throw new Exception('No events found');
+        try {
+            // dd($request->id);
+            $campus = auth()->user()->AllowSuper == 1 ? ($request->id ?? throw new Exception('Select campus')) : session('campus');
+            // Fetch all events
+            $events = DB::connection(strtolower($campus))
+                ->table('var_event')
+                ->select('id', 'event')
+                ->orderby('event')
+                ->get() ?? throw new Exception('No events found');
 
-    //         // Encrypt event IDs before sending
-    //         $events = $events->map(function ($event) {
-    //             return [
-    //                 'id' => Crypt::encryptString($event->id),
-    //                 'event' => $event->event,
-    //             ];
-    //         });
+            // Encrypt event IDs before sending
+            $events = $events->map(function ($event) {
+                return [
+                    'id' => Crypt::encryptString($event->id),
+                    'event' => $event->event,
+                ];
+            });
 
-    //         return response()->json($events);
-    //     } catch (Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 400);
-    //     }
-    // }
+            return response()->json($events);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
 }

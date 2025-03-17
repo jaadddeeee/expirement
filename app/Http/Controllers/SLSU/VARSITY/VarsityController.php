@@ -146,7 +146,7 @@ class VarsityController extends Controller
             if (empty($selectedVarsities)) {
                 throw new Exception('No varsity selected.');
             }
-
+            //  dd($selectedVarsities);
             foreach ($selectedVarsities as $varsityId) {
                 // Find the varsity student and school year using a join query
                 $varsity = DB::connection(strtolower($campus))
@@ -161,9 +161,11 @@ class VarsityController extends Controller
                         )
                     ->first() ?? throw new Exception('Varsity student not found.');
 
+                
+
                 // Get the total participants allowed for the event
                 $event = Event::where('id', $varsity->VarsityEvent)
-                ->select('totalAtlhetes')
+                ->select('totalAtlhetes','event')
                 ->first();
 
             if (!$event) {
@@ -171,7 +173,7 @@ class VarsityController extends Controller
             }
 
             // Count the number of existing varsity students for the event
-            $existingVarsityCount = Varsity::where('VarsityEvent', $varsity->VarsityEvent)->count();
+            $existingVarsityCount = ListVarsity::where('Event', $varsity->VarsityEvent)->count();
 
             // Check if adding the new varsity student would exceed the total participants
             if ($existingVarsityCount >= $event->totalAtlhetes) {

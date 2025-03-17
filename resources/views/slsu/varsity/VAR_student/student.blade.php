@@ -56,7 +56,6 @@
                                 </select>
                                 @if (auth()->user()->AllowSuper == 1)
                                     <select name="filterCampus" id="filterCampus" class="form-select form-select-sm w-auto">
-                                        <option value="0">Select campus</option>
                                         @foreach (GENERAL::Campuses() as $index => $campus)
                                             <option value="{{ $index }}" <?= $index == $Campus ? 'Selected' : '' ?>>
                                                 {{ $campus['Campus'] }}

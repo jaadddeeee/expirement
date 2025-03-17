@@ -38,6 +38,11 @@ class Varsity extends Model
         return $this->belongsTo(Student::class, 'StudentNo', 'StudentNo');
     }
 
+    public function listVarsity()
+    {
+        return $this->hasMany(ListVarsity::class, 'StudentNo', 'StudentNo');
+    }
+
     public function __construct(){
         $this->connection = strtolower(session('campus'));
     }

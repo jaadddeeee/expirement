@@ -9,7 +9,7 @@
         let campus = $("#filterCampus").val();
         e.preventDefault();
         $.ajax({
-            url: '/varsity/set-scuaa',
+            url: '/varsity/set-event',
             method: 'post',
             data: $("#frmSet").serialize() + "&id=" + encodeURIComponent(campus),
             cache: false,
