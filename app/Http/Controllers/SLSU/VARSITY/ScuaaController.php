@@ -17,44 +17,53 @@ class ScuaaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ListVarsity::with([
-            'event' => function ($query) {
-                $query->whereNull('deleted_at');
-            }
-        ])
+        $query = ListVarsity::with(['event' => function ($query) {
+            $query->whereNull('deleted_at');; // Ensures only active events are included
+        }])
         ->orderBy('SchoolYear', 'desc');
-    
-        if ($request->has('filterEvent') && $request->filterEvent != '0') {
-            $query->where('VarsityEvent', $request->filterEvent);
-        }
-    
-        if ($request->has('filterSchoolYear') && $request->filterSchoolYear != '0') {
-            $query->where('var_list.SchoolYear', $request->filterSchoolYear);
-        }
-    
-        if ($request->has('search') && !empty($request->search)) {
-            $query->whereHas('varsity.student', function ($q) use ($request) {
-                $q->where('LastName', 'LIKE', "%{$request->search}%")
-                    ->orWhere('FirstName', 'LIKE', "%{$request->search}%")
-                    ->orWhere('MiddleName', 'LIKE', "%{$request->search}%");
-            });
-        }
-    
-        $varsityList = $query->paginate(10);
-    
-        // Fetch student data from multiple databases
-        $connections = ['sg','mcc', 'to', 'bn', 'sj', 'hn'];
         
-        $varsityList->getCollection()->transform(function ($item) use ($connections) {
-            $student = null;
-    
+        if ($request->has('filterEvent') && $request->filterEvent != '0') {
+            $query->where('Event', $request->filterEvent);
+        }
+        
+        if ($request->has('filterSchoolYear') && $request->filterSchoolYear != '0') {
+            $query->where('var_scuaa_list.SchoolYear', $request->filterSchoolYear);
+        }
+        
+        if ($request->has('search') && !empty($request->search)) {
+            $studentNos = collect();
+        
+            // Search across multiple databases
+            $connections = ['sg', 'mcc', 'to', 'bn', 'sj', 'hn'];
             foreach ($connections as $connection) {
-                $student = Student::on($connection)->where('StudentNo', $item->StudentNo)->first();
-                if ($student) {
-                    break;
-                }
+                $students = Student::on($connection)
+                    ->where('LastName', 'LIKE', "%{$request->search}%")
+                    ->orWhere('FirstName', 'LIKE', "%{$request->search}%")
+                    ->orWhere('MiddleName', 'LIKE', "%{$request->search}%")
+                    ->orWhere('StudentNo', 'LIKE', "%{$request->search}%") // Get matching StudentNo
+                    ->pluck('StudentNo');
+        
+                $studentNos = $studentNos->merge($students);
             }
-            // dd($varsity);
+        
+            // Filter ListVarsity by matching StudentNo values
+            $query->whereIn('StudentNo', $studentNos->unique());
+        }
+        
+        $varsityList = $query->paginate(10);
+        
+        // Fetch student data from multiple databases (batch query)
+        $connections = ['sg','mcc', 'to', 'bn', 'sj', 'hn'];
+        $allStudents = collect();
+        foreach ($connections as $connection) {
+            $allStudents = $allStudents->merge(
+                Student::on($connection)->whereIn('StudentNo', $varsityList->pluck('StudentNo'))->get()
+            );
+        }
+        
+        $varsityList->getCollection()->transform(function ($item) use ($allStudents) {
+            $student = $allStudents->firstWhere('StudentNo', $item->StudentNo);
+            
             return (object) [
                 'SchoolYear' => $item->SchoolYear,
                 'StudentNo'  => $item->StudentNo,
@@ -64,6 +73,7 @@ class ScuaaController extends Controller
                 'event_name' => $item->event->event ?? null,
             ];
         });
+        
     
         $events = Event::select('id', 'event')->orderby('event')->get();
     

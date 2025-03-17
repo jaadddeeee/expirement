@@ -112,19 +112,50 @@
                     <div class="row mt-2">
                         <div class="form-group">
                             <div class="col-auto">
-                                <label class="form-label">Location:</label>
-                                <input type="text" name="location" id="location" class="form-control">
+                                <label class="form-label">University:</label>
+                                <input type="text" name="University" id="University" class="form-control">
                             </div>
                         </div>
                     </div>
                     <div class="row mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Date:</label>
-                                <input type="date" name="date" id="date" class="form-control flatpickr-validation flatpickr-input active">
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Municipality:</label>
+                                    <input type="text" name="Municipality" id="municipality" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Province:</label>
+                                    <input type="text" name="Province" id="Province" class="form-control">
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">SCUAA Logo:</label>
+                                    <input class="form-control" type="file" id="formValidationFile"
+                                        name="formValidationFile">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Date:</label>
+                                    <input type="text" name="date" id="date-range"
+                                        placeholder="YYYY-MM-DD to YYYY-MM-DD" class="form-control flatpickr-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </form>
             </div>
             <div class="modal-footer">

@@ -98,6 +98,8 @@
 
 @section('page-script')
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     @include('slsu.varsity.VAR_scuaa.js')
 
 @endsection

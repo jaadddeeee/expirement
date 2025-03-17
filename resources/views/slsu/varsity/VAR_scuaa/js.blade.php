@@ -76,4 +76,9 @@
             }
         });
     });
+
+    flatpickr("#date-range", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+    });
 </script>
