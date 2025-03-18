@@ -21,7 +21,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between pb-1">
                     <div class="header-title">
-                        <h4 class="card-title">{{ $pageTitle ?? 'List' }}</h4>
+                        <h4 class="card-title" id="pageTitle">{{ $pageTitle ?? 'List' }}</h4>
                         <h5 class="card-title">{{ $title ?? 'List' }}</h5>
                     </div>
                     <div class="card-action d-flex align-items-center gap-2">
@@ -51,6 +51,8 @@
                                         class='bx bxs-filter-alt'></i></button>
                             </div>
                             <div class="d-flex mt-1 gap-2 justify-content-end">
+                                <a href="" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#scuaaHistory"><i class='bx bx-history'></i></a>
                                 {!! $headerAction ?? '' !!}
                             </div>
                         </form>
@@ -61,6 +63,7 @@
                         id="btn-list"><i class='bx bx-cog'></i>Set SCUAA</a>
                     <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalList"
                         id="btn-list"><i class='bx bx-cog'></i>Set Event</a>
+                    <a href="" class="btn btn-sm btn-primary"><i class='bx bxs-report'></i></a>
                 </div>
                 <hr>
                 <div class="card-body">

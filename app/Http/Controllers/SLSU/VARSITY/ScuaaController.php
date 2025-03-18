@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\VARSITY\Event;
 use Illuminate\Http\Request;
 use App\Models\VARSITY\Varsity;
+use App\Models\VARSITY\Scuaa;
 use App\Models\Student;
 use App\Models\VARSITY\ListVarsity;
 use Illuminate\Support\Facades\DB;
@@ -73,15 +74,11 @@ class ScuaaController extends Controller
                 'event_name' => $item->event->event ?? null,
             ];
         });
+
+        $scuaaLists = Scuaa::all(); // Fetch all records
         
     
         $events = Event::select('id', 'event')->orderby('event')->get();
-    
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('_partials.scuaa-table', ['Lists' => $varsityList])->render()
-            ]);
-        }
     
         return view('slsu.varsity.VAR_scuaa.scuaa', [
             'pageTitle' => "SCUAA 8 REGIONAL GAMES - " . date('Y'),
@@ -89,6 +86,7 @@ class ScuaaController extends Controller
             'title' => "List of Athletes ",
             'headerAction' => '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>',
             'Lists' => $varsityList,
+            'ScuaaLists' => $scuaaLists,
             'Events' => $events
         ]);
     }
@@ -119,44 +117,57 @@ class ScuaaController extends Controller
 
     public function setScuaa(Request $request)
     {
-        // try {
-        //     // Fetch all events
-        //     $events = Event::all() ?? throw new Exception('No events found');
-
-        //     // Encrypt event IDs before sending
-        //     $events = $events->map(function ($event) {
-        //         return [
-        //             'id' => Crypt::encryptString($event->id),
-        //             'event' => $event->event,
-        //         ];
-        //     });
-
-        //     return response()->json($events);
-        // } catch (Exception $e) {
-        //     return response()->json(['error' => $e->getMessage()], 400);
-        // }
-
         try {
-            // dd($request->id);
-            $campus = auth()->user()->AllowSuper == 1 ? ($request->id ?? throw new Exception('Select campus')) : session('campus');
-            // Fetch all events
-            $events = DB::connection(strtolower($campus))
-                ->table('var_event')
-                ->select('id', 'event')
-                ->orderby('event')
-                ->get() ?? throw new Exception('No events found');
-
-            // Encrypt event IDs before sending
-            $events = $events->map(function ($event) {
-                return [
-                    'id' => Crypt::encryptString($event->id),
-                    'event' => $event->event,
-                ];
-            });
-
-            return response()->json($events);
+            // Validate required fields
+            // $title = $request->title ?? throw new Exception('Title is required');
+            // $university = $request->University ?? throw new Exception('University is required');
+            // $municipality = $request->Municipality ?? throw new Exception('Municipality is required');
+            // $province = $request->Province ?? throw new Exception('Province is required');
+            $date = $request->Date ?? throw new Exception('Date is required');
+            $dates = explode(" to ", $date);
+            if (count($dates) != 2) {
+                throw new Exception('Invalid date range format');
+            }
+            $startDate = date('F j', strtotime($dates[0]));
+            $endDate = date('j, Y', strtotime($dates[1]));
+            $formattedDate = $startDate . '-' . $endDate;
+    
+            // Prevent duplicate records
+            $exists = Scuaa::where('Title', $title)->where('Date', $date)->exists();
+            if ($exists) {
+                throw new Exception('This Scuaa record already exists.');
+            }
+    
+            // Validate file upload
+            if (!$request->hasFile('ScuaaLogo')) {
+                throw new Exception('Logo is required');
+            }
+    
+            // Store file only if it doesn’t exist
+            $file = $request->file('ScuaaLogo');
+            $filePath = $file->store('scuaa_logos', 'public');
+    
+            // Combine Municipality & Province into Location
+            $location = "{$municipality}, {$province}";
+    
+            // Save to Database
+            $setScuaa = Scuaa::create([
+                'Title' => $title,
+                'ScuaaLogo' => $filePath, // Save file path instead of raw file
+                'University' => $university,
+                'Location' => $location,
+                'Date' => $formattedDate,
+            ]);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Scuaa record created successfully!',
+                'file_path' => asset('storage/' . $filePath), // Provide file URL
+            ]);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+    
+    
 }
