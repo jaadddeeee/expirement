@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SLSU\Report;
 
 use Elibyy\TCPDF\Facades\TCPDF;
 use App\Http\Controllers\SLSU\Preference;
+use App\Models\VARSITY\Scuaa;
 use GENERAL;
 
 class LetterHead extends TCPDF
@@ -28,7 +29,7 @@ class LetterHead extends TCPDF
       $this::Image(GENERAL::Logo(),15,7,20);
       $this::setXY(35, 11);
       $this::Cell(30,5,"Southern Leyte",0,0,'L');
-      $this::setXY(35, 18);
+      $this::setXY(35, 17);
       $this::Cell(30,5,"State University",0,0,'L');
 
       $x = 115;
@@ -170,6 +171,57 @@ class LetterHead extends TCPDF
 
     $startX = 280;
     $this::Image(GENERAL::ISOLogo(),$startX,$startY-3,25);
+  }
+
+  public function ScuaaHeaderLandScape(){
+    $year = date('Y'); // Get the current year
+
+    // Fetch the ScuaaLogo where the Date column contains the current year
+    $scuaaList = Scuaa::where('Date', 'LIKE', '%' . $year . '%')
+        ->select('*')
+        ->first();
+
+        preg_match('/\d{4}/', $scuaaList->Date, $matches);
+        $title = $scuaaList->Title . ' ' . ($matches ? $matches[0] : '');
+        $dateLocation = $scuaaList->Date .', '. $scuaaList->University .', '. $scuaaList->Location;
+        $logoPath = ('storage/' . $scuaaList->ScuaaLogo);
+
+    $x = 20;
+    $yl = 6;
+    $y=11;
+    $this::SetTextColor(0,0,0);
+    $this::Image($logoPath, $x, $yl, 24.9, 25);
+    $x+=35;
+    $this::setXY($x, $y);
+    $this::SetFont('arialb','',16);
+    $this::Cell(30,5,$title,0,0,'L');
+    $y+=8;
+    $this::setXY($x, $y);
+    $this::SetFont('lucidafax','',10);
+    $this::Cell(30,5,$dateLocation,0,0,'L');
+    $this::SetFont("cambria",'',8);
+
+    // Add vertical line
+    $this::SetLineWidth(0.4);
+    $this::Line(205, 17, 205, 30);
+
+    $this::Line(325, 17, 325, 30);
+
+    //horizontal line short
+    $this::Line(205, 17, 325, 17);
+    // Add "SCUAA Form 2" text
+    $this::setXY(304, 12);
+    $this::SetFont('calibri','',10);
+    $this::Cell(0,5,'SCUAA Form 2',0,1,'L');
+
+    // Add horizontal line
+    $this::SetLineWidth(0.7);
+    $this::Line(5, 30, 325, 30);
+
+    // Add "OFFICIAL ENTRY FORM AND GALLERY OF" text with border
+    $this::setXY(228, 14);
+    $this::SetFont('lucidafax','B',11);
+    $this::Cell(70, 15, 'OFFICIAL ENTRY FORM AND GALLERY OF', 0, 0, 'C');
   }
 
 }

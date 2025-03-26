@@ -63,7 +63,7 @@
                         id="btn-list"><i class='bx bx-cog'></i>Set SCUAA</a>
                     <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalList"
                         id="btn-list"><i class='bx bx-cog'></i>Set Event</a>
-                    <a href="" class="btn btn-sm btn-primary"><i class='bx bxs-report'></i></a>
+                    <a href="{{ route('generate') }}" class="btn btn-sm btn-primary" id="btnGenerate"><i class='bx bxs-report'></i></a>
                 </div>
                 <hr>
                 <div class="card-body">

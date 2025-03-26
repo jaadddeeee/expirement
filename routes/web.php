@@ -596,4 +596,5 @@ Route::group(['prefix' => 'varsity', 'middleware' => ['auth', 'varsity']], funct
   Route::get('/scuaa', $controller_path . '\SLSU\VARSITY\ScuaaController@index')->name('scuaa');
   Route::post('/set-event', $controller_path . '\SLSU\VARSITY\ScuaaController@setEvent');
   Route::post('/set-scuaa', $controller_path . '\SLSU\VARSITY\ScuaaController@setScuaa');
+  Route::get('/generate', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaList')->name('generate');
 });

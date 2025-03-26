@@ -12,15 +12,18 @@ use App\Models\VARSITY\ListVarsity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 use Exception;
+use App\Http\Controllers\SLSU\Report\ScuaaReport;
+use General;
 
 class ScuaaController extends Controller
 {
     public function index(Request $request)
     {
         $query = ListVarsity::with(['event' => function ($query) {
-            $query->whereNull('deleted_at');; // Ensures only active events are included
         }])
+        ->whereNull('deleted_at')
         ->orderBy('SchoolYear', 'desc');
         
         if ($request->has('filterEvent') && $request->filterEvent != '0') {
@@ -119,10 +122,10 @@ class ScuaaController extends Controller
     {
         try {
             // Validate required fields
-            // $title = $request->title ?? throw new Exception('Title is required');
-            // $university = $request->University ?? throw new Exception('University is required');
-            // $municipality = $request->Municipality ?? throw new Exception('Municipality is required');
-            // $province = $request->Province ?? throw new Exception('Province is required');
+            $title = $request->title ?? throw new Exception('Title is required');
+            $university = $request->University ?? throw new Exception('University is required');
+            $municipality = $request->Municipality ?? throw new Exception('Municipality is required');
+            $province = $request->Province ?? throw new Exception('Province is required');
             $date = $request->Date ?? throw new Exception('Date is required');
             $dates = explode(" to ", $date);
             if (count($dates) != 2) {
@@ -168,6 +171,41 @@ class ScuaaController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+
+    public function scuaaList(Request $request){
+        $pdf = new ScuaaReport('P', 'cm', array(330.2, 215.9));
+        $pdf->setId($request->DateOfGraduation);
+        $pdf->setSy($request->SchoolYear);
+        $pdf->setSem($request->Semester);
+    
+        // HEADER
     
     
+        $pdf::setHeaderCallback(function($p) use ($pdf){
+            $pdf->Header();
+    
+        });
+    
+        // $pdf::setFooterCallback(function($p) use ($pdf){
+        //   $pdf->Footer();
+        // });
+    
+        $pdf::AddPage('L', array(215.9, 330.2));
+        $pdf::SetTopMargin(57);
+        $pdf::SetAutoPageBreak(TRUE,20);
+        $pdf->Body();
+        $date = \Str::slug($request->DateOfGraduation);
+    
+        $fname = "scuaalist-".$date.".pdf";
+    
+        // $public = "public";
+        // $directoryPath = 'prcgraduation/'.session('campus');
+        // if (!Storage::exists($public."/".$directoryPath)) {
+        //   Storage::makeDirectory($public."/".$directoryPath);
+        // }
+    
+        $pdf::Output(storage_path($fname),'I');
+    
+        // return response()->download($fname);
+    }
 }
