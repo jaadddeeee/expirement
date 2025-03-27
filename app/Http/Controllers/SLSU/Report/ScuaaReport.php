@@ -44,7 +44,12 @@ class ScuaaReport extends TCPDF
     foreach ($connections as $connection) {
         $students = Student::on($connection)
             ->whereIn('StudentNo', $studentNos)
-            ->get();
+            ->get()
+            ->map(function ($student) use ($connection) {
+              // Add the connection name to the student data for picture path
+              $student->connection = $connection;
+              return $student;
+          });
         $allStudents = $allStudents->merge($students);
     }
     
@@ -61,6 +66,8 @@ class ScuaaReport extends TCPDF
         $dob = !empty($student->BirthDate) 
           ? \DateTime::createFromFormat('d/m/Y', $student->BirthDate)?->format('F j, Y') ?? 'N/A'
           : 'N/A';
+
+        $picture = ('storage/photo/'. strtoupper($student->connection).'/' . $student->Picture);
     
         return [
             'SchoolYear' => $item->SchoolYear,
@@ -70,7 +77,7 @@ class ScuaaReport extends TCPDF
             'CourseYear' => isset($student->Course, $student->StudentYear) 
                               ? "{$student->Course} - {$student->StudentYear}" 
                               : 'N/A',
-            'Picture'    => $student->Picture ?? null,
+            'Picture'    => $picture ?? null,
             'event_name' => optional($item->event)->event ?? 'N/A', // Safe handling
         ];
     })->toArray();
@@ -160,8 +167,11 @@ class ScuaaReport extends TCPDF
     $cols = 0;
     $row = 0;
     foreach ($athletes as $athlete) {
+        // dd($athlete);
         $x = 49 + ($cols * 57);
         $y = $startY + ($row * ($cellHeight + 41.5));
+        $this::Image($athlete['Picture'], $x - 3, $y - 20, 46, 46);
+        $this::Rect($x - 3, $y - 20, 46, 46); //Image border
         // Draw full name
         $this::SetXY($x, $y + 26.4);
         $this::SetFont('calibrib', '', 12);
@@ -221,7 +231,7 @@ class ScuaaReport extends TCPDF
       } else {
           $this->drawNames($offsetY + 7, 'default');
       }
-  
+      
       // Draw athletes properly
       $this->drawAthletes($offsetY + 7, $cellHeight, $numColumns, array_slice($athletes, $numAthletes - $remainingAthletes, $currentBatch));
   
