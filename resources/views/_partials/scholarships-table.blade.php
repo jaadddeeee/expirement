@@ -1,41 +1,48 @@
 @forelse ($scholarships as $scholarship)
     <tr>
-        <td class="text-nowrap">{{ $loop->iteration }}</td>
-        <td class="text-nowrap">{{ $scholarship->sch_name }}</td>
-        <td class="text-nowrap">
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ $scholarship->sch_name }}</td>
+        <td>
             {{ GENERAL::ScholarshipsNew()[$scholarship->sch_type]['Description'] ?? 'Unknown' }}
         </td>
-        <td class="text-nowrap">
+        <td>
             @if ($scholarship->sch_type == 1)
                 N/A
             @else
                 {{ GENERAL::ExternalSchType()[$scholarship->ext_type]['Description'] ?? 'Unknown' }}
             @endif
         </td>
-        <td class="text-nowrap">
-            <!-- Add Button Icon -->
-            <i class="fa fa-plus-circle text-success me-2 addScholarView"
-                data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}"
-                data-scholarship-name="{{ $scholarship->sch_name }}" style="cursor: pointer;" title="Add"></i>
+        <td>
+            <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+                    data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-dots-vertical-rounded"></i></button>
+                <div class="dropdown-menu">
+                    <!-- Add Scholar -->
+                    <a class="dropdown-item addScholarView"
+                        data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}"
+                        data-scholarship-name="{{ $scholarship->sch_name }}" href="javascript:void(0);">
+                        <i class="bx bx-show me-1"></i> View Scholars</a>
 
-            <!-- Edit Button Icon -->
-            <i class="fa fa-edit text-warning me-2 editScholarship"
-                data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" style="cursor: pointer;"
-                title="Edit"></i>
+                    <!-- Edit Scholarship -->
+                    <a class="dropdown-item editScholarship"
+                        data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" href="javascript:void(0);">
+                        <i class="bx bx-edit-alt me-1"></i> Edit Scholarship</a>
 
-            <!-- Delete Button Icon -->
-            <i class="fa fa-trash text-danger deleteScholarship"
-                data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" style="cursor: pointer;"
-                title="Delete"></i>
+                    <!-- Delete Scholarship -->
+                    <a class="dropdown-item deleteScholarship"
+                        data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" href="javascript:void(0);">
+                        <i class="bx bx-trash me-1"></i> Delete Scholarship</a>
+                </div>
+            </div>
         </td>
     </tr>
 @empty
     @if (isset($isSearch) && $isSearch)
-        <tr style="background-color:#033874; color: white;">
+        <tr>
             <td colspan="5" class="text-center">No scholarships found</td>
         </tr>
     @else
-        <tr style="background-color:#033874; color: white;">
+        <tr>
             <td colspan="5" class="text-center">No scholarships available</td>
         </tr>
     @endif

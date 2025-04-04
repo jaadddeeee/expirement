@@ -9,7 +9,7 @@ use Session;
 use ROLE;
 
 
-class ScholarshipNew
+class Scholarships
 {
     /**
      * Handle an incoming request.
@@ -18,7 +18,7 @@ class ScholarshipNew
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!ROLE::isScholar()){
+        if (!ROLE::isScholarships()) {
             return redirect('/');
         }
         return $next($request);

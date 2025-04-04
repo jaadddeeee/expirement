@@ -1,46 +1,49 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Scholarship;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Student;
 
-
-class Scholar extends Model
+class ScholarDetail extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $connection;
 
-    protected $table = 'sch_scholars';
+    protected $table = 'sch_scholar_details';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $dates = ['deleted_at'];
 
-
     protected $fillable = [
-        'scholarship_id',
         'student_no',
+        'scholarship_id',
         'date_awarded',
-        'SchoolYear',
-        'Semester',
         'bank_account',
-        'deleted_at',
+        'contact_no'
     ];
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->connection = strtolower(session('campus'));
     }
 
     public function scholarship()
     {
-        return $this->belongsTo(ScholarshipNew::class, 'scholarship_id', 'id');
+        return $this->belongsTo(Scholarship::class, 'scholarship_id', 'id');
     }
 
     public function student()
     {
         return $this->belongsTo(Student::class, 'student_no', 'StudentNo');
+    }
+
+    public function enrollments()
+    {
+        return $this->hasMany(ScholarEnrollment::class, 'scholar_id', 'id');
     }
 }

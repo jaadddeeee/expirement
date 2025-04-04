@@ -563,23 +563,27 @@ Route::get('/form/layouts-horizontal', $controller_path . '\form_layouts\Horizon
 // tables
 Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tables-basic');
 
-// scholarship new
-Route::group(['prefix' => 'scholarship-new', 'middleware' => ['auth', 'scholarshipnew']], function () use ($controller_path) {
-  // scholarships | DONE
-  Route::get('/scholarships', $controller_path . '\SLSU\ScholarshipNController@index')->name('scholarships');
-  Route::get('/search-scholarship', $controller_path . '\SLSU\ScholarshipNController@search')->name('search-scholarship');
-  Route::get('/fetch-scholarships', $controller_path . '\SLSU\ScholarshipNController@fetchScholarships')->name('fetch-scholarships');
-  Route::post('/save-scholarship', $controller_path . '\SLSU\ScholarshipNController@save');
-  Route::get('/edit-scholarship/{id}', $controller_path . '\SLSU\ScholarshipNController@edit')->name('edit-scholarship');
-  Route::put('/update-scholarship/', $controller_path . '\SLSU\ScholarshipNController@update')->name('update-scholarship');
-  Route::delete('/delete-scholarship/', $controller_path . '\SLSU\ScholarshipNController@delete')->name('delete-scholarship');
-  
-  // scholar
-  Route::get('/add-scholar-view', $controller_path . '\SLSU\ScholarshipNController@addScholarView')->name('add-scholar-view');
-  Route::get('/search-student', $controller_path . '\SLSU\ScholarshipNController@searchStudent')->name('search-student');
-  Route::get('/search-scholar/', $controller_path . '\SLSU\ScholarshipNController@searchScholar')->name('search-scholar');
-  Route::post('/add-scholar', $controller_path . '\SLSU\ScholarshipNController@addScholar');
-  Route::get('/edit-scholar/{id}', $controller_path . '\SLSU\ScholarshipNController@editScholar')->name('edit-scholar');
-  Route::put('/update-scholar/', $controller_path . '\SLSU\ScholarshipNController@updateScholar')->name('update-scholar');
-  Route::delete('/delete-scholar/', $controller_path . '\SLSU\ScholarshipNController@deleteScholar')->name('delete-scholar');
+// scholarships
+Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships']], function () use ($controller_path) {
+  // scholarships
+  Route::get('/', $controller_path . '\SLSU\Scholarship\ScholarshipController@index')->name('scholarships.index');
+  Route::post('/store', $controller_path . '\SLSU\Scholarship\ScholarshipController@store')->name('scholarships.store');
+  Route::get('/edit', $controller_path . '\SLSU\Scholarship\ScholarshipController@edit')->name('scholarships.edit');
+  Route::put('/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@update')->name('scholarships.update');
+  Route::delete('/destroy', $controller_path . '\SLSU\Scholarship\ScholarshipController@destroy')->name('scholarships.destroy');
+
+  // scholars
+  Route::get('/scholars', $controller_path . '\SLSU\Scholarship\ScholarController@index')->name('scholars.index');
+  Route::get('/scholars/search-student', $controller_path . '\SLSU\Scholarship\ScholarController@searchStudent')->name('scholars.search-student');
+  Route::post('/scholars/store', $controller_path . '\SLSU\Scholarship\ScholarController@store')->name('scholars.store');
+  Route::get('/scholars/edit', $controller_path . '\SLSU\Scholarship\ScholarController@edit')->name('scholars.edit');
+  Route::put('/scholars/update', $controller_path . '\SLSU\Scholarship\ScholarController@update')->name('scholars.update');
+  Route::delete('/scholars/destroy', $controller_path . '\SLSU\Scholarship\ScholarController@destroy')->name('scholars.destroy');
+
+  // copy and delete multiple scholars
+  Route::post('/scholars/copy-scholars', $controller_path . '\SLSU\Scholarship\ScholarController@copyScholars')->name('scholars.copy-scholars');
+  Route::delete('/scholars/delete-scholars', $controller_path . '\SLSU\Scholarship\ScholarController@deleteScholars')->name('scholars.delete-scholars');
+
+  // genererate scholarship certificate
+  Route::get('/generate-noa', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipCertificate')->name('generate-noa');
 });

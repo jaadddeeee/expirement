@@ -1,32 +1,38 @@
 @forelse ($scholars as $scholar)
     <tr>
-        <td class="text-nowrap">{{ $loop->iteration }}</td>
-        <td class="text-nowrap">{{ $scholar->LastName }}, {{ $scholar->FirstName }} {{ $scholar->MiddleName }}</td>
-        <td class="text-nowrap">{{ $scholar->date_awarded }}</td>
-        <td class="text-nowrap">
-            {{ \GENERAL::setSchoolYearLabel($scholar->SchoolYear, $scholar->Semester) }}
+        <td>
+            <input style="cursor: pointer;" type="checkbox" class="select-scholar form-check-input"
+                name="selected_scholars[]" value="{{ $scholar->id }}">
         </td>
-        <td class="text-nowrap">
-            {{ \GENERAL::Semesters()[$scholar->Semester]['Long'] }}
+        <td>{{ $scholar->LastName }}, {{ $scholar->FirstName }} {{ $scholar->MiddleName }}</td>
+        <td>
+            {{ GENERAL::setSchoolYearLabel($scholar->SchoolYear, $scholar->Semester) }}
         </td>
-        <td class="text-nowrap">
-            <!-- Edit Button Icon -->
-            <i class="fa fa-edit text-warning me-2 editScholar" data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
-                style="cursor: pointer;" title="Edit"></i>
+        <td>
+            {{ GENERAL::Semesters()[$scholar->Semester]['Long'] }}
+        </td>
+        <td>
+            <!-- Edit Scholar -->
+            <a class="editScholar me-2 text-warning" data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                href="javascript:void(0);" title="Edit Scholar">
+                <i class="bx bx-edit-alt me-1"></i></a>
 
-            <!-- Delete Button Icon -->
-            <i class="fa fa-trash text-danger deleteScholar" data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
-                style="cursor: pointer;" title="Delete"></i>
+            <!-- Delete Scholar -->
+            <a class="deleteScholar me-2 text-danger" data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                href="javascript:void(0);">
+                <i class="bx bx-trash me-1"></i></a>
+
+            <!-- Generate Scholarship Certification -->
+            <a class="generateSCHCert text-secondary" data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
+                data-school-year="{{ $scholar->SchoolYear }}" data-semester="{{ $scholar->Semester }}"
+                href="javascript:void(0);">
+                <i class="bx bxs-file-pdf me-1"></i></a>
+
         </td>
     </tr>
 @empty
-    @if (isset($isSearch) && $isSearch)
-        <tr style="background-color:#033874; color: white;">
-            <td colspan="6" class="text-center">No scholars found</td>
-        </tr>
-    @else
-        <tr style="background-color:#033874; color: white;">
-            <td colspan="6" class="text-center">No scholars available</td>
-        </tr>
-    @endif
+    <tr>
+        <td colspan="5" class="text-center">No scholars found.</td>
+    </tr>
 @endforelse

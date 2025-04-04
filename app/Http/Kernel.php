@@ -61,7 +61,7 @@ class Kernel extends HttpKernel
     'nstp' => \App\Http\Middleware\NSTP::class,
     'uisa' => \App\Http\Middleware\UISA::class,
     'scholarship' => \App\Http\Middleware\Scholarship::class,
-    'scholarshipnew' => \App\Http\Middleware\ScholarshipNew::class,
+    'scholarships' => \App\Http\Middleware\Scholarships::class,
     'enrol' => \App\Http\Middleware\Enrol::class,
     'tes' => \App\Http\Middleware\TES::class,
     'registrar' => \App\Http\Middleware\Registrar::class,
