@@ -25,7 +25,7 @@ class Scholarship extends Model
         'sch_acronym',
         'sch_type',
         'ext_type',
-        'sch_requirements'
+        'sch_provider',
     ];
 
     public function __construct()

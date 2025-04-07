@@ -3,9 +3,9 @@
         <tr>
             <th>#</th>
             <th>Scholarship Name</th>
-            <th>Scholarship Acronym</th>
+            <th>Acronym</th>
             <th>Type</th>
-            <th>External Type</th>
+            <th>Provider</th>
             <th>Requirements</th>
             <th>Actions</th>
         </tr>
@@ -15,17 +15,15 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $scholarship->sch_name }}</td>
-                <td></td>
-                <td>
-                    {{ GENERAL::ScholarshipsNew()[$scholarship->sch_type]['Description'] ?? 'Unknown' }}
-                </td>
+                <td>{{ $scholarship->sch_acronym }}</td>
                 <td>
                     @if ($scholarship->sch_type == 1)
-                        SLSU
+                        Internal
                     @else
-                        {{ GENERAL::ExternalSchType()[$scholarship->ext_type]['Description'] ?? 'Unknown' }}
+                        External - {{ GENERAL::ExternalSchType()[$scholarship->ext_type]['Description'] ?? 'Unknown' }}
                     @endif
                 </td>
+                <td>{{ $scholarship->sch_provider }}</td>
                 <td></td>
                 <td>
                     <!-- View Scholars -->
@@ -50,7 +48,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="5" class="text-center">No scholarships found.</td>
+                <td colspan="7" class="text-center">No scholarships found.</td>
             </tr>
         @endforelse
     </tbody>

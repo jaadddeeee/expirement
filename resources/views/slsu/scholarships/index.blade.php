@@ -28,13 +28,13 @@
                     <div class="d-flex align-items-center gap-2">
                         {!! $headerAction ?? '' !!}
 
-                        <a href="#" class="btn btn-sm btn-success" data-bs-toggle="offcanvas"
+                        {{-- <a href="#" class="btn btn-sm btn-success" data-bs-toggle="offcanvas"
                             data-bs-target="#offcanvasAddScholarship" aria-controls="offcanvasBackdrop">
                             <i class="fa fa-plus"></i> New
-                        </a>
+                        </a> --}}
 
                         <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
-                            data-bs-target="#largeModal">
+                            data-bs-target="#createScholarshipModal">
                             <i class="fa fa-plus"></i> New
                         </button>
                     </div>
@@ -196,8 +196,8 @@
         </form>
     </div> --}}
 
-    <!-- Large Modal -->
-    <div class="modal fade" id="largeModal" tabindex="-1" aria-hidden="true">
+    <!-- Store Scholarship Modal -->
+    <div class="modal fade" id="createScholarshipModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <!-- Modal Header -->
@@ -212,6 +212,18 @@
                 <div class="modal-body">
                     <form id="frmAddScholarship">
                         @csrf
+                        <!-- Scholarship Type -->
+                        <div class="mb-3">
+                            <label for="scholarshipType" class="form-label">Scholarship Type</label>
+                            <select style="cursor: pointer;" class="form-select" name="ScholarshipType"
+                                id="scholarshipType">
+                                <option value="" disabled selected>Select Scholarship Type</option>
+                                @foreach (GENERAL::ScholarshipsNew() as $index => $sch)
+                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="row g-2 mb-3">
                             <!-- Scholarship Name -->
                             <div class="col mb-0">
@@ -228,11 +240,31 @@
                             </div>
                         </div>
 
+                        <!-- External Scholarship Type -->
+                        <div id="externalOptions" class="mb-3" style="display: none;">
+                            <label for="externalScholarshipType" class="form-label">External Type</label>
+                            <select style="cursor: pointer;" class="form-select" name="ExternalScholarshipType"
+                                id="externalScholarshipType">
+                                <option value="" disabled selected>Select External Type</option>
+                                @foreach (GENERAL::ExternalSchType() as $index => $sch)
+                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Scholarship Provider -->
+                        <div class="mb-3" style="display: none;">
+                            <label for="schProvider" class="form-label">Scholarship Provider</label>
+                            <input id="schProvider" type="text" class="form-control"
+                                placeholder="Enter Scholarship Provider" disabled>
+                            <input id="schProviderHidden" type="hidden" name="SchProvider">
+                        </div>
+
                         <!-- Scholarship Requirements -->
                         <div class="mb-3">
                             <label for="schRequirements" class="form-label">Scholarship Requirements</label>
                             <div id="requirementsContainer" class="border rounded p-3"
-                                style="max-height: 300px; overflow-y: auto;">
+                                style="max-height: 250px; overflow-y: auto;">
                                 <div class="input-group mb-2 requirement-item">
                                     <!-- Quantity Input -->
                                     <input type="number" name="SchRequirementQuantities[]" class="form-control"
@@ -251,37 +283,6 @@
                             <button type="button" class="btn btn-sm btn-success mt-2" id="btnAddRequirement">
                                 <i class="fa fa-plus"></i> Add Requirement
                             </button>
-                        </div>
-
-                        <!-- Scholarship Type -->
-                        <div class="mb-3">
-                            <label for="scholarshipType" class="form-label">Scholarship Type</label>
-                            <select style="cursor: pointer;" class="form-select" name="ScholarshipType"
-                                id="scholarshipType">
-                                <option value="" disabled selected>Select Scholarship Type</option>
-                                @foreach (GENERAL::ScholarshipsNew() as $index => $sch)
-                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- External Scholarship Type -->
-                        <div id="externalOptions" class="mb-3" style="display: none;">
-                            <label for="externalScholarshipType" class="form-label">External Type</label>
-                            <select style="cursor: pointer;" class="form-select" name="ExternalScholarshipType"
-                                id="externalScholarshipType">
-                                <option value="" disabled selected>Select External Type</option>
-                                @foreach (GENERAL::ExternalSchType() as $index => $sch)
-                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Scholarship Provider -->
-                        <div class="mb-3" style="display: none;">
-                            <label for="schProvider" class="form-label">Scholarship Provider</label>
-                            <input id="schProvider" type="text" name="SchProvider" class="form-control"
-                                placeholder="Enter Scholarship Provider">
                         </div>
                     </form>
                 </div>

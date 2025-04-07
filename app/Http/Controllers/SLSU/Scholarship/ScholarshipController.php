@@ -5,7 +5,7 @@ namespace App\Http\Controllers\SLSU\Scholarship;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Scholarship\Scholarship;
-
+use GENERAL;
 
 class ScholarshipController extends Controller
 {
@@ -46,6 +46,7 @@ class ScholarshipController extends Controller
         }
     }
 
+
     public function store(Request $request)
     {
         try {
@@ -56,33 +57,46 @@ class ScholarshipController extends Controller
             $ScholarshipProvider = $request->SchProvider;
 
             if (empty($ScholarshipName)) {
-                return response()->json(['Error' => 1, 'Message' => "Empty Scholarship Name"]);
+                throw new \Exception("Empty Scholarship Name");
             }
 
             if (empty($ScholarshipAcronym)) {
-                return response()->json(['Error' => 1, 'Message' => "Empty Scholarship Acronym"]);
+                throw new \Exception("Empty Scholarship Acronym");
             }
 
             if (empty($ScholarshipType) || $ScholarshipType == 0) {
-                return response()->json(['Error' => 1, 'Message' => "Please select scholarship type"]);
+                throw new \Exception("Please select scholarship type");
             }
 
             if ($ScholarshipType == 1) {
-                $ExternalSchType = 'SLSU';
+                $ExternalSchType = 0;
+
+                $campuses = GENERAL::Campuses();
+                $campusCode = strtoupper(session('campus'));
+                $campusName = isset($campuses[$campusCode]) ? $campuses[$campusCode]['Campus'] : 'Unknown Campus';
+
+                $ScholarshipProvider = 'SLSU - ' . $campusName;
             } elseif (empty($ExternalSchType)) {
-                return response()->json(['Error' => 1, 'Message' => "Please select external type"]);
+                throw new \Exception("Please select external type");
             }
 
+            if ($ScholarshipType != 1 && empty($ScholarshipProvider)) {
+                throw new \Exception("Please provide a scholarship provider");
+            }
+
+            // check if scholarship already exists
             $existing = Scholarship::where('sch_name', $ScholarshipName)->first();
-
             if ($existing) {
-                return response()->json(['Error' => 1, 'Message' => "Scholarship already exists."]);
+                throw new \Exception("Scholarship already exists.");
             }
 
+            // Create Scholarship
             Scholarship::create([
                 'sch_name' => $ScholarshipName,
+                'sch_acronym' => $ScholarshipAcronym,
                 'sch_type' => $ScholarshipType,
                 'ext_type' => $ExternalSchType,
+                'sch_provider' => $ScholarshipProvider,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -94,8 +108,8 @@ class ScholarshipController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'Error' => 1,
-                'Message' => "An error occurred: " . $e->getMessage()
-            ], 400);
+                'Message' => $e->getMessage()
+            ]);
         }
     }
 
