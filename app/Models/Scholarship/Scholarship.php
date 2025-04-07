@@ -37,4 +37,9 @@ class Scholarship extends Model
     {
         return $this->hasMany(Scholar::class, 'scholarship_id');
     }
+
+    public function requirements()
+    {
+        return $this->hasMany(ScholarshipRequirements::class, 'scholarship_id');
+    }
 }

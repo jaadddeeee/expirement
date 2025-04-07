@@ -24,7 +24,20 @@
                     @endif
                 </td>
                 <td>{{ $scholarship->sch_provider }}</td>
-                <td></td>
+                <td>
+                    <!-- Add Requirements Modal -->
+                    <a class="addRequirments me-2 text-success" data-scholarship-id="{{ $scholarship->id }}"
+                        data-scholarship-name="{{ $scholarship->sch_name }}" href="javascript:void(0);"
+                        title="Add Requirements">
+                        <i class="bx bxs-plus-circle"></i>
+                    </a>
+
+                    <!-- Edit Requirements -->
+                    <a class="editRequirements me-2 text-warning" data-scholarship-id="{{ $scholarship->id }}"
+                        href="javascript:void(0);" title="Edit Requirements">
+                        <i class="bx bx-edit-alt"></i>
+                    </a>
+                </td>
                 <td>
                     <!-- View Scholars -->
                     <a class="viewScholars me-2 text-info"

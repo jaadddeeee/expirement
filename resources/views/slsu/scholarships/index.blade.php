@@ -107,95 +107,6 @@
         </div>
     </div>
 
-    {{-- Store Scholarship --}}
-    {{-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAddScholarship"
-        aria-labelledby="offcanvasBackdropLabel">
-        <div class="offcanvas-header">
-            <h5 id="offcanvasBackdropLabel" class="offcanvas-title"><i class="fa fa-plus"></i> New Scholarship</h5>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <hr>
-        <form id="frmAddScholarship">
-            @csrf
-            <div class="offcanvas-body my-auto mx-0 flex-grow-0">
-                <!-- Scholarship Name -->
-                <div class="mb-4">
-                    <label for="scholarshipName" class="form-label">Scholarship Name</label>
-                    <input id="scholarshipName" type="text" name="ScholarshipName" class="form-control"
-                        placeholder="Enter Scholarship Name">
-                </div>
-
-                <!-- Scholarship Acronym -->
-                <div class="mb-4">
-                    <label for="schAcronym" class="form-label">Scholarship Acronym</label>
-                    <input id="schAcronym" type="text" name="SchAcronym" class="form-control"
-                        placeholder="Enter Acronym">
-                </div>
-
-                <!-- Scholarship Requirements -->
-                <div class="mb-4">
-                    <label for="schRequirements" class="form-label">Scholarship Requirements</label>
-                    <div id="requirementsContainer"
-                        style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
-                        <div class="input-group mb-3 requirement-item">
-                            <!-- Quantity Input -->
-                            <input type="number" name="SchRequirementQuantities[]"
-                                class="form-control quantity-input ms-2" placeholder="Qty" min="1">
-
-                            <!-- Requirement Input -->
-                            <input type="text" name="SchRequirements[]" class="form-control"
-                                placeholder="Enter a requirement">
-
-                            <!-- Remove Button -->
-                            <button type="button" class="btn btn-danger btnRemoveRequirement ms-2">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-success mt-2" id="btnAddRequirement">
-                        <i class="fa fa-plus"></i> Add Requirement
-                    </button>
-                </div>
-
-                <!-- Scholarship Type -->
-                <div class="mb-4">
-                    <label for="scholarshipType" class="form-label">Scholarship Type</label>
-                    <select class="form-select" name="ScholarshipType" id="scholarshipType">
-                        <option value="" disabled selected>Select Scholarship Type</option>
-                        @foreach (GENERAL::ScholarshipsNew() as $index => $sch)
-                            <option value="{{ $index }}">{{ $sch['Description'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- External Scholarship Type -->
-                <div id="externalOptions" class="mb-4" style="display: none;">
-                    <label for="externalScholarshipType" class="form-label">External Scholarship Type</label>
-                    <select class="form-select" name="ExternalScholarshipType" id="externalScholarshipType">
-                        <option value="" disabled selected>Select External Type</option>
-                        @foreach (GENERAL::ExternalSchType() as $index => $sch)
-                            <option value="{{ $index }}">{{ $sch['Description'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Scholarship Provider -->
-                <div class="mb-4">
-                    <label for="schProvider" class="form-label">Scholarship Provider</label>
-                    <input id="schProvider" type="text" name="SchProvider" class="form-control"
-                        placeholder="Enter Scholarship Provider">
-                </div>
-
-                <!-- Submit Button -->
-                <div class="mt-4">
-                    <button type="button" class="btn btn-primary w-100 btn" id="btnStoreScholarship">
-                        Create Scholarship
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div> --}}
-
     <!-- Store Scholarship Modal -->
     <div class="modal fade" id="createScholarshipModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -259,31 +170,6 @@
                                 placeholder="Enter Scholarship Provider" disabled>
                             <input id="schProviderHidden" type="hidden" name="SchProvider">
                         </div>
-
-                        <!-- Scholarship Requirements -->
-                        <div class="mb-3">
-                            <label for="schRequirements" class="form-label">Scholarship Requirements</label>
-                            <div id="requirementsContainer" class="border rounded p-3"
-                                style="max-height: 250px; overflow-y: auto;">
-                                <div class="input-group mb-2 requirement-item">
-                                    <!-- Quantity Input -->
-                                    <input type="number" name="SchRequirementQuantities[]" class="form-control"
-                                        placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto;">
-
-                                    <!-- Requirement Input -->
-                                    <input type="text" name="SchRequirements[]" class="form-control ms-2"
-                                        placeholder="Enter a requirement">
-
-                                    <!-- Remove Button -->
-                                    <button type="button" class="btn btn-danger btnRemoveRequirement ms-2">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-success mt-2" id="btnAddRequirement">
-                                <i class="fa fa-plus"></i> Add Requirement
-                            </button>
-                        </div>
                     </form>
                 </div>
                 <!-- Modal Footer -->
@@ -297,49 +183,121 @@
         </div>
     </div>
 
-    {{-- Edit/Update Scholarship --}}
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasEditScholarship"
-        aria-labelledby="offcanvasBackdropLabel">
-        <div class="offcanvas-header">
-            <h5 id="offcanvasBackdropLabel" class="offcanvas-title"><i class="fa fa-edit"></i> Edit Scholarship</h5>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <!-- Edit Scholarship Modal -->
+    <div class="modal fade" id="editScholarshipModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel3">
+                        <i class="fa fa-edit me-2"></i> Edit Scholarship
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form id="frmEditScholarship">
+                        @csrf
+                        <input type="hidden" id="editScholarshipId" name="ScholarshipId"> <!-- Hidden ID Field -->
+
+                        <!-- Scholarship Type -->
+                        <div class="mb-3">
+                            <label for="editScholarshipType" class="form-label">Scholarship Type</label>
+                            <select style="cursor: pointer;" class="form-select" name="ScholarshipType"
+                                id="editScholarshipType">
+                                <option value="" disabled>Select Scholarship Type</option>
+                                @foreach (GENERAL::ScholarshipsNew() as $index => $sch)
+                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <!-- Scholarship Name -->
+                            <div class="col mb-0">
+                                <label for="editScholarshipName" class="form-label">Scholarship Name</label>
+                                <input id="editScholarshipName" type="text" name="ScholarshipName"
+                                    class="form-control" placeholder="Enter Scholarship Name">
+                            </div>
+
+                            <!-- Scholarship Acronym -->
+                            <div class="col mb-0">
+                                <label for="editSchAcronym" class="form-label">Scholarship Acronym</label>
+                                <input id="editSchAcronym" type="text" name="SchAcronym" class="form-control"
+                                    placeholder="Enter Acronym">
+                            </div>
+                        </div>
+
+                        <!-- External Scholarship Type -->
+                        <div id="editExternalOptions" class="mb-3" style="display: none;">
+                            <label for="editExternalScholarshipType" class="form-label">External Type</label>
+                            <select style="cursor: pointer;" class="form-select" name="ExternalScholarshipType"
+                                id="editExternalScholarshipType">
+                                <option value="" disabled>Select External Type</option>
+                                @foreach (GENERAL::ExternalSchType() as $index => $sch)
+                                    <option value="{{ $index }}">{{ $sch['Description'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Scholarship Provider -->
+                        <div class="mb-3" style="display: none;">
+                            <label for="editSchProvider" class="form-label">Scholarship Provider</label>
+                            <input id="editSchProvider" type="text" class="form-control"
+                                placeholder="Enter Scholarship Provider" disabled>
+                            <input id="editSchProviderHidden" type="hidden" name="SchProvider">
+                        </div>
+
+                        <!-- Scholarship Requirements -->
+                        <div class="mb-3">
+                            <label for="editSchRequirements" class="form-label">Scholarship Requirements</label>
+                            <div id="editRequirementsContainer" class="border rounded p-3"
+                                style="max-height: 250px; overflow-y: auto;">
+                                <!-- Requirements will be dynamically loaded here -->
+                            </div>
+                            <button type="button" class="btn btn-sm btn-success mt-2" id="btnEditAddRequirement">
+                                <i class="fa fa-plus"></i> Add Requirement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="btnUpdateScholarship">
+                        <i class="fa fa-save me-1"></i> Update Scholarship
+                    </button>
+                </div>
+            </div>
         </div>
-        <hr>
-        <form id="frmEditScholarship">
-            @csrf
-            <div class="offcanvas-body my-auto mx-0 flex-grow-0">
-                <input type="hidden" name="id" id="scholarshipId">
+    </div>
 
-                <label>Scholarship Name</label>
-                <input type="text" id="editScholarshipName" name="editScholarshipName" class="mb-4 form-control"
-                    placeholder="Scholarship Name">
 
-                <label>Scholarship Type</label>
-                <select id="editScholarshipType" name="editScholarshipType" class="mb-4 form-select">
-                    <option value="" disabled selected>Select Scholarship Type</option>
-                    @foreach (GENERAL::ScholarshipsNew() as $index => $sch)
-                        <option value="{{ $index }}">{{ $sch['Description'] }}</option>
-                    @endforeach
-                </select>
+    <!-- Add Requirements Modal -->
+    <div class="modal fade" id="addRequirementsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
 
-                <!-- Additional Select Field for "External" -->
-                <div id="editExternalOptions" style="display: none;">
-                    <label>External Scholarship Type</label>
-                    <select id="editExternalScholarshipType" name="editExternalScholarshipType" class="mb-4 form-select">
-                        <option value="" disabled selected>Select External Type</option>
-                        @foreach (GENERAL::ExternalSchType() as $index => $sch)
-                            <option value="{{ $index }}">{{ $sch['Description'] }}</option>
-                        @endforeach
-                    </select>
                 </div>
 
-                <button style="background-color: #66a6ea; color: white;" type="button" class="w-100 mb-3 btn mt-1"
-                    id="btnUpdateScholarship">Update Scholarship</button>
+                <!-- Modal Body -->
+                <div class="modal-body">
 
-                <div id="editScholarshipMsg"></div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+
+                </div>
             </div>
-        </form>
+        </div>
     </div>
+
+
+
 @endsection
 
 @section('page-script')

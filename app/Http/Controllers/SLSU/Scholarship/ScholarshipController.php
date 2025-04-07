@@ -46,7 +46,6 @@ class ScholarshipController extends Controller
         }
     }
 
-
     public function store(Request $request)
     {
         try {
@@ -125,8 +124,10 @@ class ScholarshipController extends Controller
                 'Scholarship' => [
                     'id' => $scholarship->id,
                     'name' => $scholarship->sch_name,
+                    'acronym' => $scholarship->sch_acronym,
                     'type' => $scholarship->sch_type,
                     'externalType' => $scholarship->ext_type,
+                    'provider' => $scholarship->sch_provider,
                 ]
             ]);
         } catch (\Exception $e) {

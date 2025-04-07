@@ -7,7 +7,7 @@
       "url": "scholarship",
       "name": "Scholarship",
       "icon": "menu-icon tf-icons bx bxs-graduation",
-      "slug": "scholarships"
+      "slug": "scholarships.index"
     },
     {
       "name": "User interface",
