@@ -199,7 +199,7 @@
                 <div class="modal-body">
                     <form id="frmEditScholarship">
                         @csrf
-                        <input type="hidden" id="editScholarshipId" name="ScholarshipId"> <!-- Hidden ID Field -->
+                        <input type="hidden" id="editScholarshipId" name="id">
 
                         <!-- Scholarship Type -->
                         <div class="mb-3">
@@ -242,23 +242,11 @@
                         </div>
 
                         <!-- Scholarship Provider -->
-                        <div class="mb-3" style="display: none;">
+                        <div class="mb-3">
                             <label for="editSchProvider" class="form-label">Scholarship Provider</label>
                             <input id="editSchProvider" type="text" class="form-control"
                                 placeholder="Enter Scholarship Provider" disabled>
                             <input id="editSchProviderHidden" type="hidden" name="SchProvider">
-                        </div>
-
-                        <!-- Scholarship Requirements -->
-                        <div class="mb-3">
-                            <label for="editSchRequirements" class="form-label">Scholarship Requirements</label>
-                            <div id="editRequirementsContainer" class="border rounded p-3"
-                                style="max-height: 250px; overflow-y: auto;">
-                                <!-- Requirements will be dynamically loaded here -->
-                            </div>
-                            <button type="button" class="btn btn-sm btn-success mt-2" id="btnEditAddRequirement">
-                                <i class="fa fa-plus"></i> Add Requirement
-                            </button>
                         </div>
                     </form>
                 </div>
@@ -272,7 +260,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Add Requirements Modal -->
     <div class="modal fade" id="addRequirementsModal" tabindex="-1" aria-hidden="true">
@@ -291,7 +278,7 @@
                         <input type="hidden" name="scholarship_id">
 
                         <div id="requirementsContainer" class="border rounded p-3"
-                            style="max-height: 250px; overflow-y: auto;">
+                            style="max-height: 500px; overflow-y: auto;">
                             <!-- Requirements will be dynamically added here -->
                         </div>
 
@@ -311,9 +298,6 @@
             </div>
         </div>
     </div>
-
-
-
 @endsection
 
 @section('page-script')

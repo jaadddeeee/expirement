@@ -27,7 +27,8 @@
                 <td>
                     <!-- Add Requirements Modal -->
                     <a class="addRequirements me-2 text-success" data-scholarship-id="{{ $scholarship->id }}"
-                        data-scholarship-name="{{ $scholarship->sch_name }}" href="javascript:void(0);"
+                        data-scholarship-name="{{ $scholarship->sch_name }}"
+                        data-scholarship-acronym=" {{ $scholarship->sch_acronym }}" href="javascript:void(0);"
                         title="Add Requirements">
                         <i class="bx bxs-plus-circle"></i>
                     </a>

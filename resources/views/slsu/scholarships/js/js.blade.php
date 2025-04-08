@@ -139,9 +139,6 @@
             $('#scholarshipName').closest('.col').show();
             $('#schAcronym').closest('.col').show();
 
-            // show scholarship requirements
-            $('#requirementsContainer').closest('.mb-3').show();
-
             // show or hide external options based on scholarship type
             if (scholarshipType === '1') {
                 $('#externalOptions').hide();
@@ -171,7 +168,7 @@
                 validateField($(this));
             });
 
-        // validation function
+        // validation function store scholarship
         function validateField(field) {
             const value = field.val().trim();
             const id = field.attr('id');
@@ -218,6 +215,8 @@
         }
 
 
+        // scholarship UI for editing/updating scholarships
+
         // SCHOLARSHIP REQUIREMENTS
 
         // show modal for adding requirements
@@ -226,21 +225,19 @@
 
             const scholarshipId = $(this).data('scholarship-id');
             const scholarshipName = $(this).data('scholarship-name');
+            const scholarshipAcronym = $(this).data('scholarship-acronym');
 
-            // Set the scholarship name in the modal header
-            $('#addRequirementsModalLabel').text(`Add Requirements for ${scholarshipName}`);
+            $('#addRequirementsModalLabel').text(
+                `Add Requirements for ${scholarshipName.trim()} (${scholarshipAcronym.trim()})`);
 
-            // Set the scholarship ID in a hidden input field in the modal
             $('#addRequirementsForm input[name="scholarship_id"]').val(scholarshipId);
 
-            // Clear the requirements container
             $('#requirementsContainer').html('');
 
-            // Show the modal
             $('#addRequirementsModal').modal('show');
         });
 
-        // Add new requirement row
+        // add new requirement row
         $('#btnAddRequirement').on('click', function() {
             const requirementHtml = `
                 <div class="input-group mb-2 requirement-item">
@@ -254,11 +251,12 @@
             $('#requirementsContainer').append(requirementHtml);
         });
 
-        // Remove a requirement row
+        // remove a requirement row
         $(document).on('click', '.btnRemoveRequirement', function() {
             $(this).closest('.requirement-item').remove();
         });
 
+        // save requirements
         $('#btnSaveRequiremnts').on('click', function() {
             let hasValidInput = false;
             $('input[name="requirements[]"]').each(function() {
@@ -452,17 +450,17 @@
             }
         });
 
-        // edit scholarship
+        // Edit scholarship
         $(document).on('click', '.editScholarship', function(e) {
             e.preventDefault();
 
-            let id = $(this).data('scholarship-id');
+            const scholarshipId = $(this).data('scholarship-id');
 
             $.ajax({
                 url: "{{ route('scholarships.edit') }}",
                 method: 'GET',
                 data: {
-                    id: id
+                    id: scholarshipId,
                 },
                 beforeSend: function() {
                     $('#editScholarshipMsg').html("");
@@ -479,20 +477,25 @@
 
                         $('#editScholarshipId').val(scholarship.id);
                         $('#editScholarshipName').val(scholarship.name);
-                        $('#editScholarshipType').val(scholarship.type).change();
                         $('#editSchAcronym').val(scholarship.acronym);
+                        $('#editScholarshipType').val(scholarship.type).change();
+                        $('#editExternalScholarshipType').val(scholarship.externalType)
+                            .change();
                         $('#editSchProvider').val(scholarship.provider);
                         $('#editSchProviderHidden').val(scholarship.provider);
 
-                        if (scholarship.type == 2) {
-                            $('#editExternalOptions').show();
-                            $('#editExternalScholarshipType').val(scholarship.externalType)
-                                .change();
-                        } else {
-                            $('#editExternalOptions').hide();
-                            $('#editExternalScholarshipType').val('');
-                        }
 
+                        // clear or update the original data attributes
+                        $('#editExternalScholarshipType').data('original-external-type',
+                            scholarship.type === 2 ? scholarship.externalType : '');
+                        $('#editSchProvider').data('original-external-provider', scholarship
+                            .type === 2 ? scholarship.provider : '');
+                        $('#editSchProvider').data('original-provider', scholarship.type ===
+                            1 ? scholarship.provider : '');
+
+                        handleScholarshipTypeChange(scholarship.type);
+
+                        // Show the modal
                         $('#editScholarshipModal').modal('show');
                     } else {
                         Swal.fire({
@@ -508,26 +511,62 @@
                         title: 'Error',
                         text: 'Unable to fetch scholarship details. Please try again later.',
                     });
-                }
+                },
             });
         });
+
+        function handleScholarshipTypeChange(scholarshipType) {
+            if (parseInt(scholarshipType) === 1) {
+                // Internal scholarship
+                $('#editExternalOptions').hide();
+                $('#editExternalScholarshipType').val('');
+                $('#editSchProvider').val('');
+                $('#editSchProviderHidden').val('');
+
+                // Restore the original provider value for internal scholarships
+                const originalProvider = $('#editSchProvider').data('original-provider') || 'SLSU';
+                $('#editSchProvider').val(originalProvider);
+                $('#editSchProviderHidden').val(originalProvider);
+                $('#editSchProvider').prop('disabled', true);
+            } else if (parseInt(scholarshipType) === 2) {
+                // External scholarship
+                $('#editExternalOptions').show();
+
+                // Prefill external type and provider if available
+                const externalType = $('#editExternalScholarshipType').data('original-external-type') || '';
+                const externalProvider = $('#editSchProvider').data('original-external-provider') || '';
+
+                $('#editExternalScholarshipType').val(externalType);
+                $('#editSchProvider').val(externalProvider);
+                $('#editSchProviderHidden').val(externalProvider);
+                $('#editSchProvider').prop('disabled', false); // Enable the provider field
+            }
+        }
+
+
+        $(document).on('change', '#editScholarshipType', function() {
+            const scholarshipType = $(this).val();
+            handleScholarshipTypeChange(scholarshipType);
+        });
+
 
         // update scholarship
         $('#btnUpdateScholarship').on('click', function(e) {
             e.preventDefault();
 
-            let formData = $("#frmEditScholarship").serialize();
+            $('#editSchProviderHidden').val($('#editSchProvider').val());
+
+            const formData = $('#frmEditScholarship').serialize();
 
             $.ajax({
                 url: "{{ route('scholarships.update') }}",
                 method: 'PUT',
                 data: formData,
-                cache: false,
-                dataType: 'json',
                 beforeSend: function() {
-                    $("#btnUpdateScholarship")
-                        .prop("disabled", true)
-                        .html("<i class='spinner-grow spinner-grow-sm'></i> Updating...");
+                    $('#btnUpdateScholarship')
+                        .prop('disabled', true)
+                        .html(
+                            "<i class='spinner-grow spinner-grow-sm'></i> Updating...");
                 },
                 success: function(response) {
                     const {
@@ -535,14 +574,14 @@
                         Message
                     } = response;
 
-                    if (Error == 0) {
+                    if (!Error) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Updated',
+                            title: 'Scholarship Updated!',
                             text: Message,
-                            showConfirmButton: true
+                            showConfirmButton: true,
                         }).then(() => {
-                            $('#offcanvasEditScholarship').offcanvas('hide');
+                            $('#editScholarshipModal').modal('hide');
                             window.location.reload();
                         });
                     } else {
@@ -550,7 +589,7 @@
                             icon: 'warning',
                             title: 'Warning!',
                             text: Message,
-                            showConfirmButton: true
+                            showConfirmButton: true,
                         });
                     }
                 },
@@ -558,16 +597,33 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'An unexpected error occurred',
-                        text: xhr.responseJSON?.Message || xhr.statusText,
-                        showConfirmButton: true
+                        text: xhr.statusText,
+                        showConfirmButton: true,
                     });
                 },
                 complete: function() {
-                    $("#btnUpdateScholarship").prop("disabled", false).html(
-                        "Update Scholarship");
-                }
+                    $('#btnUpdateScholarship').prop('disabled', false).html(
+                        'Update Scholarship');
+                },
             });
+
         });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // destroy scholarship
         $(document).on('click', '.deleteScholarship', function(e) {

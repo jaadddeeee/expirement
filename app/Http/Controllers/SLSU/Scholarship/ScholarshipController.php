@@ -139,44 +139,118 @@ class ScholarshipController extends Controller
         }
     }
 
+    // public function update(Request $request)
+    // {
+    //     try {
+    //         $id = $request->id;
+    //         $scholarship = Scholarship::findOrFail($id);
+
+    //         $ScholarshipName = trim($request->editScholarshipName);
+    //         $ScholarshipType = $request->editScholarshipType;
+    //         $ExternalSchType = $request->editExternalScholarshipType;
+
+    //         if (empty($ScholarshipName)) {
+    //             return response()->json(['Error' => 1, 'Message' => "Empty Scholarship Name"]);
+    //         }
+
+    //         if (empty($ScholarshipType) || $ScholarshipType == 0) {
+    //             return response()->json(['Error' => 1, 'Message' => "Please select scholarship type"]);
+    //         }
+
+    //         if ($ScholarshipType == 1) {
+    //             $ExternalSchType = 'N/A';
+    //         } elseif (empty($ExternalSchType)) {
+    //             return response()->json(['Error' => 1, 'Message' => "Please select external type"]);
+    //         }
+
+    //         $existing = Scholarship::where('sch_name', $ScholarshipName)
+    //             ->where('sch_type', $ScholarshipType)
+    //             ->where('ext_type', $ExternalSchType)
+    //             ->first();
+
+    //         if ($existing) {
+    //             return response()->json(['Error' => 1, 'Message' => "Scholarship already exists."]);
+    //         }
+
+    //         $scholarship->update([
+    //             'sch_name' => $ScholarshipName,
+    //             'sch_type' => $ScholarshipType,
+    //             'ext_type' => $ExternalSchType,
+    //             'updated_at' => now()
+    //         ]);
+
+    //         return response()->json(['Error' => 0, 'Message' => "Scholarship updated successfully."]);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['Error' => 1, 'Message' => "An error occurred: " . $e->getMessage()], 400);
+    //     }
+    // }
+
+
     public function update(Request $request)
     {
         try {
             $id = $request->id;
             $scholarship = Scholarship::findOrFail($id);
 
-            $ScholarshipName = trim($request->editScholarshipName);
-            $ScholarshipType = $request->editScholarshipType;
-            $ExternalSchType = $request->editExternalScholarshipType;
+            $ScholarshipName = trim($request->ScholarshipName);
+            $ScholarshipAcronym = trim($request->SchAcronym);
+            $ScholarshipType = $request->ScholarshipType;
+            $ExternalSchType = $request->ExternalScholarshipType;
+            $ScholarshipProvider = $request->SchProvider;
 
+            // Validate Scholarship Name
             if (empty($ScholarshipName)) {
-                return response()->json(['Error' => 1, 'Message' => "Empty Scholarship Name"]);
+                return response()->json(['Error' => 1, 'Message' => "Scholarship Name is required."]);
             }
 
+            // Validate Scholarship Acronym
+            if (empty($ScholarshipAcronym)) {
+                return response()->json(['Error' => 1, 'Message' => "Scholarship Acronym is required."]);
+            }
+
+            // Validate Scholarship Type
             if (empty($ScholarshipType) || $ScholarshipType == 0) {
-                return response()->json(['Error' => 1, 'Message' => "Please select scholarship type"]);
+                return response()->json(['Error' => 1, 'Message' => "Please select a Scholarship Type."]);
             }
 
+            // Handle Internal Scholarship
             if ($ScholarshipType == 1) {
-                $ExternalSchType = 'N/A';
+                $ExternalSchType = 0;
+
+                $campuses = GENERAL::Campuses();
+                $campusCode = strtoupper(session('campus'));
+                $campusName = isset($campuses[$campusCode]) ? $campuses[$campusCode]['Campus'] : 'Unknown Campus';
+
+                $ScholarshipProvider = 'SLSU - ' . $campusName;
             } elseif (empty($ExternalSchType)) {
-                return response()->json(['Error' => 1, 'Message' => "Please select external type"]);
+                // Validate External Type for External Scholarships
+                return response()->json(['Error' => 1, 'Message' => "Please select an External Type."]);
             }
 
+            // Validate Scholarship Provider for External Scholarships
+            if ($ScholarshipType != 1 && empty($ScholarshipProvider)) {
+                return response()->json(['Error' => 1, 'Message' => "Please provide a Scholarship Provider."]);
+            }
+
+            // Check if scholarship already exists (excluding the current scholarship)
             $existing = Scholarship::where('sch_name', $ScholarshipName)
                 ->where('sch_type', $ScholarshipType)
                 ->where('ext_type', $ExternalSchType)
+                ->where('id', '!=', $id)
                 ->first();
 
             if ($existing) {
-                return response()->json(['Error' => 1, 'Message' => "Scholarship already exists."]);
+                return response()->json(['Error' => 1, 'Message' => "A scholarship with the same name, type, and external type already exists."]);
             }
 
+            // Update Scholarship
             $scholarship->update([
                 'sch_name' => $ScholarshipName,
+                'sch_acronym' => $ScholarshipAcronym,
                 'sch_type' => $ScholarshipType,
                 'ext_type' => $ExternalSchType,
-                'updated_at' => now()
+                'sch_provider' => $ScholarshipProvider,
+                'updated_at' => now(),
             ]);
 
             return response()->json(['Error' => 0, 'Message' => "Scholarship updated successfully."]);
@@ -202,9 +276,9 @@ class ScholarshipController extends Controller
     public function storeRequirements(Request $request)
     {
         try {
-            $scholarshipId = $request->input('scholarship_id');
-            $requirements = $request->input('requirements');
-            $quantities = $request->input('quantities');
+            $scholarshipId = $request->scholarship_id;
+            $requirements = $request->requirements;
+            $quantities = $request->quantities;
 
             if (!$scholarshipId || empty($requirements)) {
                 return response()->json([
@@ -213,7 +287,6 @@ class ScholarshipController extends Controller
                 ]);
             }
 
-            // Validate that at least one non-empty requirement exists
             $hasValidRequirement = false;
             foreach ($requirements as $r) {
                 if (trim($r) !== '') {
