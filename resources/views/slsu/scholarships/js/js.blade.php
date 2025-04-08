@@ -100,7 +100,7 @@
 
 
 
-        // scholarship UI
+        // scholarship UI for storing scholarships
 
         // show modal
         $('#createScholarshipModal').on('show.bs.modal', function() {
@@ -164,34 +164,6 @@
             $('#schProviderHidden').val($(this).val());
         });
 
-        // add new requirement
-        $('#btnAddRequirement').on('click', function() {
-            const requirementHtml = `
-                <div class="input-group mb-2 requirement-item">
-                    <!-- Quantity Input -->
-                    <input type="number" name="SchRequirementQuantities[]" class="form-control"
-                        placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto;">
-
-                    <!-- Requirement Input -->
-                    <input type="text" name="SchRequirements[]" class="form-control ms-2"
-                        placeholder="Enter a requirement">
-
-                    <!-- Remove Button -->
-                    <button type="button" class="btn btn-danger btnRemoveRequirement ms-2">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>
-            `;
-
-            // append new requirement to the container
-            $('#requirementsContainer').append(requirementHtml);
-        });
-
-        // remove a requirement
-        $(document).on('click', '.btnRemoveRequirement', function() {
-            $(this).closest('.requirement-item').remove();
-        });
-
         // validation for inputs
         $('#scholarshipName, #schAcronym, #scholarshipType, #externalScholarshipType, #schProvider').on(
             'input change',
@@ -245,7 +217,120 @@
             return true;
         }
 
-        // scholarship CRUD
+
+        // SCHOLARSHIP REQUIREMENTS
+
+        // show modal for adding requirements
+        $(document).on('click', '.addRequirements', function(e) {
+            e.preventDefault();
+
+            const scholarshipId = $(this).data('scholarship-id');
+            const scholarshipName = $(this).data('scholarship-name');
+
+            // Set the scholarship name in the modal header
+            $('#addRequirementsModalLabel').text(`Add Requirements for ${scholarshipName}`);
+
+            // Set the scholarship ID in a hidden input field in the modal
+            $('#addRequirementsForm input[name="scholarship_id"]').val(scholarshipId);
+
+            // Clear the requirements container
+            $('#requirementsContainer').html('');
+
+            // Show the modal
+            $('#addRequirementsModal').modal('show');
+        });
+
+        // Add new requirement row
+        $('#btnAddRequirement').on('click', function() {
+            const requirementHtml = `
+                <div class="input-group mb-2 requirement-item">
+                    <input type="number" name="quantities[]" class="form-control ms-2" placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto;">
+                    <input type="text" name="requirements[]" class="form-control ms-2" placeholder="Enter a requirement">
+                    <button type="button" class="btn btn-danger btnRemoveRequirement ms-2">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            $('#requirementsContainer').append(requirementHtml);
+        });
+
+        // Remove a requirement row
+        $(document).on('click', '.btnRemoveRequirement', function() {
+            $(this).closest('.requirement-item').remove();
+        });
+
+        $('#btnSaveRequiremnts').on('click', function() {
+            let hasValidInput = false;
+            $('input[name="requirements[]"]').each(function() {
+                if ($(this).val().trim() !== '') {
+                    hasValidInput = true;
+                }
+            });
+
+            if (!hasValidInput) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Requirements',
+                    text: 'Please enter at least one valid requirement before saving.',
+                    showConfirmButton: true
+                });
+                return;
+            }
+
+            const formData = $('#addRequirementsForm').serialize();
+
+            $.ajax({
+                url: "{{ route('scholarships.requirements.store') }}",
+                method: 'POST',
+                data: formData,
+                beforeSend: function() {
+                    $('#btnSaveRequiremnts').prop('disabled', true).html(
+                        "<i class='spinner-grow spinner-grow-sm'></i> Saving...");
+                },
+                success: function(response) {
+                    const {
+                        Error,
+                        Message
+                    } = response;
+
+                    if (Error == 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: Message,
+                            showConfirmButton: true
+                        }).then(() => {
+                            $('#addRequirementsModal').modal('hide');
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Warning!',
+                            text: Message,
+                            showConfirmButton: true
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'An unexpected error occurred',
+                        text: xhr.statusText,
+                        showConfirmButton: true
+                    });
+                },
+                complete: function() {
+                    $('#btnSaveRequiremnts').prop('disabled', false).html(
+                        "Save Requirements");
+                }
+            });
+        });
+
+
+
+
+        // SCHOLARSHIP CRUD
 
         // store scholarship
         $('#btnStoreScholarship').on('click', function(e) {

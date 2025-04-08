@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SLSU\Scholarship;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Scholarship\Scholarship;
+use App\Models\Scholarship\ScholarshipRequirements;
 use GENERAL;
 
 class ScholarshipController extends Controller
@@ -195,6 +196,58 @@ class ScholarshipController extends Controller
             return response()->json(['Error' => 0, 'Message' => 'Scholarship deleted successfully.']);
         } catch (\Exception $e) {
             return response()->json(['Error' => 1, 'Message' => 'Error deleting scholarship: ' . $e->getMessage()], 400);
+        }
+    }
+
+    public function storeRequirements(Request $request)
+    {
+        try {
+            $scholarshipId = $request->input('scholarship_id');
+            $requirements = $request->input('requirements');
+            $quantities = $request->input('quantities');
+
+            if (!$scholarshipId || empty($requirements)) {
+                return response()->json([
+                    'Error' => 1,
+                    'Message' => 'Please input at least one requirement.',
+                ]);
+            }
+
+            // Validate that at least one non-empty requirement exists
+            $hasValidRequirement = false;
+            foreach ($requirements as $r) {
+                if (trim($r) !== '') {
+                    $hasValidRequirement = true;
+                    break;
+                }
+            }
+
+            if (!$hasValidRequirement) {
+                return response()->json([
+                    'Error' => 1,
+                    'Message' => 'Please enter at least one valid requirement.',
+                ]);
+            }
+
+            foreach ($requirements as $index => $requirement) {
+                if (!empty($requirement)) {
+                    ScholarshipRequirements::create([
+                        'scholarship_id' => $scholarshipId,
+                        'quantity' => $quantities[$index] ?? 1,
+                        'sch_requirements' => $requirement,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'Error' => 0,
+                'Message' => 'Requirements saved successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'Error' => 1,
+                'Message' => $e->getMessage(),
+            ]);
         }
     }
 }

@@ -572,6 +572,9 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   Route::put('/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@update')->name('scholarships.update');
   Route::delete('/destroy', $controller_path . '\SLSU\Scholarship\ScholarshipController@destroy')->name('scholarships.destroy');
 
+  // scholarship requirements
+  Route::post('/requirements', $controller_path . '\SLSU\Scholarship\ScholarshipController@storeRequirements')->name('scholarships.requirements.store');
+
   // scholars
   Route::get('/scholars', $controller_path . '\SLSU\Scholarship\ScholarController@index')->name('scholars.index');
   Route::get('/scholars/search-student', $controller_path . '\SLSU\Scholarship\ScholarController@searchStudent')->name('scholars.search-student');
@@ -583,6 +586,8 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   // copy and delete multiple scholars
   Route::post('/scholars/copy-scholars', $controller_path . '\SLSU\Scholarship\ScholarController@copyScholars')->name('scholars.copy-scholars');
   Route::delete('/scholars/delete-scholars', $controller_path . '\SLSU\Scholarship\ScholarController@deleteScholars')->name('scholars.delete-scholars');
+
+
 
   // genererate scholarship certificate
   Route::get('/generate-noa', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipCertificate')->name('generate-noa');

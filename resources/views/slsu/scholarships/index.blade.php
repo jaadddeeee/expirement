@@ -280,17 +280,33 @@
             <div class="modal-content">
                 <!-- Modal Header -->
                 <div class="modal-header">
-
+                    <h5 class="modal-title" id="addRequirementsModalLabel">Add Requirements</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <!-- Modal Body -->
                 <div class="modal-body">
+                    <form id="addRequirementsForm">
+                        @csrf
+                        <input type="hidden" name="scholarship_id">
 
+                        <div id="requirementsContainer" class="border rounded p-3"
+                            style="max-height: 250px; overflow-y: auto;">
+                            <!-- Requirements will be dynamically added here -->
+                        </div>
+
+                        <button type="button" class="btn btn-sm btn-success mt-2" id="btnAddRequirement">
+                            <i class="fa fa-plus"></i> Add Requirement
+                        </button>
+                    </form>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer">
-
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveRequiremnts">
+                        <i class="fa fa-save me-1"></i> Save Requirements
+                    </button>
                 </div>
             </div>
         </div>
