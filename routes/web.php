@@ -582,6 +582,7 @@ Route::group(['prefix' => 'varsity', 'middleware' => ['auth', 'varsity']], funct
   Route::get('/edit-coach/{id}', $controller_path . '\SLSU\VARSITY\CoachController@edit');
   Route::post('/update-coach', $controller_path . '\SLSU\VARSITY\CoachController@update')->name('update-coach');
   Route::get('/search-coach', $controller_path . '\SLSU\VARSITY\CoachController@search')->name('search-coach');
+  Route::post('/coach-list', $controller_path . '\SLSU\VARSITY\CoachController@saveSelectedCoach');
   //Varsity
   Route::get('/varsity', $controller_path . '\SLSU\VARSITY\VarsityController@index')->name('varsity');
   Route::post('/student-campus', $controller_path . '\SLSU\VARSITY\VarsityController@studlist');
@@ -593,8 +594,13 @@ Route::group(['prefix' => 'varsity', 'middleware' => ['auth', 'varsity']], funct
   Route::get('/search-varsity', $controller_path . '\SLSU\VARSITY\VarsityController@search')->name('search-varsity');
   Route::post('/student-list', $controller_path . '\SLSU\VARSITY\VarsityController@saveSelectedVarsities');
   //SCUAA
-  Route::get('/scuaa', $controller_path . '\SLSU\VARSITY\ScuaaController@index')->name('scuaa');
+  Route::get('/scuaa/athletes', $controller_path . '\SLSU\VARSITY\ScuaaController@indexAthletes')->name('scuaa-athletes');
+  Route::get('/scuaa/coaches', $controller_path . '\SLSU\VARSITY\ScuaaController@indexCoaches')->name('scuaa-coaches');
   Route::post('/set-event', $controller_path . '\SLSU\VARSITY\ScuaaController@setEvent');
   Route::post('/set-scuaa', $controller_path . '\SLSU\VARSITY\ScuaaController@setScuaa');
-  Route::get('/generate', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaList')->name('generate');
+  Route::get('/generate/list', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaList')->name('generate.list');
+  Route::get('/generate/checklist', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaChecklist')->name('generate.checklist');
+  Route::get('/generate/eligibility', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaEligibility')->name('generate.eligibility');
+  Route::post('/delete-coaches', $controller_path . '\SLSU\VARSITY\ScuaaController@destroyCoaches');
+  Route::post('/delete-athletes', $controller_path . '\SLSU\VARSITY\ScuaaController@destroyAthletes');
 });

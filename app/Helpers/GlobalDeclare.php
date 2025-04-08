@@ -119,7 +119,7 @@ class GlobalDeclare {
   }
 
   public static function CoachType(){
-    $out = [
+    $out = [  
       1 => ["Type" => "Main Coach"],
       2 => ["Type" => "Assistant Coach"],
     ];

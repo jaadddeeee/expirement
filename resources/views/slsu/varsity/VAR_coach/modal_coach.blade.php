@@ -7,14 +7,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="frmAdd">
+                <form id="frmAdd" enctype="multipart/form-data">
                     @csrf
                     <div class="text-center p-1" id="msg"></div>
                     @if (auth()->user()->AllowSuper == 1)
                         <div class="row mt-1  ">
                             <div class = "form-group">
                                 <div class="col-auto">
-                                    <label class="form-label">Campus <span class = 'text-danger'>*</span></label>
+                                    <label class="form-label">Campus: </label>
                                     <select name="Campus" id="Campus" class="form-select">
                                         <option value="0">Select Campus</option>
                                         @foreach (GENERAL::Campuses() as $index => $campus)
@@ -28,39 +28,54 @@
                         </div>
                     @endif
                     <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto position-relative">
-                                <label class="form-label">Employee</label>
-                                <!-- Employee Input Field -->
-                                <input type="text" name="Emp" id="Emp" class="form-control"
-                                    placeholder="Enter employee name">
-                                <div id="EmployeeDropdown" class="dropdown-menu position-absolute w-100 shadow bg-white"
-                                    style="display: none; z-index: 1050; max-height: 200px; overflow-y: auto; border: 1px; border-radius: 5px;">
-                                    <ul id="EmployeeList" class="list-group list-group-flush"></ul>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto position-relative">
+                                    <label class="form-label">Employee: </label>
+                                    <!-- Employee Input Field -->
+                                    <input type="text" name="Emp" id="Emp" class="form-control"
+                                        placeholder="Enter employee name">
+                                        <input type="hidden" name="EmployeeID" id="EmployeeID">
+                                    <div id="EmployeeDropdown" class="dropdown-menu position-absolute w-100 shadow bg-white"
+                                        style="display: none; z-index: 1050; max-height: 170px; overflow-y: auto; border: 1px; border-radius: 5px;">
+                                        <ul id="EmployeeList" class="list-group list-group-flush"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Coach Type: </label>
+                                    <select name="coachType" id="coachType" class="form-select">
+                                        <option value="0">Select Type</option>
+                                        @foreach (GENERAL::CoachType() as $index => $type)
+                                            <option value = "{{ $index }}">{{ $type['Type'] }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Coach Type</label>
-                                <select name="coachType" id="coachType" class="form-select">
-                                    <option value="0">Select Type</option>
-                                    @foreach (GENERAL::CoachType() as $index => $type)
-                                        <option value = "{{ $index }}">{{ $type['Type'] }}</option>
-                                    @endforeach
-                                </select>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Event: </label>
+                                    <select name="Event" id="Event" class="form-select">
+                                        <option value="0">Select Event</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Event</label>
-                                <select name="Event" id="Event" class="form-select">
-                                    <option value="0">Select Event</option>
-                                </select>
+                        <div class="col">
+                            <div class="row all mt-2">
+                                <div class="form-group">
+                                    <div class="col-auto">
+                                        <label class="form-label">Coach Picture: </label>
+                                        <input type="file" name="CoachImage" id="image" class="form-control" accept="image/*">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

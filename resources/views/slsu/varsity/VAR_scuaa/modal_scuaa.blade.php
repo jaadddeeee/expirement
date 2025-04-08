@@ -1,4 +1,4 @@
-{{-- add modal --}}
+{{-- history modal --}}
 <div class="modal fade" id="scuaaHistory" tabindex="-1" aria-labelledby="coachModal" aria-hidden="true"
     style="display: none;">
     <div class="modal-dialog modal-m">
@@ -24,7 +24,7 @@
                         <div class="d-flex justify-content-end mt-2">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination pagination-sm">
-                                    {{ $Lists->appends(request()->query())->links() }}
+                                    {{ $ScuaaLists->appends(request()->query())->links() }}
                                 </ul>
                             </nav>
                         </div>
@@ -54,6 +54,14 @@
                             <div class="col-auto">
                                 <label class="form-label">Title:</label>
                                 <input type="text" name="title" id="title" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-1">
+                        <div class = "form-group">
+                            <div class="col-auto">
+                                <label class="form-label">Theme:</label>
+                                <input type="text" name="Theme" id="Theme" class="form-control">
                             </div>
                         </div>
                     </div>
@@ -88,7 +96,7 @@
                             <div class="form-group">
                                 <div class="col-auto">
                                     <label class="form-label">SCUAA Logo:</label>
-                                    <input class="form-control" type="file" id="Logo" name="ScuaaLogo">
+                                    <input class="form-control" type="file" id="Logo" name="ScuaaLogo" accept="image/*">
                                 </div>
                             </div>
                         </div>

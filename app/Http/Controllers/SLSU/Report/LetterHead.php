@@ -187,7 +187,7 @@ class LetterHead extends TCPDF
         $logoPath = ('storage/' . $scuaaList->ScuaaLogo);
 
     $x = 20;
-    $yl = 6;
+    $yl = 3;
     $y=11;
     $this::SetTextColor(0,0,0);
     $this::Image($logoPath, $x, $yl, 24.9, 25);
@@ -209,10 +209,6 @@ class LetterHead extends TCPDF
 
     //horizontal line short
     $this::Line(205, 17, 325, 17);
-    // Add "SCUAA Form 2" text
-    $this::setXY(304, 12);
-    $this::SetFont('calibri','',10);
-    $this::Cell(0,5,'SCUAA Form 2',0,1,'L');
 
     // Add horizontal line
     $this::SetLineWidth(0.7);
@@ -224,4 +220,54 @@ class LetterHead extends TCPDF
     $this::Cell(70, 15, 'OFFICIAL ENTRY FORM AND GALLERY OF', 0, 0, 'C');
   }
 
+  public function ScuaaHeader(){
+    $year = date('Y'); // Get the current year
+
+    // Fetch the ScuaaLogo where the Date column contains the current year
+    $scuaaList = Scuaa::where('Date', 'LIKE', '%' . $year . '%')
+        ->select('*')
+        ->first();
+
+    preg_match('/\d{4}/', $scuaaList->Date, $matches);
+    $year = ($matches ? $matches[0] : '');
+    $dateLocation = $scuaaList->Date .', '. $scuaaList->University .', '. $scuaaList->Location;
+    $logoPath = ('storage/' . $scuaaList->ScuaaLogo);
+
+    $x = 14;
+    $yl = 8;
+    $y=6;
+
+    $this::SetTextColor(0,0,0);
+    $this::Image($logoPath, $x, $yl, 41, 41);
+
+    $x+=76;
+    $this::setXY($x, $y);
+    $this::SetFont('bodonimtb','',18);
+    $this::Cell(30,5,'REGIONAL SCUAA GAMES',0,0,'C');
+
+    $y+=8;
+    $this::SetFont('bodonimtb','',16);
+    $this::setXY($x, $y);
+    $this::Cell(30,5,$year,0,0,'C');
+    
+    $y+=8;
+    $this::SetFont('lucidafaxdemib','',11);
+    $this::setXY($x, $y);
+    $this::Cell(30,5,'Host: '. $scuaaList->University,0,0,'C');
+
+    $y+=5;
+    $this::setXY($x, $y);
+    $this::SetFont('lucidafaxdemib','',10);
+    $this::Cell(30,5,$scuaaList->Date,0,0,'C');
+
+    $y+=5;
+    $this::setXY($x, $y);
+    $this::SetFont('lucidafaxdemibi','',10.5);
+    $this::Cell(30,5,'Theme: '. $scuaaList->Theme,0,0,'C');
+
+    $y+=9;
+    $this::setXY($x, $y);
+    $this::SetFont('elephantdarkness','B',14);
+    $this::Cell(30,10,'ELIGIBILITY FORM ',0,0,'C');
+  }
 }

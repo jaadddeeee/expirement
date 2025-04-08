@@ -13,7 +13,7 @@ class Scuaa extends Model
     protected $connection;
     protected $table = "var_scuaa";
     protected $fillable = [
-        'id','Title', 'ScuaaLogo', 'University', 'Location','Date'
+        'id','Title','Theme', 'ScuaaLogo', 'University', 'Location','Date'
     ];
 
     public function __construct(){

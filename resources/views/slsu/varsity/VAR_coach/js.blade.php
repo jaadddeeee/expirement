@@ -76,7 +76,9 @@
         $(document).on("click", ".employee-item", function(e) {
             e.preventDefault();
             let selectedText = $(this).text();
+            let employeeID = $(this).data('id');
             $("#Emp").val(selectedText);
+            $("#EmployeeID").val(employeeID);
             $("#EmployeeDropdown").hide();
         });
 
@@ -111,11 +113,7 @@
                 }, 1000);
             }
         });
-    });
-
-    $(document).ready(function() {
-        fetchEvents();
-    });
+    }); 
 
     $(document).ready(function() {
         let allowSuper = @json(auth()->user()->AllowSuper);
@@ -163,10 +161,15 @@
 
     $(document).on("click", "#btn-save", function(e) {
         e.preventDefault();
+
+        var formData = new FormData($("#frmAdd")[0]);
+        
         $.ajax({
             url: '/varsity/save-coach',
             method: 'post',
-            data: $("#frmAdd").serialize(),
+            data: formData,
+            processData: false, // Prevent jQuery from processing FormData
+            contentType: false, // Ensure correct content type for file upload
             cache: false,
             beforeSend: function() {
                 $("#btn-save").prop("disabled", true);
@@ -273,14 +276,21 @@
                     },
                     beforeSend: function() {
                         Swal.fire({
-                            position: "center",
+                            position: "Successfully",
                             icon: "info",
                             title: "Deleting...",
                             showConfirmButton: false
                         });
                     },
                     success: function(data) {
-                        window.location.reload();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: data.Message,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                        // window.location.reload();
                     },
                     error: function(response) {
 
@@ -394,4 +404,44 @@
 
         });
     });
+
+    $(document).on('click', '.addCoach', function(e) {
+        e.preventDefault();
+
+        let campus = $('#filterCampus').val();
+        let $this = $(this);
+        let employeeID = $(this).attr('cid'); // Get encrypted Employee ID
+        if ($this.attr('data-exists') === 'true') return;
+
+        $.ajax({
+            url: '/varsity/coach-list',
+            method: 'POST',
+            data: {
+                campus: campus,
+                EmployeeID: employeeID,
+            },
+            beforeSend: function() {
+                $this.addClass('disabled').css({
+                    "pointer-events": "none",
+                    "opacity": "1",
+                    "cursor": "not-allowed"
+                }).html("<i class='spinner-grow spinner-grow-sm'></i>"); // Show loading
+            },
+            success: function(response) {
+
+                // Change the icon to bx-check-circle
+                $this.attr('data-exists', 'true').html("<i class='bx bx-check-circle text-success'></i>");
+                location.reload(); // Reload the page after success
+            },
+            error: function(xhr) {
+                let errorMessage = xhr.responseJSON.error || "An error occurred";
+                $this.removeClass('disabled').css({
+                    "pointer-events": "auto",
+                    "opacity": "1",
+                    "cursor": "pointer"
+                }).html("<i class='bx bx-plus-circle'></i>");
+            }
+        });
+});
+
 </script>

@@ -290,7 +290,14 @@
                         });
                     },
                     success: function(data) {
-                        window.location.reload();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: data.Message,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                        // window.location.reload();
                     },
                     error: function(response) {
 

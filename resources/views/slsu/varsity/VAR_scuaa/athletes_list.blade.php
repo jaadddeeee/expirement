@@ -22,19 +22,19 @@
                 <div class="card-header d-flex justify-content-between pb-1">
                     <div class="header-title">
                         <h4 class="card-title" id="pageTitle">{{ $pageTitle ?? 'List' }}</h4>
-                        <h5 class="card-title">{{ $title ?? 'List' }}</h5>
+                        <h5 class="card-title">{{ $title_athlete ?? 'List' }}</h5>
                     </div>
                     <div class="card-action d-flex align-items-center gap-2">
-                        <form method="GET" action="/varsity/scuaa">
+                        <form method="GET" action="{{ route('scuaa-athletes') }}">
                             @csrf
                             <div class="d-flex align-items-center gap-2">
-                                <input type="search" name="search" id="search" class="form-control form-control-sm"
-                                    placeholder="Search" value="{{ request('search') }}">
+                                <input type="search" name="searchAthletes" id="searchAthletes" class="form-control form-control-sm"
+                                    placeholder="Search" value="{{ request('searchAthletes') }}">
                                 <select name="filterEvent" id="filterEvent" class="form-select form-select-sm w-auto">
                                     <option value="0">Select Event</option>
                                     @foreach ($Events as $Event)
                                         <option value="{{ $Event->id }}"
-                                            {{ request('filterEvent') == $Event ? 'selected' : '' }}>{{ $Event->event }}
+                                            {{ request('filterEvent') == $Event->id ? 'selected' : '' }}>{{ $Event->event }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -63,7 +63,17 @@
                         id="btn-list"><i class='bx bx-cog'></i>Set SCUAA</a>
                     <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalList"
                         id="btn-list"><i class='bx bx-cog'></i>Set Event</a>
-                    <a href="{{ route('generate') }}" class="btn btn-sm btn-primary" id="btnGenerate"><i class='bx bxs-report'></i></a>
+                        @if (request('filterEvent') != 0)
+                        <a href="{{ route('generate.list', ['filterEvent' => request('filterEvent'), 'filterSchoolYear' => request('filterSchoolYear')]) }}" 
+                            class="btn btn-sm btn-primary" id="btnGenerateList">
+                            <i class='bx bxs-report'></i>
+                        </a>
+                    @endif
+                    <a href="{{ route('generate.checklist', ['filterEvent' => request('filterEvent'), 'filterSchoolYear' => request('filterSchoolYear')]) }}" 
+                        class="btn btn-sm btn-primary" id="btnGenerateChecklist">
+                        <i class='bx bxs-report'></i>
+                    </a>
+                    
                 </div>
                 <hr>
                 <div class="card-body">

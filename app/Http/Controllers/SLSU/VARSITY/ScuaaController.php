@@ -8,21 +8,105 @@ use Illuminate\Http\Request;
 use App\Models\VARSITY\Varsity;
 use App\Models\VARSITY\Scuaa;
 use App\Models\Student;
+use App\Models\Employee;
 use App\Models\VARSITY\ListVarsity;
+use App\Models\VARSITY\CoachVarsity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Exception;
-use App\Http\Controllers\SLSU\Report\ScuaaReport;
+use App\Http\Controllers\SLSU\Report\Varsity\ScuaaReport;
+use App\Http\Controllers\SLSU\Report\Varsity\ChecklistReport;
+use App\Http\Controllers\SLSU\Report\Varsity\EligibilityForm;
 use General;
 
 class ScuaaController extends Controller
 {
-    public function index(Request $request)
+    public function indexCoaches(Request $request)
     {
-        $query = ListVarsity::with(['event' => function ($query) {
-        }])
+        // $athletes = DB::connection('clinic')
+        // ->table('medicalrecord')
+        // ->where('patientId', '1810396-1') // Ensure the subtraction is correct
+        // ->where('campus', 1)
+        // ->first();
+
+        // dd($athletes);
+
+        $query = CoachVarsity::with(['event'])
+            ->whereNull('deleted_at')
+            ->orderBy('SchoolYear', 'desc');
+
+        if ($request->has('filterEvent') && $request->filterEvent != '0') {
+            $query->where('Event', $request->filterEvent);
+        }
+        
+        if ($request->has('filterSchoolYear') && $request->filterSchoolYear != '0') {
+            $query->where('SchoolYear', $request->filterSchoolYear);
+        }
+        
+        if ($request->has('searchCoach') && !empty($request->searchCoach)) {
+            $Emp = DB::connection('hrmis')
+                ->table('employee')
+                ->whereIn('campus', [1, 2, 3, 4, 5, 6])
+                ->where(function ($query) use ($request) {
+                    $query->where('LastName', 'LIKE', "%{$request->searchCoach}%")
+                        ->orWhere('FirstName', 'LIKE', "%{$request->searchCoach}%")
+                        ->orWhere('MiddleName', 'LIKE', "%{$request->searchCoach}%")
+                        ->orWhere('id', 'LIKE', "%{$request->searchCoach}%");
+                })
+                ->whereNull('deleted_at');
+        
+            $query->whereIn('CoachID', $Emp->pluck('id'));
+        }
+    
+        $coachList = $query->paginate(10);
+        
+        // Fetch employee data from hrmis.employee
+        $employeeData = DB::connection('hrmis')
+            ->table('employee')
+            ->whereIn('id', $coachList->pluck('CoachID'))
+            ->whereIn('campus', [1, 2, 3, 4, 5, 6])
+            ->get();
+        
+        $coachList->getCollection()->transform(function ($item) use ($employeeData) {
+            $emp = $employeeData->firstWhere('id', $item->CoachID);
+            
+            return (object) [
+                'SchoolYear' => $item->SchoolYear,
+                'id'      => $item->id,
+                'FirstName'  => $emp->FirstName ?? null,
+                'LastName'   => $emp->LastName ?? null,
+                'MiddleName' => $emp->MiddleName ?? null,
+                'event_name' => $item->event->event ?? null,
+            ];
+        });
+    
+        $scuaaLists = Scuaa::paginate(5);; // Fetch all records
+
+
+        $events = Event::select('id', 'event')->orderby('event')->get();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('_partials.scuaa-coach-table', ['Coaches' => $coachList])->render()
+            ]);
+        }
+        
+        return view('slsu.varsity.VAR_scuaa.coaches_list', [
+            'pageTitle' => "SCUAA 8 REGIONAL GAMES - " . date('Y'),
+            'page' => "SCUAA",
+            'title_coach' => "List of Coaches",
+            'headerAction' => '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>',
+            'Coaches' => $coachList,
+            'ScuaaLists' => $scuaaLists,
+            'Events' => $events
+        ]);
+    }
+
+    public function indexAthletes(Request $request)
+    {
+        $query = ListVarsity::with(['event'])
         ->whereNull('deleted_at')
         ->orderBy('SchoolYear', 'desc');
         
@@ -31,20 +115,20 @@ class ScuaaController extends Controller
         }
         
         if ($request->has('filterSchoolYear') && $request->filterSchoolYear != '0') {
-            $query->where('var_scuaa_list.SchoolYear', $request->filterSchoolYear);
+            $query->where('SchoolYear', $request->filterSchoolYear);
         }
         
-        if ($request->has('search') && !empty($request->search)) {
+        if ($request->has('searchAthletes') && !empty($request->searchAthletes)) {
             $studentNos = collect();
         
             // Search across multiple databases
             $connections = ['sg', 'mcc', 'to', 'bn', 'sj', 'hn'];
             foreach ($connections as $connection) {
                 $students = Student::on($connection)
-                    ->where('LastName', 'LIKE', "%{$request->search}%")
-                    ->orWhere('FirstName', 'LIKE', "%{$request->search}%")
-                    ->orWhere('MiddleName', 'LIKE', "%{$request->search}%")
-                    ->orWhere('StudentNo', 'LIKE', "%{$request->search}%") // Get matching StudentNo
+                    ->where('LastName', 'LIKE', "%{$request->searchAthletes}%")
+                    ->orWhere('FirstName', 'LIKE', "%{$request->searchAthletes}%")
+                    ->orWhere('MiddleName', 'LIKE', "%{$request->searchAthletes}%")
+                    ->orWhere('StudentNo', 'LIKE', "%{$request->searchAthletes}%") // Get matching StudentNo
                     ->pluck('StudentNo');
         
                 $studentNos = $studentNos->merge($students);
@@ -70,7 +154,7 @@ class ScuaaController extends Controller
             
             return (object) [
                 'SchoolYear' => $item->SchoolYear,
-                'StudentNo'  => $item->StudentNo,
+                'id'         => $item->id,
                 'FirstName'  => $student->FirstName ?? null,
                 'LastName'   => $student->LastName ?? null,
                 'MiddleName' => $student->MiddleName ?? null,
@@ -78,15 +162,21 @@ class ScuaaController extends Controller
             ];
         });
 
-        $scuaaLists = Scuaa::all(); // Fetch all records
-        
-    
+        $scuaaLists = Scuaa::paginate(5);; // Fetch all records
+
+
         $events = Event::select('id', 'event')->orderby('event')->get();
-    
-        return view('slsu.varsity.VAR_scuaa.scuaa', [
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('_partials.scuaa-table', ['Lists' => $varsityList])->render()
+            ]);
+        }
+        
+        return view('slsu.varsity.VAR_scuaa.athletes_list', [
             'pageTitle' => "SCUAA 8 REGIONAL GAMES - " . date('Y'),
             'page' => "SCUAA",
-            'title' => "List of Athletes ",
+            'title_athlete' => "List of Athletes ",
             'headerAction' => '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>',
             'Lists' => $varsityList,
             'ScuaaLists' => $scuaaLists,
@@ -127,6 +217,7 @@ class ScuaaController extends Controller
             $municipality = $request->Municipality ?? throw new Exception('Municipality is required');
             $province = $request->Province ?? throw new Exception('Province is required');
             $date = $request->Date ?? throw new Exception('Date is required');
+            $theme = $request->Theme ?? throw new Exception('Theme is required');
             $dates = explode(" to ", $date);
             if (count($dates) != 2) {
                 throw new Exception('Invalid date range format');
@@ -156,6 +247,7 @@ class ScuaaController extends Controller
             // Save to Database
             $setScuaa = Scuaa::create([
                 'Title' => $title,
+                'Theme' => $theme,
                 'ScuaaLogo' => $filePath, // Save file path instead of raw file
                 'University' => $university,
                 'Location' => $location,
@@ -172,23 +264,70 @@ class ScuaaController extends Controller
         }
     }
 
-    public function scuaaList(Request $request){
-        $pdf = new ScuaaReport('P', 'cm', array(330.2, 215.9));
+    public function scuaaList(Request $request)
+    {
+        try{
+            if(!$request->has('filterSchoolYear') || $request->filterSchoolYear == '0'){
+                throw new Exception('Please select an school year.');
+            }
+    
+            $pdf = new ScuaaReport('P', 'cm', array(330.2, 215.9));
+            $pdf->setId($request->DateOfGraduation);
+            $pdf->setSy($request->filterSchoolYear);
+            $pdf->setEvent($request->filterEvent);
+        
+            // HEADER
+        
+        
+            $pdf::setHeaderCallback(function($p) use ($pdf){
+                $pdf->Header();
+        
+            });
+        
+            // $pdf::setFooterCallback(function($p) use ($pdf){
+            //   $pdf->Footer();
+            // });
+        
+            $pdf::AddPage('L', array(215.9, 330.2));
+            $pdf::SetTopMargin(57);
+            $pdf::SetAutoPageBreak(TRUE,20);
+            $pdf->Body();
+            $date = \Str::slug($request->DateOfGraduation);
+        
+            $fname = "scuaalist-".$date.".pdf";
+        
+            // $public = "public";
+            // $directoryPath = 'prcgraduation/'.session('campus');
+            // if (!Storage::exists($public."/".$directoryPath)) {
+            //   Storage::makeDirectory($public."/".$directoryPath);
+            // }
+        
+            $pdf::Output(storage_path($fname),'I');
+        
+            // return response()->download($fname);
+        }
+        catch(Exception $e){
+            return response()->json(['Error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function scuaaChecklist(Request $request)
+    {
+        $pdf = new ChecklistReport('P', 'cm', array(330.2, 215.9));
         $pdf->setId($request->DateOfGraduation);
-        $pdf->setSy($request->SchoolYear);
-        $pdf->setSem($request->Semester);
+        $pdf->setSy($request->filterSchoolYear);
+        $pdf->setEvent($request->filterEvent);
     
         // HEADER
-    
     
         $pdf::setHeaderCallback(function($p) use ($pdf){
             $pdf->Header();
     
         });
     
-        // $pdf::setFooterCallback(function($p) use ($pdf){
-        //   $pdf->Footer();
-        // });
+        $pdf::setFooterCallback(function($p) use ($pdf){
+            $pdf->Footer();
+        });
     
         $pdf::AddPage('L', array(215.9, 330.2));
         $pdf::SetTopMargin(57);
@@ -196,7 +335,7 @@ class ScuaaController extends Controller
         $pdf->Body();
         $date = \Str::slug($request->DateOfGraduation);
     
-        $fname = "scuaalist-".$date.".pdf";
+        $fname = "checklist-".$date.".pdf";
     
         // $public = "public";
         // $directoryPath = 'prcgraduation/'.session('campus');
@@ -207,5 +346,82 @@ class ScuaaController extends Controller
         $pdf::Output(storage_path($fname),'I');
     
         // return response()->download($fname);
+    }
+
+    public function scuaaEligibility(Request $request)
+    {
+        try{
+            $id = Crypt::decryptstring($request->id);
+    
+        }catch(DecryptException $e){
+            session(['ErrorBlob' => "Invalid Hash"]);
+            return false;
+        }
+        
+        $pdf = new EligibilityForm('P', 'cm', array(215.9,330.2));
+        $pdf->setId($id);
+        // dd($id);
+        // HEADER
+    
+    
+        $pdf::setHeaderCallback(function($p) use ($pdf){
+            $pdf->Header();
+    
+        });
+    
+        // $pdf::setFooterCallback(function($p) use ($pdf){
+        //     $pdf->Footer();
+        // });
+    
+    
+    
+        $pdf::AddPage();
+        $pdf::SetTopMargin(40);
+        $pdf::SetLeftMargin(15);
+        $pdf::SetRightMargin(15);
+        $pdf::SetAutoPageBreak(TRUE,10);
+        $pdf->Body();
+        $date = \Str::slug($request->DateOfGraduation);
+    
+        $fname = "eligibility-".$date.".pdf";
+    
+        // $public = "public";
+        // $directoryPath = 'prcgraduation/'.session('campus');
+        // if (!Storage::exists($public."/".$directoryPath)) {
+        //   Storage::makeDirectory($public."/".$directoryPath);
+        // }
+    
+        $pdf::Output(storage_path($fname),'I');
+    
+        // return response()->download($fname);
+    }
+
+    public function destroyAthletes(Request $request)
+    {
+        try {
+            $athletesID = Crypt::decryptstring($request->id);
+
+            // dd($athletesID);
+            $scuaa = ListVarsity::findOrFail($athletesID);
+            $scuaa->delete();
+    
+            return response()->json(['success' => true, 'message' => 'Scuaa record deleted successfully.']);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function destroyCoaches(Request $request)
+    {
+        try {
+            $coachID = Crypt::decryptstring($request->id);;
+
+            $coach = CoachVarsity::findOrFail($coachID);
+            $coach->delete();
+    
+            return response()->json(['success' => true, 'message' => 'Athlete record deleted successfully.']);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
     }
 }

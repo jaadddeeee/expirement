@@ -3,7 +3,7 @@
     <tr class="varsity-row">
         @if (session('campus') == 'SG')
             <td><input class="form-check-input select-row" type="checkbox" name="selectedVarsities[]"
-                    value="{{ $varsity->StudentNo }}"></td>
+                    value="{{ $varsity->id }}"></td>
         @else
             <td class="text-nowrap">{{ isset($ctr) ? ++$ctr : ($ctr = 1) }}</td>
         @endif
@@ -18,11 +18,11 @@
             {{ \GENERAL::setSchoolYearLabel($varsity->SchoolYear, $varsity->Semester) . ' - ' . \GENERAL::Semesters()[$varsity->Semester]['Long'] }}
         </td>
         <td class="text-nowrap">
-            <a href="#" class="editVarsity" cid="{{ Crypt::encryptString($varsity->StudentNo) }}">
+            <a href="#" class="editVarsity" cid="{{ Crypt::encryptString($varsity->id) }}">
                 <i class="bx bx-edit text-warning"></i>
             </a>
             &nbsp;
-            <a href="#" class="deleteVarsity" cid="{{ Crypt::encryptString($varsity->StudentNo) }}">
+            <a href="#" class="deleteVarsity" cid="{{ Crypt::encryptString($varsity->id) }}">
                 <i class="text-danger bx bx-trash"></i>
             </a>
         </td>

@@ -29,7 +29,7 @@ class VarsityController extends Controller
             ->select(
                 'var_varsity.SchoolYear',
                 'var_varsity.Semester',
-                'var_varsity.StudentNo',
+                'var_varsity.id',
                 'students.FirstName as FirstName',
                 'students.MiddleName as MiddleName',
                 'students.LastName as LastName',
@@ -153,15 +153,13 @@ class VarsityController extends Controller
                     ->table('var_varsity')
                     ->join('var_event', 'var_varsity.VarsityEvent', '=', 'var_event.id')
                     ->join('students', 'var_varsity.StudentNo', '=', 'students.StudentNo')
-                    ->where('var_varsity.StudentNo', $varsityId)
+                    ->where('var_varsity.id', $varsityId)
                     ->select('var_varsity.*',
                         'students.FirstName as FirstName',
                         'students.MiddleName as MiddleName',
                         'students.LastName as LastName',
                         )
                     ->first() ?? throw new Exception('Varsity student not found.');
-
-                
 
                 // Get the total participants allowed for the event
                 $event = Event::where('id', $varsity->VarsityEvent)
@@ -184,18 +182,28 @@ class VarsityController extends Controller
             $exists = ListVarsity::where([
                 'StudentNo' => $varsity->StudentNo,
                 'SchoolYear' => date('Y'),
-            ])->exists();
+                ])
+                ->select('id', 'deleted_at')
+                ->first();
+                // dd($exists);
+                if ($exists) {
+                    if ($exists->deleted_at !== null) {
+                        // Restore the soft-deleted record manually
+                        ListVarsity::where('id', $exists->id)
+                            ->update(['deleted_at' => null]);
+    
+                        return response()->json(['success' => true, 'message' => 'Varsity restored successfully.']);
+                    } else {
+                        throw new Exception("Varsity already exists for this school year.");
+                    }
+                }
 
-            if ($exists) {
-                throw new Exception("Varsity already exists for this school year.");
-            }
-
-            // Save the varsity to the var_list table
-            ListVarsity::create([
-                'StudentNo' => $varsity->StudentNo,
-                'SchoolYear' => date('Y'),
-                'Event' => $varsity->VarsityEvent,
-            ]);
+                // Save the varsity to the var_list table
+                ListVarsity::create([
+                    'StudentNo' => $varsity->StudentNo,
+                    'SchoolYear' => date('Y'),
+                    'Event' => $varsity->VarsityEvent,
+                ]);
             }
 
             return response()->json(['success' => true, 'message' => 'Selected varsity students successfully stored.']);
@@ -270,10 +278,10 @@ class VarsityController extends Controller
                 ->table('var_varsity')
                 ->leftjoin('var_event', 'var_varsity.VarsityEvent', '=', 'var_event.id')
                 ->leftjoin('students', 'var_varsity.StudentNo', '=', 'students.StudentNo')
-                ->where('var_varsity.StudentNo', $id)
+                ->where('var_varsity.id', $id)
                 ->select('var_varsity.SchoolYear',
                     'var_varsity.Semester',
-                    'var_varsity.StudentNo',
+                    'var_varsity.id',
                     'students.FirstName as FirstName',
                     'students.MiddleName as MiddleName',
                     'students.LastName as LastName',
@@ -282,7 +290,7 @@ class VarsityController extends Controller
                 ->first() ?? throw new Exception('Record not found.');
 
             return response()->json([
-                'id' => $editVarsity->StudentNo,
+                'id' => $editVarsity->id,
                 'campus' => $campus,
                 'stud' => trim($editVarsity->LastName . ', ' . $editVarsity->FirstName . ($editVarsity->MiddleName ? ', ' . $editVarsity->MiddleName : '')),
                 'event' => $editVarsity->event,
@@ -307,11 +315,11 @@ class VarsityController extends Controller
                 ->table('var_varsity')
                 ->join('var_event', 'var_varsity.VarsityEvent', '=', 'var_event.id')
                 ->join('students', 'var_varsity.StudentNo', '=', 'students.StudentNo')
-                ->where('var_varsity.StudentNo', $decryptedId)
+                ->where('var_varsity.id', $decryptedId)
                 ->select('var_varsity.SchoolYear',
                     'var_varsity.Semester',
                     'var_varsity.VarsityEvent',
-                    'var_varsity.StudentNo',
+                    'var_varsity.id',
                     'students.FirstName as FirstName',
                     'students.MiddleName as MiddleName',
                     'students.LastName as LastName',
@@ -349,7 +357,7 @@ class VarsityController extends Controller
             }
             
             Varsity::on(strtolower($campus))
-                ->where('StudentNo', $decryptedId)
+                ->where('id', $decryptedId)
                 ->update([
                     'SchoolYear' => $sy,
                     'Semester' => $sem,
@@ -373,8 +381,10 @@ class VarsityController extends Controller
 
             // Find the Varsity record, delete record
             $varsity = Varsity::on(strtolower($campus))
-                ->where('StudentNo', $id)
-                ->update(['deleted_at' => now()]);
+                ->where('id', $id)
+                ->firstOrFail() ?? throw new Exception('Varsity record not found.');
+
+            $varsity->delete();
 
             return response()->json(['success' => true, 'message' => 'Varsity successfully deleted.']);
         } catch (DecryptException) {

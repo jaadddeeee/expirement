@@ -48,16 +48,16 @@
         });
     });
 
-    $('#search').on('input', function() {
+    $('#searchAthletes').on('input', function() {
         var query = $(this).val();
         var filterEvent = $('#filterEvent').val();
         var filterSchoolYear = $('#filterSchoolYear').val();
 
         $.ajax({
-            url: '{{ route('scuaa') }}',
+            url: '{{ route('scuaa-athletes') }}',
             method: 'GET',
             data: {
-                search: query,
+                searchAthletes: query,
                 filterEvent: filterEvent,
                 filterSchoolYear: filterSchoolYear,
             },
@@ -72,6 +72,40 @@
                         $('.pagination').show();
                     }
                 }, 1000);
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+
+    $('#searchCoach').on('input', function() {
+        var query = $(this).val();
+        var filterEvent = $('#filterEvent').val();
+        var filterSchoolYear = $('#filterSchoolYear').val();
+
+        $.ajax({
+            url: '{{ route('scuaa-coaches') }}', // Ensure this route is correct
+            method: 'GET',
+            data: {
+                searchCoach: query, // Ensure this matches the request parameter in your controller
+                filterEvent: filterEvent,
+                filterSchoolYear: filterSchoolYear,
+            },
+            success: function(response) {
+                setTimeout(function() {
+                    $('#data').html(response.html);
+
+                    // Hide pagination if there are fewer results than per-page limit
+                    if ($('#data').find('.varsity-row').length < 10) {
+                        $('.pagination').hide();
+                    } else {
+                        $('.pagination').show();
+                    }
+                }, 1000);
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
             }
         });
     });
@@ -125,4 +159,200 @@
             }
         });
     });
+
+    $("#btnGenerateList").on("click", function (e) {
+        e.preventDefault();
+
+        var filterEvent = $("#filterEvent").val();
+        var filterSchoolYear = $("#filterSchoolYear").val();
+
+        $.ajax({
+            url: "{{ route('generate.list') }}",
+            method: "GET",
+            data: {
+                filterEvent: filterEvent,
+                filterSchoolYear: filterSchoolYear,
+            },
+            success: function (response) {
+                window.open(response.url, '_blank'); // Open the generated PDF
+            },
+            error: function (xhr) {
+            // Parse the error response
+                var response = xhr.responseJSON;
+
+                // Show SweetAlert with the error message
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: response.Error,
+                });
+            },
+        });
+    });
+
+    $("#btnGenerateChecklist").on("click", function (e) {
+        e.preventDefault();
+
+        var filterEvent = $("#filterEvent").val();
+        var filterSchoolYear = $("#filterSchoolYear").val();
+
+        $.ajax({
+            url: "{{ route('generate.checklist') }}",
+            method: "GET",
+            data: {
+                filterEvent: filterEvent,
+                filterSchoolYear: filterSchoolYear,
+            },
+            success: function (response) {
+                window.open(response.url, '_blank'); // Open the generated PDF
+            },
+            error: function (xhr) {
+            // Parse the error response
+                var response = xhr.responseJSON;
+
+                // Show SweetAlert with the error message
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: response.Error,
+                });
+            },
+        });
+    });
+
+    // $("#generateEli").on("click", function (e) {
+    //     e.preventDefault();
+    //     let id = $(this).attr("cid");
+    //     $.ajax({
+    //         url: "{{ route('generate.eligibility') }}",
+    //         method: "GET",
+    //         data: {
+    //             id,
+    //         },
+    //         success: function (response) {
+    //             window.open(response.url, '_blank'); // Open the generated PDF
+    //         },
+    //         error: function (xhr) {
+    //         // Parse the error response
+    //             var response = xhr.responseJSON;
+
+    //             // Show SweetAlert with the error message
+    //             Swal.fire({
+    //                 icon: "error",
+    //                 title: "Error!",
+    //                 text: response.Error,
+    //             });
+    //         },
+    //     });
+    // });
+
+    $(document).on("click", "#deleteCoaches", function(e) {
+        e.preventDefault();
+        let id = $(this).attr("cid");
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This will delete the coach select. You can't revert this.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/varsity/delete-coaches",
+                    method: 'post',
+                    data: {
+                        id,
+                    },
+                    beforeSend: function() {
+                        Swal.fire({
+                            position: "center",
+                            icon: "info",
+                            title: "Deleting...",
+                            showConfirmButton: false
+                        });
+                    },
+                    success: function(data) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: data.Message,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                        // window.location.reload();
+                    },
+                    error: function(response) {
+
+                        if (response.status == 419) {
+                            window.location.reload();
+                        } else {
+                            var errors = response.responseJSON.errors;
+
+                            Swal.fire(
+                                'Error!',
+                                errors,
+                                'error'
+                            );
+                        }
+                    }
+                });
+            }
+        });
+    })
+
+    $(document).on("click", "#deleteAthletes", function(e) {
+        e.preventDefault();
+        let id = $(this).attr("cid");
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This will delete the coach select. You can't revert this.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/varsity/delete-athletes",
+                    method: 'post',
+                    data: {
+                        id,
+                    },
+                    beforeSend: function() {
+                        Swal.fire({
+                            position: "center",
+                            icon: "info",
+                            title: "Deleting...",
+                            showConfirmButton: false
+                        });
+                    },
+                    success: function(data) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: data.Message,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                        // window.location.reload();
+                    },
+                    error: function(response) {
+
+                        if (response.status == 419) {
+                            window.location.reload();
+                        } else {
+                            var errors = response.responseJSON.errors;
+
+                            Swal.fire(
+                                'Error!',
+                                errors,
+                                'error'
+                            );
+                        }
+                    }
+                });
+            }
+        });
+    })
 </script>

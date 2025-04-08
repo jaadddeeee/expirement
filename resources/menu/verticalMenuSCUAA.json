@@ -2,10 +2,23 @@
     "menu": [
         {
             "name": "SCUAA",
-            "url": "/varsity/scuaa",
             "icon": "menu-icon tf-icons bx bx-medal",
-            "slug": "scuaa"
+            "slug": "scuaa",
+            "submenu" : [
+                {
+                    "name": "List Athletes",
+                    "url": "/varsity/scuaa/athletes",
+                    "icon": "menu-icon tf-icons bx bx-list-ol",
+                    "slug": "scuaa-athletes"
+                },
+                {
+                    "name": "List Coaches",
+                    "url": "/varsity/scuaa/coaches",
+                    "icon": "menu-icon tf-icons bx bx-list-ol",
+                    "slug": "scuaa-coaches"
+                }
+            ]
             
         }
-    ] 
+    ]
 }

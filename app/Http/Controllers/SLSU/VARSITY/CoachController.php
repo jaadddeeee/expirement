@@ -5,6 +5,7 @@ namespace App\Http\Controllers\SLSU\VARSITY;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\VARSITY\Coach;
+use App\Models\VARSITY\CoachVarsity;
 use Illuminate\Support\Facades\DB;
 use App\Models\VARSITY\Event;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -17,16 +18,23 @@ class CoachController extends Controller
 {
     public function index(Request $request)
 {
-
     $campus = auth()->user()->AllowSuper == 1 ? ($request->filterCampus ?? "SG") : session('campus');
 
+    $employees = 'db_hrmis.employee';
+
     $query = DB::connection(strtolower($campus))
-        ->table('var_coaches')
-        ->leftJoin('var_event', 'var_coaches.CoachEvent', '=', 'var_event.id') 
-        ->whereNull('var_coaches.deleted_at')
-        ->orderBy('var_coaches.FirstName')
-        ->orderBy('var_coaches.LastName', 'asc')
-        ->select('var_coaches.*', 'var_event.event as event_name');
+    ->table('var_coaches')
+    ->leftJoin('var_event', 'var_coaches.CoachEvent', '=', 'var_event.id')
+    ->leftJoin("$employees as employee", 'var_coaches.EmpNo', '=', 'employee.id') // Use HRMIS DB dynamically
+    ->whereNull('var_coaches.deleted_at')
+    ->orderBy('employee.LastName', 'asc')
+    ->select(
+        'employee.FirstName as FirstName',
+        'employee.MiddleName as MiddleName',
+        'employee.LastName as LastName',
+        'var_coaches.*',
+        'var_event.event as event_name'
+    );
 
     if ($request->has('filterCampus') && $request->filterCampus != '0') {
         $query = $query;
@@ -45,6 +53,13 @@ class CoachController extends Controller
     }
     
     $coach = $query->paginate(10);
+
+    $currentYear = date('Y');
+    foreach ($coach as $item) { // Iterate through the paginated collection
+        $item->alreadyExists = CoachVarsity::where('CoachID', $item->EmpNo)
+            ->where('SchoolYear', $currentYear)
+            ->first();
+    }
 
     if ($request->ajax()) {
         return response()->json([
@@ -121,29 +136,30 @@ class CoachController extends Controller
 {
     try {
         $campus = auth()->user()->AllowSuper == 1 ? ($request->Campus ?? throw new Exception('Select campus')) : session('campus');
-
-        $employeeParts = array_map('trim', explode(",", $request->Emp ?? throw new Exception('Please select coach'))); // Extract employee name
-        [$lastName, $firstName, $middleName] = array_pad($employeeParts, 3, null);
+        
+        $EmpNo = Crypt::decryptString($request->EmployeeID) ?? throw new Exception('Please select student'); // Decrypt student number
         $event = Crypt::decryptString($request->Event ?: throw new Exception("Please select event"));
         $ct = $request->coachType ?? throw new Exception("Please select coach type");
 
+        if (!$request->hasFile('CoachImage')) {
+            throw new Exception('Logo is required');
+        }
+
+        $picture = $request->file('CoachImage');
+        
         $campusID = GENERAL::Campuses()[$campus]['ID'];
 
         // Check for duplicate entry
         $C = DB::connection(strtolower($campus))
             ->table('var_coaches')
-            ->where("FirstName", $firstName)
-            ->where("MiddleName", $middleName)
-            ->where("LastName", $lastName)
+            ->where("id", $EmpNo)
             ->exists() && throw new Exception('Duplicate entry detected for this coach');
         
         DB::connection('hrmis')
             ->table('employee')
             ->whereNull('deleted_at')
             ->where('campus',  $campusID)
-            ->where('FirstName', $firstName)
-            ->where('MiddleName', $middleName)
-            ->where('LastName', $lastName)
+            ->where('id', $EmpNo)
             ->first() ?? throw new Exception('This employee is not exist in this campus');
 
         // Check if the event already has a main coach in the same campus
@@ -154,14 +170,19 @@ class CoachController extends Controller
             ->exists();
 
             ($mainCoach && $ct == 1) && throw new Exception('This event already has a main coach');
+
+        $imagePath = null;
+        if ($picture) {
+            $imagePath = $picture->store("coachphoto/".strtoupper($campus), 'public'); // Store in storage/app/public/coachphoto/{campus}
+            // \Log::info('Image stored at: ' . $imagePath);
+        }
         
         Coach::on(strtolower($campus))
             ->create([
-                'FirstName' => $firstName,
-                'MiddleName' => $middleName,
-                'LastName' => $lastName,
+                'EmpNo' => $EmpNo,
                 'CoachType' => $ct,
                 'CoachEvent' => $event,
+                'Picture' => $imagePath,
             ]);
 
         return response()->json(['Error' => 0, "Message" => "Coach successfully added."]);
@@ -181,8 +202,14 @@ class CoachController extends Controller
         $editCoach = DB::connection(strtolower($campus))
         ->table('var_coaches')
         ->join('var_event', 'var_coaches.CoachEvent', '=', 'var_event.id')
+        ->join('db_hrmis.employee as employee', 'var_coaches.EmpNo', '=', 'employee.id')
         ->where('var_coaches.id', $id)
-        ->select('var_coaches.*', 'var_event.event as event')
+        ->select('var_coaches.*',
+            'employee.FirstName as FirstName',
+            'employee.MiddleName as MiddleName',
+            'employee.LastName as LastName',
+            'var_event.event as event'
+        )
         ->first() ?? throw new Exception('Record not found.');
         // dd($editCoach);
         return response()->json([
@@ -255,14 +282,80 @@ class CoachController extends Controller
 
         // Find the Varsity record, delete record
         $varsity = Coach::on(strtolower($campus))
-            ->where('id', $id)
-            ->update(['deleted_at' => now()]);
+                    ->where('id', $id)
+                    ->firstOrFail();
+
+        $varsity->delete();
 
         return response()->json(['success' => true, 'message' => 'Varsity successfully deleted.']);
     }catch(Exception $e){
         return response()->json(['errors' => General::Error($e->getMessage())], 400);
     }catch(DecryptException $e){
         return response()->json(['errors' => General::Error('Invalid encrypted ID.')], 400);
+    }
+}
+
+public function saveSelectedCoach(Request $request)
+{
+    try {
+        $campus = auth()->user()->AllowSuper == 1 ? ($request->campus ?? throw new Exception('Select Campus')) : session('campus');
+
+        // // Retrieve the selected varsity IDs from the request
+        $selectedVarsities = $request->input('selectedCoach');
+
+        $EmpNo = Crypt::decryptString($request->EmployeeID) ?? throw new Exception('Please select student'); // Decrypt student number
+        // dd($EmpNo);
+                //     // Find the varsity student and school year using a join query
+        $coach = DB::connection(strtolower($campus))
+            ->table('var_coaches')
+            ->join('var_event', 'var_coaches.CoachEvent', '=', 'var_event.id')
+            ->join('db_hrmis.employee as employee', 'var_coaches.EmpNo', '=', 'employee.id')
+            ->where('var_coaches.EmpNo', $EmpNo)
+            ->select('var_coaches.*',
+                'employee.FirstName as FirstName',
+                'employee.MiddleName as MiddleName',
+                'employee.LastName as LastName',
+                )
+            ->first() ?? throw new Exception('Varsity student not found.');
+
+        //     // Get the total participants allowed for the event
+        $event = Event::where('id', $coach->CoachEvent)
+        ->select('totalAtlhetes','event')
+        ->first();
+
+        if (!$event) {
+            throw new Exception('Event not found.');
+        }
+
+        // // Count the number of existing varsity students for the event
+        $existingVarsityCount = CoachVarsity::where('Event', $coach->CoachEvent)->count();
+
+        // // Check if adding the new varsity student would exceed the total participants
+        if ($existingVarsityCount >= $event->totalAtlhetes) {
+            throw new Exception($event->event . ' event has reached the maximum number of participants.');
+        }
+
+        // // Check if the varsity student already exists for the current school year
+        $exists = CoachVarsity::where([
+            'CoachID' => $coach->EmpNo,
+            'SchoolYear' => date('Y'),
+        ])->exists();
+
+        if ($exists) {
+            throw new Exception("Varsity already exists for this school year.");
+        }
+
+        // // Save the varsity to the var_list table
+        CoachVarsity::create([
+            'CoachID' => $coach->EmpNo,
+            'SchoolYear' => date('Y'),
+            'Event' => $coach->CoachEvent,
+        ]);
+        // }
+
+        return response()->json(['success' => true, 'message' => 'Selected coach successfully stored.']);
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
     }
 }
 }
