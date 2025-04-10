@@ -198,22 +198,18 @@ class ScholarshipController extends Controller
             $ExternalSchType = $request->ExternalScholarshipType;
             $ScholarshipProvider = $request->SchProvider;
 
-            // Validate Scholarship Name
             if (empty($ScholarshipName)) {
                 return response()->json(['Error' => 1, 'Message' => "Scholarship Name is required."]);
             }
 
-            // Validate Scholarship Acronym
             if (empty($ScholarshipAcronym)) {
                 return response()->json(['Error' => 1, 'Message' => "Scholarship Acronym is required."]);
             }
 
-            // Validate Scholarship Type
             if (empty($ScholarshipType) || $ScholarshipType == 0) {
                 return response()->json(['Error' => 1, 'Message' => "Please select a Scholarship Type."]);
             }
 
-            // Handle Internal Scholarship
             if ($ScholarshipType == 1) {
                 $ExternalSchType = 0;
 
@@ -223,16 +219,13 @@ class ScholarshipController extends Controller
 
                 $ScholarshipProvider = 'SLSU - ' . $campusName;
             } elseif (empty($ExternalSchType)) {
-                // Validate External Type for External Scholarships
                 return response()->json(['Error' => 1, 'Message' => "Please select an External Type."]);
             }
 
-            // Validate Scholarship Provider for External Scholarships
             if ($ScholarshipType != 1 && empty($ScholarshipProvider)) {
                 return response()->json(['Error' => 1, 'Message' => "Please provide a Scholarship Provider."]);
             }
 
-            // Check if scholarship already exists (excluding the current scholarship)
             $existing = Scholarship::where('sch_name', $ScholarshipName)
                 ->where('sch_type', $ScholarshipType)
                 ->where('ext_type', $ExternalSchType)
@@ -243,7 +236,6 @@ class ScholarshipController extends Controller
                 return response()->json(['Error' => 1, 'Message' => "A scholarship with the same name, type, and external type already exists."]);
             }
 
-            // Update Scholarship
             $scholarship->update([
                 'sch_name' => $ScholarshipName,
                 'sch_acronym' => $ScholarshipAcronym,
