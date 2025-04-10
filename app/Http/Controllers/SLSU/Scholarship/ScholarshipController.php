@@ -361,6 +361,7 @@ class ScholarshipController extends Controller
         }
     }
 
+
     public function updateRequirements(Request $request)
     {
         try {
@@ -378,9 +379,15 @@ class ScholarshipController extends Controller
                 ]);
             }
 
+            // Fetch existing requirements for comparison
+            $existingRequirements = ScholarshipRequirements::where('scholarship_id', $scholarshipId)->get();
+
+            $hasChanges = false;
+
             // Delete removed requirements
             if (!empty($deletedIds)) {
                 ScholarshipRequirements::whereIn('id', $deletedIds)->delete();
+                $hasChanges = true;
             }
 
             // Update existing or create new requirements
@@ -392,12 +399,30 @@ class ScholarshipController extends Controller
                     continue;
                 }
 
+                // Check for duplicates in the database
+                $duplicate = ScholarshipRequirements::where('scholarship_id', $scholarshipId)
+                    ->where('sch_requirements', $requirementText)
+                    ->where('id', '!=', $requirementId) // Exclude the current requirement being updated
+                    ->exists();
+
+                if ($duplicate) {
+                    return response()->json([
+                        'Error' => 1,
+                        'Message' => "The requirement '{$requirementText}' already exists in the database.",
+                    ]);
+                }
+
                 if ($requirementId) {
                     // Update existing requirement
-                    ScholarshipRequirements::where('id', $requirementId)->update([
-                        'quantity' => $quantity,
-                        'sch_requirements' => $requirementText,
-                    ]);
+                    $requirement = ScholarshipRequirements::find($requirementId);
+
+                    if ($requirement && ($requirement->quantity != $quantity || $requirement->sch_requirements != $requirementText)) {
+                        $requirement->update([
+                            'quantity' => $quantity,
+                            'sch_requirements' => $requirementText,
+                        ]);
+                        $hasChanges = true;
+                    }
                 } else {
                     // Create new requirement
                     ScholarshipRequirements::create([
@@ -405,7 +430,15 @@ class ScholarshipController extends Controller
                         'quantity' => $quantity,
                         'sch_requirements' => $requirementText,
                     ]);
+                    $hasChanges = true;
                 }
+            }
+
+            if (!$hasChanges) {
+                return response()->json([
+                    'Error' => 1,
+                    'Message' => 'No changes detected.',
+                ]);
             }
 
             return response()->json([

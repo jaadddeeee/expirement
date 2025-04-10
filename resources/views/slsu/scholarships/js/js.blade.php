@@ -538,13 +538,11 @@
 
             // Validate all required fields
             $('#editScholarshipName, #editSchAcronym, #editScholarshipType, #editExternalScholarshipType, #editSchProvider')
-                .each(
-                    function() {
-                        if (!validateEditField($(this))) {
-                            isValid = false;
-                        }
+                .each(function() {
+                    if (!validateEditField($(this))) {
+                        isValid = false;
                     }
-                );
+                });
 
             if (isValid) {
                 const formData = $('#frmEditScholarship').serialize();
@@ -779,7 +777,7 @@
                         $('#editScholarshipId').val(Scholarship.id);
 
                         $('#editRequirementsModalLabel').text(
-                            `Edit Requirements for ${Scholarship.name}`);
+                            `Add/Edit Requirements for ${Scholarship.name}`);
 
                         const container = $('#editRequirementsContainer');
                         container.empty();
@@ -788,9 +786,9 @@
                             container.append(`
                                 <div class="input-group mb-2 requirement-edit-item">
                                     <input type="hidden" name="requirement_ids[]" value="${req.id}">
-                                    <input type="number" name="quantities_edit[]" class="form-control ms-2" value="${req.quantity}" style="width: 80px; flex: 0 0 auto;">
+                                    <input type="number" name="quantities_edit[]" class="form-control ms-2" value="${req.quantity}" style="width: 80px; flex: 0 0 auto; border-radius: 0.50rem 0 0 0.50rem;">
                                     <input type="text" name="requirements_edit[]" class="form-control ms-2" value="${req.sch_requirements}">
-                                    <button type="button" class="btn btn-danger btnRemoveEditRequirement ms-2">
+                                    <button type="button" class="btn btn-danger btnRemoveEditRequirement ms-2 me-2">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </div>
@@ -820,9 +818,9 @@
             const requirementHtml =
                 `<div class="input-group mb-2 requirement-edit-item">
                     <input type="hidden" name="requirement_ids[]" value="">
-                    <input type="number" name="quantities_edit[]" class="form-control ms-2" placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto;">
+                    <input type="number" name="quantities_edit[]" class="form-control ms-2" placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto; border-radius: 0.50rem 0 0 0.50rem;">
                     <input type="text" name="requirements_edit[]" class="form-control ms-2" placeholder="Enter a requirement">
-                    <button type="button" class="btn btn-danger btnRemoveEditRequirement ms-2">
+                    <button type="button" class="btn btn-danger btnRemoveEditRequirement ms-2 me-2">
                         <i class="fa fa-trash"></i>
                     </button>
                 </div>`;
@@ -886,10 +884,17 @@
         $('#btnUpdateRequirements').on('click', function() {
             let hasValidInput = false;
             let allValid = true;
+            let hasChanges = false;
+
+            const existingRequirements = []; // Store existing requirements for comparison
+            const newRequirements = []; // Store new requirements to check for duplicates
 
             $('.requirement-edit-item').each(function() {
-                const requirement = $(this).find('input[name="requirements_edit[]"]').val();
-                const quantity = $(this).find('input[name="quantities_edit[]"]').val();
+                const requirement = $(this).find('input[name="requirements_edit[]"]').val()
+                    .trim();
+                const quantity = $(this).find('input[name="quantities_edit[]"]').val().trim();
+                const originalRequirement = $(this).data('original-requirement');
+                const originalQuantity = $(this).data('original-quantity');
 
                 if (requirement !== '' && quantity !== '' && quantity > 0) {
                     hasValidInput = true;
@@ -898,6 +903,29 @@
                 if ((requirement !== '' && (quantity === '' || quantity <= 0)) ||
                     (quantity > 0 && requirement === '')) {
                     allValid = false;
+                }
+
+                // Check if the requirement or quantity has changed
+                if (requirement !== originalRequirement || quantity !== originalQuantity) {
+                    hasChanges = true;
+                }
+
+                // Check for duplicates in the new requirements
+                if (newRequirements.includes(requirement)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Duplicate Requirement',
+                        text: `The requirement '${requirement}' is duplicated.`,
+                        showConfirmButton: true,
+                    });
+                    allValid = false;
+                } else if (requirement !== '') {
+                    newRequirements.push(requirement);
+                }
+
+                // Add to existing requirements for backend validation
+                if (originalRequirement) {
+                    existingRequirements.push(originalRequirement);
                 }
             });
 
@@ -912,10 +940,14 @@
             }
 
             if (!allValid) {
+                return;
+            }
+
+            if (!hasChanges) {
                 Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Input',
-                    text: 'Please provide both requirement and valid quantity for all items.',
+                    icon: 'info',
+                    title: 'No Changes Detected',
+                    text: 'No changes were made to the requirements.',
                     showConfirmButton: true,
                 });
                 return;
@@ -923,7 +955,7 @@
 
             const scholarshipId = $('#editScholarshipId').val();
 
-            // prepare the data
+            // Prepare the data
             const data = {
                 scholarship_id_edit: scholarshipId,
                 requirement_ids: $('input[name="requirement_ids[]"]').map(function() {
@@ -937,8 +969,6 @@
                 }).get(),
                 deleted_requirement_ids: deletedRequirementIds,
             };
-
-            console.log("Deleting these IDs:", deletedRequirementIds);
 
             $.ajax({
                 url: "{{ route('scholarships.requirements.update') }}",
