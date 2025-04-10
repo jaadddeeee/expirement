@@ -6,7 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Scholarship\Scholarship;
 use App\Models\Scholarship\ScholarshipRequirements;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
+
+
 use GENERAL;
+
 
 class ScholarshipController extends Controller
 {
@@ -14,6 +19,7 @@ class ScholarshipController extends Controller
     public function index(Request $request)
     {
         try {
+
             $pageTitle = "Scholarships";
             $headerAction = '<a href="' . url()->previous() . '" class="btn btn-sm btn-primary" role="button">Back</a>';
 
@@ -117,8 +123,9 @@ class ScholarshipController extends Controller
     {
         try {
             $id = $request->id;
+            $dId = Crypt::decryptString($id);
 
-            $scholarship = Scholarship::findOrFail($id);
+            $scholarship = Scholarship::findOrFail($dId);
 
             return response()->json([
                 'Error' => 0,
@@ -138,53 +145,6 @@ class ScholarshipController extends Controller
             ], 400);
         }
     }
-
-    // public function update(Request $request)
-    // {
-    //     try {
-    //         $id = $request->id;
-    //         $scholarship = Scholarship::findOrFail($id);
-
-    //         $ScholarshipName = trim($request->editScholarshipName);
-    //         $ScholarshipType = $request->editScholarshipType;
-    //         $ExternalSchType = $request->editExternalScholarshipType;
-
-    //         if (empty($ScholarshipName)) {
-    //             return response()->json(['Error' => 1, 'Message' => "Empty Scholarship Name"]);
-    //         }
-
-    //         if (empty($ScholarshipType) || $ScholarshipType == 0) {
-    //             return response()->json(['Error' => 1, 'Message' => "Please select scholarship type"]);
-    //         }
-
-    //         if ($ScholarshipType == 1) {
-    //             $ExternalSchType = 'N/A';
-    //         } elseif (empty($ExternalSchType)) {
-    //             return response()->json(['Error' => 1, 'Message' => "Please select external type"]);
-    //         }
-
-    //         $existing = Scholarship::where('sch_name', $ScholarshipName)
-    //             ->where('sch_type', $ScholarshipType)
-    //             ->where('ext_type', $ExternalSchType)
-    //             ->first();
-
-    //         if ($existing) {
-    //             return response()->json(['Error' => 1, 'Message' => "Scholarship already exists."]);
-    //         }
-
-    //         $scholarship->update([
-    //             'sch_name' => $ScholarshipName,
-    //             'sch_type' => $ScholarshipType,
-    //             'ext_type' => $ExternalSchType,
-    //             'updated_at' => now()
-    //         ]);
-
-    //         return response()->json(['Error' => 0, 'Message' => "Scholarship updated successfully."]);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['Error' => 1, 'Message' => "An error occurred: " . $e->getMessage()], 400);
-    //     }
-    // }
-
 
     public function update(Request $request)
     {
@@ -226,6 +186,22 @@ class ScholarshipController extends Controller
                 return response()->json(['Error' => 1, 'Message' => "Please provide a Scholarship Provider."]);
             }
 
+            $hasChanges = false;
+
+            if (
+                $scholarship->sch_name !== $ScholarshipName ||
+                $scholarship->sch_acronym !== $ScholarshipAcronym ||
+                $scholarship->sch_type !== $ScholarshipType ||
+                $scholarship->ext_type !== $ExternalSchType ||
+                $scholarship->sch_provider !== $ScholarshipProvider
+            ) {
+                $hasChanges = true;
+            }
+
+            if ($hasChanges) {
+                return response()->json(['Error' => 1, 'Message' => "No updates were made because no changes were detected."]);
+            }
+
             $existing = Scholarship::where('sch_name', $ScholarshipName)
                 ->where('sch_type', $ScholarshipType)
                 ->where('ext_type', $ExternalSchType)
@@ -242,7 +218,7 @@ class ScholarshipController extends Controller
                 'sch_type' => $ScholarshipType,
                 'ext_type' => $ExternalSchType,
                 'sch_provider' => $ScholarshipProvider,
-                'updated_at' => now(),
+                'updated_at' => now()
             ]);
 
             return response()->json(['Error' => 0, 'Message' => "Scholarship updated successfully."]);
@@ -255,8 +231,9 @@ class ScholarshipController extends Controller
     {
         try {
             $id = $request->id;
+            $dId = Crypt::decryptString($id);
 
-            $scholarship = Scholarship::findOrFail($id);
+            $scholarship = Scholarship::findOrFail($dId);
             $scholarship->delete();
 
             return response()->json(['Error' => 0, 'Message' => 'Scholarship deleted successfully.']);
@@ -265,54 +242,181 @@ class ScholarshipController extends Controller
         }
     }
 
-    public function storeRequirements(Request $request)
+    // public function storeRequirements(Request $request)
+    // {
+    //     try {
+    //         $scholarshipId = $request->scholarship_id;
+    //         $requirements = $request->requirements;
+    //         $quantities = $request->quantities;
+
+    //         if (!$scholarshipId || empty($requirements)) {
+    //             return response()->json([
+    //                 'Error' => 1,
+    //                 'Message' => 'Please input at least one requirement.',
+    //             ]);
+    //         }
+
+    //         foreach ($quantities as $index => $quantity) {
+    //             if (empty($quantity) || $quantity <= 0) {
+    //                 return response()->json([
+    //                     'Error' => 1,
+    //                     'Message' => 'Please provide a valid quantity for all requirements.',
+    //                 ]);
+    //             }
+    //         }
+
+    //         $hasValidRequirement = false;
+    //         foreach ($requirements as $r) {
+    //             if (trim($r) !== '') {
+    //                 $hasValidRequirement = true;
+    //                 break;
+    //             }
+    //         }
+
+    //         if (!$hasValidRequirement) {
+    //             return response()->json([
+    //                 'Error' => 1,
+    //                 'Message' => 'Please enter at least one valid requirement.',
+    //             ]);
+    //         }
+
+    //         // Fetch existing requirements from the database
+    //         $existingRequirements = ScholarshipRequirements::where('scholarship_id', $scholarshipId)
+    //             ->pluck('sch_requirements')
+    //             ->toArray();
+
+    //         // Check for duplicates within the new inputs
+    //         $newRequirements = [];
+    //         foreach ($requirements as $index => $requirement) {
+    //             $requirement = trim($requirement);
+
+    //             if (empty($requirement)) {
+    //                 continue; // Skip empty requirements
+    //             }
+
+    //             if (in_array($requirement, $newRequirements)) {
+    //                 return response()->json([
+    //                     'Error' => 1,
+    //                     'Message' => "Duplicate requirement found in your input: '$requirement'.",
+    //                 ]);
+    //             }
+
+    //             $newRequirements[] = $requirement;
+    //         }
+
+    //         // Check for duplicates between new inputs and existing requirements
+    //         foreach ($newRequirements as $requirement) {
+    //             if (in_array($requirement, $existingRequirements)) {
+    //                 return response()->json([
+    //                     'Error' => 1,
+    //                     'Message' => "The requirement '$requirement' already exists in the database.",
+    //                 ]);
+    //             }
+    //         }
+
+    //         foreach ($requirements as $index => $requirement) {
+    //             if (!empty($requirement)) {
+    //                 ScholarshipRequirements::create([
+    //                     'scholarship_id' => $scholarshipId,
+    //                     'quantity' => $quantities[$index] ?? 1,
+    //                     'sch_requirements' => $requirement,
+    //                 ]);
+    //             }
+    //         }
+
+    //         return response()->json([
+    //             'Error' => 0,
+    //             'Message' => 'Requirements saved successfully!',
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'Error' => 1,
+    //             'Message' => $e->getMessage(),
+    //         ]);
+    //     }
+    // }
+
+
+    public function editRequirements(Request $request)
     {
         try {
-            $scholarshipId = $request->scholarship_id;
-            $requirements = $request->requirements;
-            $quantities = $request->quantities;
+            $id = $request->id;
+            $scholarship = Scholarship::findOrFail($id);
 
-            if (!$scholarshipId || empty($requirements)) {
+            $requirements = ScholarshipRequirements::where('scholarship_id', $id)->get();
+
+            return response()->json([
+                'Error' => 0,
+                'Scholarship' => [
+                    'id' => $scholarship->id,
+                    'name' => $scholarship->sch_name,
+                ],
+                'Requirements' => $requirements,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'Error' => 1,
+                'Message' => 'Unable to fetch scholarship requirements. Please try again later.' . $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function updateRequirements(Request $request)
+    {
+        try {
+            $scholarshipId = $request->scholarship_id_edit;
+            $requirementIds = $request->requirement_ids ?? [];
+            $quantities = $request->quantities_edit ?? [];
+            $requirements = $request->requirements_edit ?? [];
+            $deletedIds = $request->deleted_requirement_ids ?? [];
+
+            // Validate input
+            if (!$scholarshipId) {
                 return response()->json([
                     'Error' => 1,
-                    'Message' => 'Please input at least one requirement.',
+                    'Message' => 'Scholarship ID is required.',
                 ]);
             }
 
-            $hasValidRequirement = false;
-            foreach ($requirements as $r) {
-                if (trim($r) !== '') {
-                    $hasValidRequirement = true;
-                    break;
+            // Delete removed requirements
+            if (!empty($deletedIds)) {
+                ScholarshipRequirements::whereIn('id', $deletedIds)->delete();
+            }
+
+            // Update existing or create new requirements
+            foreach ($requirements as $index => $requirementText) {
+                $quantity = $quantities[$index] ?? null;
+                $requirementId = $requirementIds[$index] ?? null;
+
+                if (empty($requirementText)) {
+                    continue;
                 }
-            }
 
-            if (!$hasValidRequirement) {
-                return response()->json([
-                    'Error' => 1,
-                    'Message' => 'Please enter at least one valid requirement.',
-                ]);
-            }
-
-            foreach ($requirements as $index => $requirement) {
-                if (!empty($requirement)) {
+                if ($requirementId) {
+                    // Update existing requirement
+                    ScholarshipRequirements::where('id', $requirementId)->update([
+                        'quantity' => $quantity,
+                        'sch_requirements' => $requirementText,
+                    ]);
+                } else {
+                    // Create new requirement
                     ScholarshipRequirements::create([
                         'scholarship_id' => $scholarshipId,
-                        'quantity' => $quantities[$index] ?? 1,
-                        'sch_requirements' => $requirement,
+                        'quantity' => $quantity,
+                        'sch_requirements' => $requirementText,
                     ]);
                 }
             }
 
             return response()->json([
                 'Error' => 0,
-                'Message' => 'Requirements saved successfully!',
+                'Message' => 'Requirements updated successfully!',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'Error' => 1,
-                'Message' => $e->getMessage(),
-            ]);
+                'Message' => 'An error occurred: ' . $e->getMessage(),
+            ], 400);
         }
     }
 }

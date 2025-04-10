@@ -262,7 +262,7 @@
     </div>
 
     <!-- Add Requirements Modal -->
-    <div class="modal fade" id="addRequirementsModal" tabindex="-1" aria-hidden="true">
+    {{-- <div class="modal fade" id="addRequirementsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <!-- Modal Header -->
@@ -291,13 +291,48 @@
                 <!-- Modal Footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="btnSaveRequiremnts">
+                    <button type="button" class="btn btn-primary" id="btnSaveRequirements">
                         <i class="fa fa-save me-1"></i> Save Requirements
                     </button>
                 </div>
             </div>
         </div>
+    </div> --}}
+
+    <!-- Add/Edit Requirements Modal -->
+    <div class="modal fade" id="editRequirementsModal" tabindex="-1" aria-labelledby="editRequirementsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editRequirementsModalLabel">Edit Requirements</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editRequirementsForm">
+                        @csrf
+                        <input type="hidden" name="scholarship_id_edit" id="editScholarshipId">
+
+                        <div id="editRequirementsContainer" class="border rounded p-3"
+                            style="max-height: 500px; overflow-y: auto;">
+                            <!-- Existing requirements will be loaded here dynamically -->
+                        </div>
+
+                        <button type="button" class="btn btn-sm btn-success mt-3" id="btnAddEditRequirement">
+                            <i class="fa fa-plus"></i> Add Requirement
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="btnUpdateRequirements" class="btn btn-primary">
+                        <i class="fa fa-save me-1"></i> Update Requirements</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+
 @endsection
 
 @section('page-script')

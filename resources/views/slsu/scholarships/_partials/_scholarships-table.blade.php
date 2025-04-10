@@ -26,17 +26,17 @@
                 <td>{{ $scholarship->sch_provider }}</td>
                 <td>
                     <!-- Add Requirements Modal -->
-                    <a class="addRequirements me-2 text-success" data-scholarship-id="{{ $scholarship->id }}"
+                    {{-- <a class="addRequirements me-2 text-success" data-scholarship-id="{{ $scholarship->id }}"
                         data-scholarship-name="{{ $scholarship->sch_name }}"
-                        data-scholarship-acronym=" {{ $scholarship->sch_acronym }}" href="javascript:void(0);"
+                        data-scholarship-acronym="{{ $scholarship->sch_acronym }}" href="javascript:void(0);"
                         title="Add Requirements">
                         <i class="bx bxs-plus-circle"></i>
-                    </a>
+                    </a> --}}
 
-                    <!-- Edit Requirements -->
-                    <a class="editRequirements me-2 text-warning" data-scholarship-id="{{ $scholarship->id }}"
+                    <!-- Add/Edit Requirements -->
+                    <a class="editRequirements me-2 text-success" data-scholarship-id="{{ $scholarship->id }}"
                         href="javascript:void(0);" title="Edit Requirements">
-                        <i class="bx bx-edit-alt"></i>
+                        <i class="bx bxs-plus-circle"></i>
                     </a>
                 </td>
                 <td>
@@ -48,14 +48,16 @@
                     </a>
 
                     <!-- Edit Scholarship -->
-                    <a class="editScholarship me-2 text-warning" data-scholarship-id="{{ $scholarship->id }}"
-                        href="javascript:void(0);" title="Edit Scholarship">
+                    <a class="editScholarship me-2 text-warning"
+                        data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" href="javascript:void(0);"
+                        title="Edit Scholarship">
                         <i class="bx bx-edit-alt"></i>
                     </a>
 
                     <!-- Delete Scholarship -->
-                    <a class="deleteScholarship text-danger" data-scholarship-id="{{ $scholarship->id }}"
-                        href="javascript:void(0);" title="Delete Scholarship">
+                    <a class="deleteScholarship text-danger"
+                        data-scholarship-id="{{ Crypt::encryptString($scholarship->id) }}" href="javascript:void(0);"
+                        title="Delete Scholarship">
                         <i class="bx bx-trash"></i>
                     </a>
                 </td>
