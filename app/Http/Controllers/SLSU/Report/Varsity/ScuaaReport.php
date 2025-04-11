@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\VARSITY\Scuaa;
 use App\Models\VARSITY\CoachVarsity;
 use App\Models\VARSITY\ListVarsity;
+use GENERAL;
 
 class ScuaaReport extends TCPDF
 {
@@ -193,6 +194,9 @@ class ScuaaReport extends TCPDF
       $this::setXY(304, 12);
       $this::SetFont('calibri','',10);
       $this::Cell(0,5,'SCUAA Form 2',0,1,'L');
+
+      $this::Image(GENERAL::Logo(),7.9,65,30);
+      $this::Image(GENERAL::PASUCLogo(),7.5,135,30);
   }
 
   private function drawCategory()

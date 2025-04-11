@@ -311,6 +311,10 @@ class GlobalDeclare {
     return "images/logo/logo.png";
   }
 
+  public static function PASUCLogo(){
+    return "images/logo/PASUC_logo.png";
+  }
+
   public static function Pilipinas(){
     return "images/logo/bagongpilipinas.png";
   }

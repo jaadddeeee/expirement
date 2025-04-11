@@ -198,7 +198,7 @@ class LetterHead extends TCPDF
     $y-=1;
     $this::SetFont('lucidafaxdemib', '', 10);
     $html = '<div style="text-align: justify; word-wrap: break-word; line-height: 1.2;">
-                <p>'.$dateLocation.'sdfsdf fsfsf sersfs erwsr</p>
+                <p>'.$dateLocation.'</p>
             </div>';
     $this::writeHTMLCell(156, 0, $x , $y, $html, 0, 1, false, true, 'L');
 

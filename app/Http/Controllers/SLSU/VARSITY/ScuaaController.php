@@ -308,7 +308,7 @@ class ScuaaController extends Controller
                 Storage::makeDirectory($public."/".$directoryPath);
             }
             $filePath = storage_path("app/public/" . $directoryPath . $fname);
-            $pdf::Output($filePath,'I');
+            $pdf::Output($filePath,'F');
         
             return response()->download($filePath)->deleteFileAfterSend(true);
         }
