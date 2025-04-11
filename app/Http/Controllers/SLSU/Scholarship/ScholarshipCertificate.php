@@ -32,8 +32,9 @@ class ScholarshipCertificate extends TCPDF
     protected $date;
     protected $schEnrollmentId;
 
-    public function __construct()
+    public function __construct($orientation = 'P', $unit = 'mm', $format = 'A4')
     {
+        // Initialize the LetterHead instance
         $this->letter = new LetterHead();
     }
 

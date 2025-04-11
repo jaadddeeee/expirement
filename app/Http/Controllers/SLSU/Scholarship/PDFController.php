@@ -69,7 +69,8 @@ class PDFController
         $schoolYear = $request->school_year;
         $semester = $request->semester;
 
-        $pdf = new ScholarshipProfileForm('P', 'mm', 'A4');
+
+        $pdf = new ScholarshipProfileForm('P', 'mm', array(210, 297));
         $pdf->setId($id);
         $pdf->setSchEnrollmentId($enrollmentId);
         $pdf->setSchoolYear($schoolYear);

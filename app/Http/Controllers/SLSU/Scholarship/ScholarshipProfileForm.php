@@ -108,169 +108,70 @@ class ScholarshipProfileForm extends TCPDF
     public function content()
     {
         $this->generate();
+
         $startY = 65;
-
-
-        $startY += 10;
-        $this::setXY(43, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "THIS IS TO CERTIFY", 0, 0, 'L');
-
-        $this::setXY(82, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(0, 10, " that ", 0, 0, 'L');
-
-        // Calculate the widths of the student name and course year
-        $nameWidth = $this::GetStringWidth($this->studentName);
-        $courseWidth = $this::GetStringWidth($this->courseYear);
-
-        // Length of the underline
-        $underlineLength = 60;
-
-        // Center student name over underline
-        $nameX = 84 + (($underlineLength - $nameWidth) / 2);
-        $courseX = 129 + (($underlineLength - $courseWidth) / 2);
-
-        // Draw underlines
-        $this::setXY(92, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(70, 10, str_repeat('_', 30), 0, 0, 'L');
-        $this::setXY(141, $startY);
-        $this::Cell(70, 10, str_repeat('_', 25), 0, 0, 'L');
-
-        $this::setXY($nameX, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "{$this->studentName}", 0, 0, 'L');
-
-        $this::setXY($courseX, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "{$this->courseYear}", 0, 0, 'L');
+        $this::setXY(25, $startY);
+        $this::SetFont('cambria', 'B', 11);
+        $this::Cell(0, 10, "Direction: Please fill up the scholarship profile form completely and provide the required", 0, 1, 'L');
 
         $startY += 5;
-        $this::setXY(108, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "(Name)", 0, 0, 'L');
-
-        $this::setXY(145, $startY);
-        $this::Cell(0, 10, "(Course/Year Level)", 0, 0, 'L');
-
-        $startY += 10;
-        $this::setXY(31, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(0, 10, "with Student No.", 0, 0, 'L');
-
-        $studentNoWidth = $this::GetStringWidth($this->studentNo);
-        $scholarshipWidth = $this::GetStringWidth($this->scholarship);
-
-        $underlineLength = 50;
-
-        $studentNoX = 50 + (($underlineLength - $studentNoWidth) / 2);
-        $scholarshipX = 120 + (($underlineLength - $scholarshipWidth) / 2);
-
-        $this::setXY(63, $startY);
-        $this::Cell($underlineLength, 10, str_repeat('_', 16), 0, 0, 'L');
-
-        $this::setXY(116, $startY);
-        $this::Cell($underlineLength, 10, str_repeat('_', 40), 0, 0, 'L');
-
-        $this::setXY($studentNoX, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "{$this->studentNo}", 0, 0, 'L');
-
-        $this::setXY(89, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(0, 10, "is qualified for", 0, 0, 'L');
-
-        $this::setXY($scholarshipX, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "{$this->scholarship}", 0, 0, 'L');
-
-
-
-        $startY += 10;
-        $this::setXY(31, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(0, 10, "scholarship/grant", 0, 0, 'L');
-
-        $this::setXY(65, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(0, 10, "this ", 0, 0, 'L');
-
-        $this::setXY(73, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "{$this->semester}", 0, 0, 'L');
-
-        $this::setXY(81, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(0, 10, " semester of SY ", 0, 0, 'L');
-
-        $this::setXY(110, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "{$this->schoolYear}.", 0, 0, 'L');
-
-        $day = date('j');
-        $month = date('F');
-        $year = date('Y');
-
-        function getDayWithSuffix($day)
-        {
-            if ($day >= 11 && $day <= 13) {
-                return $day . 'th';
-            }
-            switch ($day % 10) {
-                case 1:
-                    return $day . 'st';
-                case 2:
-                    return $day . 'nd';
-                case 3:
-                    return $day . 'rd';
-                default:
-                    return $day . 'th';
-            }
-        }
-
-        $dayWithSuffix = getDayWithSuffix($day);
-
-        $startY += 10;
-        $this::setXY(40, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(0, 10, "Signed at ", 0, 0, 'L');
-
-        $this::setXY(58, $startY);
-        $this::Cell(65, 10, str_repeat('_', 35), 0, 0, 'L');
-
-        $this::setXY(113, $startY);
-        $this::Cell(10, 10, " this ", 0, 0, 'L');
-
-        $this::setXY(122, $startY);
-        $this::Cell(65, 10, str_repeat('_', 6), 0, 0, 'L');
-
-        $this::setXY(132, $startY);
-        $this::SetFont('cambria', '', 12);
-        $this::Cell(10, 10, "day of", 0, 0, 'L');
-
-        $this::setXY(144, $startY);
-        $this::Cell(65, 10, str_repeat('_', 15), 0, 0, 'L');
-
-
-        $this::setXY(168, $startY);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(20, 10,  " {$year}", 0, 1, 'L');
-
-
-        $startY += 30;
-        $this::setXY(30, $startY);
-        $this::SetFont('cambria', '', 12);
-
-        $this::Cell(0, 10, "Recommending Approval:                                                   Approved by: ", 0, 1, 'L');
-
-        $startY += 15;
-        $this::setXY(30, $startY);
-        $this::Cell(0, 10, "_______________________________                                                 ___________________________________", 0, 1, 'L');
+        $this::setXY(44, $startY);
+        $this::SetFont('cambria', 'B', 11);
+        $this::Cell(0, 10, "information.", 0, 1, 'L');
 
         $startY += 5;
-        $this::setXY(30, $startY);
-        $this::Cell(0, 10, "  Scholarship Coordinator                                                                   Director, OSAS", 0, 1, 'L');
+        $this::setXY(25, $startY);
+        $this::SetFont('cambria', 'B', 11);
+        $this::Cell(0, 10, "Write “NA” if not applicable. Do not leave blank.", 0, 1, 'L');
+
+        // Add a checkbox
+        $startY += 13;
+        $this::setXY(25, $startY);
+        $this::SetFont('cambria', '', 11);
+        $this::Cell(0, 10, "Type of Scholarship/Grant: ", 0, 1, 'L');
+
+        // Draw the checkbox for "1st Semester"
+        $checkboxX1 = 131; // X position of the 1st Semester checkbox
+        $checkboxY1 = $startY + 11.5; // Y position of the checkbox
+        $checkboxSize = 3; // Size of the checkbox
+
+        $this::Rect($checkboxX1, $checkboxY1, $checkboxSize, $checkboxSize); // Draw the checkbox
+
+        // Draw the checkbox for "2nd Semester"
+        $checkboxX2 = $checkboxX1 + 11; // X position of the 2nd Semester checkbox (adjusted to be beside the 1st)
+        $checkboxY2 = $checkboxY1; // Same Y position as the 1st Semester checkbox
+
+        $this::Rect($checkboxX2, $checkboxY2, $checkboxSize, $checkboxSize); // Draw the 2nd Semester checkbox
+
+        // Draw the checkbox for "2nd Semester"
+        $checkboxX3 = $checkboxX2 + 12; // X position of the 2nd Semester checkbox (adjusted to be beside the 1st)
+        $checkboxY3 = $checkboxY2; // Same Y position as the 1st Semester checkbox
+
+        $this::Rect($checkboxX3, $checkboxY3, $checkboxSize, $checkboxSize); // Draw the 2nd Semester checkbox
+
+        // Position (in mm) from top-left corner of the page
+        $pictureBoxX = 133; // X position of the picture box
+        $pictureBoxY = 75; // Y position from top
+
+        // Size for 2x2 inch box (1 inch = 25.4 mm)
+        $pictureBoxSize = 50.8; // 2 inches in mm
+
+        // Optional: set border style (if needed)
+        $style = array(
+            'all' => array(
+                'width' => 0.5, // border width
+                'color' => array(0, 0, 0) // black
+            )
+        );
+
+        // Draw the box
+        $this::Rect($pictureBoxX, $pictureBoxY, $pictureBoxSize, $pictureBoxSize, 'D'); // 'D' = Draw only (no fill)
+
+
+        $startY += 8;
+        $this::setXY(25, $startY);
+        $this::SetFont('cambria', '', 11);
+        $this::Cell(0, 10, "Program ___________________________                                       Semester:     1st       2nd       Summer", 0, 1, 'L');
     }
 
     public function Footer()
