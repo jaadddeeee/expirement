@@ -21,6 +21,8 @@
             let searchQuery = $('#searchScholar').val();
             let id = $('#scholarshipId').val();
             let scholarshipName = "{{ request('scholarshipName') }}";
+            let schoolYear = $('#filterSchoolYear').val();
+            let semester = $('#filterSemester').val();
 
             $.ajax({
                 url: "{{ route('scholars.index') }}",
@@ -28,7 +30,9 @@
                 data: {
                     searchScholar: searchQuery,
                     id: id,
-                    scholarshipName: scholarshipName
+                    scholarshipName: scholarshipName,
+                    filterSchoolYear: schoolYear,
+                    filterSemester: semester
                 },
                 beforeSend: function() {
                     $('#loadingIndicator').show();
@@ -36,6 +40,7 @@
                 },
                 success: function(response) {
                     $('#scholarsTable').html(response.scholarsTable);
+                    initializeSelectAllFunctionality();
                 },
                 error: function(xhr) {
                     Swal.fire({
@@ -51,6 +56,8 @@
                 }
             });
         }
+
+
         // Handle filter form submission
         $('#filterForm').on('submit', function(e) {
             e.preventDefault();
@@ -562,6 +569,11 @@
             const checkedCheckboxes = $('.select-scholar:checked').length;
 
             const selectAllCheckbox = $('#selectAllScholars')[0];
+
+            if (!selectAllCheckbox) {
+                return; // Prevent error if checkbox is not on the page
+            }
+
             if (checkedCheckboxes === 0) {
                 selectAllCheckbox.checked = false;
                 selectAllCheckbox.indeterminate = false;
@@ -572,9 +584,6 @@
                 selectAllCheckbox.checked = false;
                 selectAllCheckbox.indeterminate = true;
             }
-
-            // Update the selected scholars count
-            $('#selectedScholarsCount').text(checkedCheckboxes);
         }
 
         function updateCopyButton() {

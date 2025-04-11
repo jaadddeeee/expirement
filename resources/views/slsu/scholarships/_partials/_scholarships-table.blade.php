@@ -43,7 +43,7 @@
                     <!-- View Scholars -->
                     <a class="viewScholars me-2 text-info"
                         href="{{ route('scholars.index', ['id' => Crypt::encryptString($scholarship->id), 'scholarshipName' => $scholarship->sch_name]) }}"
-                        title="View Scholars">
+                        title="View Scholars" data-loading-text="Loading Scholars...">
                         <i class="bx bx-show"></i>
                     </a>
 

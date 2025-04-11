@@ -9,6 +9,8 @@
         let searchTimeout;
 
 
+
+
         // INDEX PAGE
         // search scholarship
         $("#searchScholarship").on('input', function() {
@@ -222,6 +224,28 @@
 
 
         // SCHOLARSHIP CRUD
+
+        // loading indicator for view scholars
+        $(document).on('click', '.viewScholars', function(e) {
+            e.preventDefault();
+
+            const $link = $(this);
+            const loadingText = $link.data('loading-text') || 'Loading...';
+
+            // Show loading indicator
+            Swal.fire({
+                title: loadingText,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            // Redirect to the link's href after a short delay
+            setTimeout(() => {
+                window.location.href = $link.attr('href');
+            }, 500);
+        });
 
         // store scholarship
         $('#btnStoreScholarship').on('click', function(e) {
@@ -786,7 +810,7 @@
                             container.append(`
                                 <div class="input-group mb-2 requirement-edit-item">
                                     <input type="hidden" name="requirement_ids[]" value="${req.id}">
-                                    <input type="number" name="quantities_edit[]" class="form-control ms-2" value="${req.quantity}" style="width: 80px; flex: 0 0 auto; border-radius: 0.50rem 0 0 0.50rem;">
+                                    <input type="number" name="quantities_edit[]" class="form-control ms-2" min="1" value="${req.quantity}" style="width: 80px; flex: 0 0 auto; border-radius: 0.50rem 0 0 0.50rem;">
                                     <input type="text" name="requirements_edit[]" class="form-control ms-2" value="${req.sch_requirements}">
                                     <button type="button" class="btn btn-danger btnRemoveEditRequirement ms-2 me-2">
                                         <i class="fa fa-trash"></i>
@@ -880,37 +904,52 @@
             }
         });
 
+
         // update requirements
         $('#btnUpdateRequirements').on('click', function() {
             let hasValidInput = false;
             let allValid = true;
             let hasChanges = false;
 
-            const existingRequirements = []; // Store existing requirements for comparison
-            const newRequirements = []; // Store new requirements to check for duplicates
+            const existingRequirements = [];
+            const newRequirements = [];
 
             $('.requirement-edit-item').each(function() {
                 const requirement = $(this).find('input[name="requirements_edit[]"]').val()
                     .trim();
-                const quantity = $(this).find('input[name="quantities_edit[]"]').val().trim();
+                const quantityInput = $(this).find('input[name="quantities_edit[]"]');
+                const quantity = quantityInput.val().trim();
+                const quantityValue = parseInt(quantity, 10);
+
                 const originalRequirement = $(this).data('original-requirement');
                 const originalQuantity = $(this).data('original-quantity');
 
-                if (requirement !== '' && quantity !== '' && quantity > 0) {
+                if (requirement !== '' && quantity !== '' && quantityValue >= 1) {
                     hasValidInput = true;
                 }
 
-                if ((requirement !== '' && (quantity === '' || quantity <= 0)) ||
-                    (quantity > 0 && requirement === '')) {
+                if ((requirement !== '' && (quantity === '' || quantityValue < 1)) ||
+                    (quantityValue >= 1 && requirement === '')) {
                     allValid = false;
                 }
 
-                // Check if the requirement or quantity has changed
+                if (quantity !== '' && quantityValue < 1) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Quantity',
+                        text: `Quantity for "${requirement || 'a requirement'}" cannot be less than 1.`,
+                        showConfirmButton: true,
+                    });
+                    allValid = false;
+                    return false;
+                }
+
+                // Detect changes
                 if (requirement !== originalRequirement || quantity !== originalQuantity) {
                     hasChanges = true;
                 }
 
-                // Check for duplicates in the new requirements
+                // Check for duplicates
                 if (newRequirements.includes(requirement)) {
                     Swal.fire({
                         icon: 'warning',
@@ -919,11 +958,11 @@
                         showConfirmButton: true,
                     });
                     allValid = false;
+                    return false; // stop loop on first duplicate
                 } else if (requirement !== '') {
                     newRequirements.push(requirement);
                 }
 
-                // Add to existing requirements for backend validation
                 if (originalRequirement) {
                     existingRequirements.push(originalRequirement);
                 }
@@ -955,7 +994,6 @@
 
             const scholarshipId = $('#editScholarshipId').val();
 
-            // Prepare the data
             const data = {
                 scholarship_id_edit: scholarshipId,
                 requirement_ids: $('input[name="requirement_ids[]"]').map(function() {
@@ -1017,6 +1055,7 @@
                 },
             });
         });
+
 
     });
 </script>

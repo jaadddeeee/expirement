@@ -73,26 +73,31 @@ class ScholarController extends Controller
 
         $entriesPerPage = $request->input('entriesPerPage', 10);
 
-        // display scholars
-        $scholars = $query->paginate(
-            $entriesPerPage,
-            [
-                'sch_scholar_details.id',
-                'students.StudentNo',
-                'students.FirstName',
-                'students.MiddleName',
-                'students.LastName',
-                'sch_scholar_details.date_awarded',
-                'sch_scholar_enrollments.school_year as SchoolYear',
-                'sch_scholar_enrollments.semester as Semester',
-                'sch_scholar_enrollments.id as enrollment_id',
-                'sch_scholar_details.contact_no'
-            ]
-        );
+        $scholars = collect();
 
-        // format middle name
-        foreach ($scholars as $scholar) {
-            $scholar->MiddleName = $scholar->MiddleName ? Str::limit($scholar->MiddleName, 1, '.') : '';
+        if ($request->filled('filterSchoolYear') && $request->filled('filterSemester')) {
+            $scholars = $query->paginate(
+                $entriesPerPage,
+                [
+                    'sch_scholar_details.id',
+                    'students.StudentNo',
+                    'students.FirstName',
+                    'students.MiddleName',
+                    'students.LastName',
+                    'students.Course',
+                    'students.StudentYear',
+                    'sch_scholar_details.date_awarded',
+                    'sch_scholar_enrollments.school_year as SchoolYear',
+                    'sch_scholar_enrollments.semester as Semester',
+                    'sch_scholar_enrollments.id as enrollment_id',
+                    'sch_scholar_details.contact_no'
+                ]
+            );
+
+            // format middle name
+            foreach ($scholars as $scholar) {
+                $scholar->MiddleName = $scholar->MiddleName ? Str::limit($scholar->MiddleName, 1, '.') : '';
+            }
         }
 
         // return json scholars table

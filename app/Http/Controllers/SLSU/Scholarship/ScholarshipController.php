@@ -379,9 +379,6 @@ class ScholarshipController extends Controller
                 ]);
             }
 
-            // Fetch existing requirements for comparison
-            $existingRequirements = ScholarshipRequirements::where('scholarship_id', $scholarshipId)->get();
-
             $hasChanges = false;
 
             // Delete removed requirements
