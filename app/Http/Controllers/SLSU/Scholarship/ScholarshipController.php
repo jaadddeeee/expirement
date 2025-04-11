@@ -189,16 +189,16 @@ class ScholarshipController extends Controller
             $hasChanges = false;
 
             if (
-                $scholarship->sch_name !== $ScholarshipName ||
-                $scholarship->sch_acronym !== $ScholarshipAcronym ||
-                $scholarship->sch_type !== $ScholarshipType ||
-                $scholarship->ext_type !== $ExternalSchType ||
-                $scholarship->sch_provider !== $ScholarshipProvider
+                $scholarship->sch_name !== trim($ScholarshipName) ||
+                $scholarship->sch_acronym !== trim($ScholarshipAcronym) ||
+                $scholarship->sch_type != $ScholarshipType || // <- note loose comparison
+                $scholarship->ext_type != $ExternalSchType || // <- note loose comparison
+                $scholarship->sch_provider !== trim($ScholarshipProvider)
             ) {
                 $hasChanges = true;
             }
 
-            if ($hasChanges) {
+            if (!$hasChanges) {
                 return response()->json(['Error' => 1, 'Message' => "No updates were made because no changes were detected."]);
             }
 
