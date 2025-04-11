@@ -22,9 +22,9 @@ class ScholarDetail extends Model
     protected $fillable = [
         'student_no',
         'scholarship_id',
+        'award_no',
         'date_awarded',
         'bank_account',
-        'contact_no'
     ];
 
     public function __construct()

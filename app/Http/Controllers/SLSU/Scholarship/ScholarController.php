@@ -90,7 +90,6 @@ class ScholarController extends Controller
                     'sch_scholar_enrollments.school_year as SchoolYear',
                     'sch_scholar_enrollments.semester as Semester',
                     'sch_scholar_enrollments.id as enrollment_id',
-                    'sch_scholar_details.contact_no'
                 ]
             );
 
@@ -124,8 +123,8 @@ class ScholarController extends Controller
     {
         $search = $request->searchStudent;
         $id = $request->id;
-        $schoolYear = $request->addSchoolYear;
-        $semester = $request->addSemester;
+        $schoolYear = $request->filterSchoolYear;
+        $semester = $request->filterSemester;
 
         $scholarshipId = Crypt::decryptString($id);
 
@@ -247,9 +246,8 @@ class ScholarController extends Controller
                     $scholarDetailId = DB::connection($campus)->table('sch_scholar_details')->insertGetId([
                         'scholarship_id' => $schId,
                         'student_no' => $studentNo,
-                        'date_awarded' => now(), // assume rani nga karon ang date
-                        'bank_account' => null, // assume nga null sa ang bank account
-                        'contact_no' => null, // assume rani nga contact no, maybe mo kuha ra sa students table
+                        'date_awarded' => now(),
+                        'bank_account' => null,
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
@@ -307,9 +305,9 @@ class ScholarController extends Controller
                     'id' => Crypt::encryptString($scholar->id),
                     'student_no' => $scholar->student_no,
                     'student_name' => $studentName,
+                    'award_no' => $scholar->award_no,
                     'date_awarded' => $scholar->date_awarded,
                     'bank_account' => $scholar->bank_account,
-                    'contact_no' => $scholar->contact_no,
                 ]
             ]);
         } catch (\Exception $e) {
@@ -345,9 +343,9 @@ class ScholarController extends Controller
                 ->table('sch_scholar_details')
                 ->where('id', $scholarId)
                 ->update([
+                    'award_no' => $request->editAwardNo,
                     'date_awarded' => $request->editDateAwarded,
                     'bank_account' => $request->editBankAccount,
-                    'contact_no' => $request->editContactNo,
                     'updated_at' => now()
                 ]);
 
@@ -451,8 +449,8 @@ class ScholarController extends Controller
                     ->insertGetId([
                         'student_no' => $scholar->student_no,
                         'scholarship_id' => $scholar->scholarship_id,
+                        'award_no' => $scholar->award_no,
                         'date_awarded' => $scholar->date_awarded,
-                        'contact_no' => $scholar->contact_no,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);

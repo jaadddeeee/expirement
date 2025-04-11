@@ -16,6 +16,7 @@
                     <input style="cursor: pointer;" class="form-check-input" type="checkbox" id="selectAllScholars">
                 </td>
                 <th>Scholar Name</th>
+                <th>Student No.</th>
                 <th>Course</th>
                 <th>School Year</th>
                 <th>Semester</th>
@@ -31,6 +32,7 @@
                             data-school-year="{{ $scholar->SchoolYear }}" data-semester="{{ $scholar->Semester }}">
                     </td>
                     <td>{{ $scholar->LastName }}, {{ $scholar->FirstName }} {{ $scholar->MiddleName }}</td>
+                    <td>{{ $scholar->StudentNo }}</td>
                     <td>{{ $scholar->Course }}&nbsp;-&nbsp;{{ $scholar->StudentYear }}</td>
                     <td>
                         {{ GENERAL::setSchoolYearLabel($scholar->SchoolYear, $scholar->Semester) }}
@@ -39,22 +41,35 @@
                         {{ GENERAL::Semesters()[$scholar->Semester]['Long'] }}
                     </td>
                     <td>
-                        <!-- Actions -->
+                        <!-- Edit Sholar Details -->
                         <a class="editScholar me-2 text-warning"
                             data-scholar-id="{{ Crypt::encryptString($scholar->id) }}" href="javascript:void(0);"
                             title="Edit Scholar">
                             <i class="bx bx-edit-alt me-1"></i>
                         </a>
+
+                        <!-- Delete Sholar -->
                         <a class="deleteScholar me-2 text-danger"
                             data-scholar-id="{{ Crypt::encryptString($scholar->id) }}" href="javascript:void(0);"
                             title="Delete Scholar">
                             <i class="bx bx-trash me-1"></i>
                         </a>
+
+                        <!-- Generate Scholarship Certificate -->
                         <a class="generateSCHCert text-secondary"
                             data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
                             data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
                             data-school-year="{{ $scholar->SchoolYear }}" data-semester="{{ $scholar->Semester }}"
                             href="javascript:void(0);" title="Generate Scholarship Certificate">
+                            <i class="bx bxs-file-pdf me-1"></i>
+                        </a>
+
+                        <!-- Generate Scholarship Profile Form -->
+                        <a class="generateSCHProfileForm text-secondary"
+                            data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                            data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
+                            data-school-year="{{ $scholar->SchoolYear }}" data-semester="{{ $scholar->Semester }}"
+                            href="javascript:void(0);" title="Generate Scholarship Profile Form">
                             <i class="bx bxs-file-pdf me-1"></i>
                         </a>
                     </td>

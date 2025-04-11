@@ -57,6 +57,19 @@
             });
         }
 
+        function toggleAddScholarButton() {
+            const schoolYear = $('#filterSchoolYear').val();
+            const semester = $('#filterSemester').val();
+
+            if (schoolYear && semester) {
+                $('#addScholarBtnModal').removeClass('d-none'); // Show the button
+            } else {
+                $('#addScholarBtnModal').addClass('d-none'); // Hide the button
+            }
+        }
+
+        toggleAddScholarButton();
+
 
         // Handle filter form submission
         $('#filterForm').on('submit', function(e) {
@@ -77,6 +90,8 @@
                 },
                 success: function(response) {
                     $('#scholarsTable').html(response.scholarsTable);
+
+                    toggleAddScholarButton();
 
                     // Update the URL to include filter parameters
                     let currentUrl = new URL(window.location.href);
@@ -121,17 +136,6 @@
         // add a student to scholarship
         let selectedStudents = [];
 
-        $('#searchStudent').prop('disabled', true);
-
-        // school year and semester change event
-        $('#addSchoolYear, #addSemester').on('change', function() {
-            if ($('#addSchoolYear').val() && $('#addSemester').val()) {
-                $('#searchStudent').prop('disabled', false);
-            } else {
-                $('#searchStudent').prop('disabled', true);
-            }
-        });
-
         // search student
         $('#searchStudent').on('input', function() {
             clearTimeout(searchTimeout);
@@ -139,8 +143,8 @@
             searchTimeout = setTimeout(() => {
                 let scholarshipId = $('#scholarship_id').val();
                 let searchStudent = $('#searchStudent').val().trim();
-                let schoolYear = $('#addSchoolYear').val();
-                let semester = $('#addSemester').val();
+                let schoolYear = $('#filterSchoolYear').val();
+                let semester = $('#filterSemester').val();
 
                 if (searchStudent.length > 1 && schoolYear && semester) {
                     $.ajax({
@@ -149,8 +153,8 @@
                         data: {
                             searchStudent: searchStudent,
                             id: scholarshipId,
-                            addSchoolYear: schoolYear,
-                            addSemester: semester
+                            filterSchoolYear: schoolYear,
+                            filterSemester: semester
                         },
                         success: function(data) {
                             let dropdown = $('#studentResults');
@@ -266,9 +270,23 @@
             $(this).closest('.selected-student').remove();
         });
 
-        // add a scholar can select singe/multiple students
+        // Add a scholar (single/multiple students)
         $('#addScholarBtn').on('click', function(e) {
             e.preventDefault();
+
+            const schoolYear = $('#filterSchoolYear').val();
+            const semester = $('#filterSemester').val();
+
+            // Validate that School Year and Semester are selected
+            if (!schoolYear || !semester) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Filters',
+                    text: 'Please select a School Year and Semester before adding scholars.',
+                    showConfirmButton: true
+                });
+                return;
+            }
 
             $.ajax({
                 url: "{{ route('scholars.store') }}",
@@ -277,8 +295,8 @@
                     _token: "{{ csrf_token() }}",
                     scholarship_id: $('#scholarship_id').val(),
                     students: selectedStudents.map(s => s.studentNo),
-                    schoolYear: $('#addSchoolYear').val(),
-                    semester: $('#addSemester').val()
+                    schoolYear: schoolYear,
+                    semester: semester
                 },
                 beforeSend: function() {
                     $("#addScholarBtn")
@@ -349,9 +367,9 @@
                         $('#id').val(scholar.id);
                         $('#displayStudentNo').text(scholar.student_no);
                         $('#displayStudentName').text(scholar.student_name);
+                        $('#editAwardNo').val(scholar.award_no);
                         $('#editDateAwarded').val(scholar.date_awarded);
                         $('#editBankAccount').val(scholar.bank_account);
-                        $('#editContactNo').val(scholar.contact_no);
 
                         $('#offcanvasEditScholar').offcanvas('show');
                     } else {
@@ -831,6 +849,23 @@
             let semester = $(this).data('semester');
 
             let url = "{{ route('generate-noa') }}" +
+                "?scholar_id=" + encodeURIComponent(scholarId) +
+                "&enrollment_id=" + encodeURIComponent(enrollmentId) +
+                "&school_year=" + encodeURIComponent(schoolYear) +
+                "&semester=" + encodeURIComponent(semester);
+
+            // Open the generated certificate in a new tab (forces the download)
+            window.open(url, '_blank');
+        });
+
+        // generate PDF Scholarship Profile Form
+        $(document).on('click', '.generateSCHProfileForm', function() {
+            let scholarId = $(this).data('scholar-id');
+            let enrollmentId = $(this).data('enrollment-id');
+            let schoolYear = $(this).data('school-year');
+            let semester = $(this).data('semester');
+
+            let url = "{{ route('generate-profile-form') }}" +
                 "?scholar_id=" + encodeURIComponent(scholarId) +
                 "&enrollment_id=" + encodeURIComponent(enrollmentId) +
                 "&school_year=" + encodeURIComponent(schoolYear) +

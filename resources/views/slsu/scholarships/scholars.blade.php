@@ -31,10 +31,11 @@
 
                     <div class="d-flex align-items-center gap-2">
                         {!! $headerAction !!}
-                        <a href="#" class="btn btn-sm btn-success" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasAddScholar" aria-controls="offcanvasBackdrop"> <i
-                                class="fa fa-plus"></i>
-                            Add</a>
+                        <a href="#" id="addScholarBtnModal" class="btn btn-sm btn-success d-none"
+                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddScholar"
+                            aria-controls="offcanvasBackdrop">
+                            <i class="fa fa-plus"></i> Add
+                        </a>
                     </div>
                 </div>
 
@@ -150,7 +151,7 @@
                 <div id="addScholarMsg"></div>
 
                 <!-- School Year Select -->
-                <div>
+                {{-- <div>
                     <label for="schoolYear" class="form-label">School Year</label>
                     <select class="form-select mb-3" id="addSchoolYear" name="addSchoolYear">
                         <option value="" disabled selected>Select School Year</option>
@@ -158,10 +159,10 @@
                             <option value="{{ $year }}">{{ $year }}</option>
                         @endforeach
                     </select>
-                </div>
+                </div> --}}
 
                 <!-- Semester Select -->
-                <div>
+                {{-- <div>
                     <label for="semester" class="form-label">Semester</label>
                     <select class="form-select mb-3" id="addSemester" name="addSemester">
                         <option value="" disabled selected>Select Semester</option>
@@ -169,7 +170,7 @@
                             <option value="{{ $index }}">{{ $sem['Long'] }}</option>
                         @endforeach
                     </select>
-                </div>
+                </div> --}}
 
                 <label for="searchStudent" class="form-label">Search Student to add in Scholarship</label>
 
@@ -242,6 +243,13 @@
                     </div>
                 </div>
 
+                <!-- Award No -->
+                <div class="mb-3">
+                    <label for="editAwardNo" class="form-label">Award No.</label>
+                    <input type="text" class="form-control" id="editAwardNo" name="editAwardNo"
+                        placeholder="Enter Award No.">
+                </div>
+
                 <!-- Date Awarded -->
                 <div class="mb-3">
                     <label for="editDateAwarded" class="form-label">Date Awarded</label>
@@ -251,14 +259,10 @@
                 <!-- Bank Account No -->
                 <div class="mb-3">
                     <label for="editBankAccount" class="form-label">Bank Account No.</label>
-                    <input type="text" class="form-control" id="editBankAccount" name="editBankAccount">
+                    <input type="text" class="form-control" id="editBankAccount" name="editBankAccount"
+                        placeholder="Enter Bank Account No.">
                 </div>
 
-                <!-- Contact No -->
-                <div class="mb-3">
-                    <label for="editContactNo" class="form-label">Contact No.</label>
-                    <input type="text" class="form-control" id="editContactNo" name="editContactNo">
-                </div>
 
                 <!-- Submit Button -->
                 <button type="button" id="btnUpdateScholar" class="btn w-100 mt-2 mb-3"

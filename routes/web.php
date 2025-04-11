@@ -590,6 +590,7 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   Route::post('/scholars/copy-scholars', $controller_path . '\SLSU\Scholarship\ScholarController@copyScholars')->name('scholars.copy-scholars');
   Route::delete('/scholars/delete-scholars', $controller_path . '\SLSU\Scholarship\ScholarController@deleteScholars')->name('scholars.delete-scholars');
 
-  // genererate scholarship certificate
+  // genererate scholarship PDF's
   Route::get('/generate-noa', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipCertificate')->name('generate-noa');
+  Route::get('/generate-profile-form', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipProfileForm')->name('generate-profile-form');
 });
