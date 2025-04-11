@@ -88,6 +88,9 @@ class ChecklistReport extends TCPDF
                 $eventName = str_ireplace('men', '', $eventName);
                 $gender = 'Men';
             }
+
+            $this->setGender(\Str::slug($gender));
+            $this->setSport(\Str::slug($eventName));
         
             return [
                 'SchoolYear' => $item->SchoolYear,
@@ -436,6 +439,46 @@ class ChecklistReport extends TCPDF
     public function setEvent($event)
     {
         $this->event = $event;
+
+        return $this;
+    }
+
+        /**
+     * Get the value of sem
+     */
+    public function getGender()
+    {
+        return $this->gender;
+    }
+
+    /**
+     * Set the value of sem
+     *
+     * @return  self
+     */
+    public function setGender($gender)
+    {
+        $this->gender = $gender;
+
+        return $this;
+    }
+
+            /**
+     * Get the value of sem
+     */
+    public function getSport()
+    {
+        return $this->sport;
+    }
+
+    /**
+     * Set the value of sem
+     *
+     * @return  self
+     */
+    public function setSport($sport)
+    {
+        $this->sport = $sport;
 
         return $this;
     }

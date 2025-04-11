@@ -297,8 +297,10 @@ class ScuaaController extends Controller
             $pdf::SetAutoPageBreak(TRUE,20);
             $pdf->Body();
             $date = $pdf->getDate();
+            $event = $pdf->getSport();
+            $gender = $pdf->getGender();
         
-            $fname = "scuaa-list-".$date.".pdf";
+            $fname = "scuaa-list-".$event."-".$gender."-".$date.".pdf";
         
             $public = "public";
             $directoryPath = 'varsity/scuaa-offcial-entry/';
@@ -308,7 +310,7 @@ class ScuaaController extends Controller
             $filePath = storage_path("app/public/" . $directoryPath . $fname);
             $pdf::Output($filePath,'I');
         
-            return response()->download($filePath);
+            return response()->download($filePath)->deleteFileAfterSend(true);
         }
         catch(Exception $e){
             return response()->json(['Error' => $e->getMessage()], 400);
@@ -348,17 +350,19 @@ class ScuaaController extends Controller
         $pdf::SetAutoPageBreak(TRUE,20);
         $pdf->Body();
         $date = $pdf->getDate();
+        $gender = $pdf->getGender();
+        $event = $pdf->getSport();
     
-        $fname = "checklist-".$date.".pdf";
+        $fname = "checklist-".$event."-".$gender."-".$date.".pdf";
         $public = "public";
         $directoryPath = 'varsity/check-list/';
         if (!Storage::exists($public."/".$directoryPath)) {
             Storage::makeDirectory($public."/".$directoryPath);
         }
         $filePath = storage_path("app/public/" . $directoryPath . $fname);
-        $pdf::Output($filePath,'I');
+        $pdf::Output($filePath,'F');
     
-        return response()->download($filePath);
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
 
     public function scuaaEligibility(Request $request)
@@ -398,10 +402,10 @@ class ScuaaController extends Controller
         }
     
         $filePath = storage_path("app/public/" . $directoryPath . $fname);
-        $pdf::Output($filePath, 'I');
+        $pdf::Output($filePath, 'F');
     
         // Return the file for download
-        return response()->download($filePath);
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
 
     public function destroyAthletes(Request $request)
