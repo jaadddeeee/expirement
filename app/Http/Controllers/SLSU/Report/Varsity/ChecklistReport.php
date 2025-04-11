@@ -75,6 +75,8 @@ class ChecklistReport extends TCPDF
 
             $picture = ('storage/photo/'. strtoupper($student->connection).'/' . $student->Picture);
 
+
+
             // Separate the gender from the event name
             $eventName = optional($item->event)->event ?? 'N/A';
             $gender = null;
@@ -172,6 +174,8 @@ class ChecklistReport extends TCPDF
         $scuaaList = Scuaa::where('Date', 'LIKE', '%' . $startYear . '%')
             ->select('*')
             ->first();
+
+        $this->setDate(\Str::slug($scuaaList->Date));
     
         $this->listAthletes = $this->listVarsity();
         $this->listCoaches = $this->listCoaches();
@@ -287,11 +291,9 @@ class ChecklistReport extends TCPDF
     {
         $event = $this->listAthletes[0] ?? null;
     
-        $date = date('F j, Y');
-    
         $this::SetFont('calibri','',12);
         $this::setXY(295, 32);
-        $this::Cell(1,5,$date,0,0,'C');
+        $this::Cell(1,5,$this->getScreen(),0,0,'C');
         $this::Line(266, 37, 325, 37);
     
         $this::setXY(295, 39);
@@ -299,7 +301,7 @@ class ChecklistReport extends TCPDF
         $this::Cell(1,5,$event['gender'],0,0,'C');
         $this::Line(266, 44, 325, 44);
     
-        $this::SetFont('lucidafax','B',12);
+        $this::SetFont('lucidafaxdemib','',12);
         $this::setXY(265, 25);
         $this::Cell(1,5,$event['event_name'],0,0,'C');
     }
@@ -361,9 +363,9 @@ class ChecklistReport extends TCPDF
     /**
    * Get the value of data
    */
-    public function getData()
+    public function getDate()
     {
-        return $this->data;
+        return $this->date;
     }
 
     /**
@@ -371,9 +373,9 @@ class ChecklistReport extends TCPDF
      *
      * @return  self
      */
-    public function setData($data)
+    public function setDate($date)
     {
-        $this->data = $data;
+        $this->date = $date;
 
         return $this;
     }
@@ -381,9 +383,9 @@ class ChecklistReport extends TCPDF
     /**
      * Get the value of id
      */
-    public function getId()
+    public function getScreen()
     {
-        return $this->id;
+        return $this->screen;
     }
 
     /**
@@ -391,9 +393,9 @@ class ChecklistReport extends TCPDF
      *
      * @return  self
      */
-    public function setId($id)
+    public function setScreen($screen)
     {
-        $this->id = $id;
+        $this->screen = $screen;
 
         return $this;
     }

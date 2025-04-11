@@ -25,6 +25,39 @@ class EligibilityForm extends TCPDF
         $this->pref = $this->prefs->GetDefaults();
     }
 
+    private function physician()
+    {
+        $defaultName = $this->prefs->GetDefaultValue($this->pref, "Physician");
+
+        // Remove suffixes (anything after the first comma)
+        $cleanedName = explode(',', $defaultName)[0];
+
+        // Split into parts
+        $nameParts = preg_split('/\s+/', trim($cleanedName));
+
+        // Extract name components
+        $lastName = strtoupper(array_pop($nameParts)); 
+        $firstName = strtoupper(array_shift($nameParts));  
+        $middleInitial = strtoupper(!empty($nameParts) ? strtoupper(substr($nameParts[0], 0, 1)) : null);
+        
+        $query = DB::connection('clinic')
+            ->table('doctors')
+            ->where('FirstName', $firstName)
+            ->where(DB::raw("TRIM(SUBSTRING_INDEX(LastName, ',', 1))"), '=', $lastName)
+            ->whereIn('campus', [1]);
+
+        // Add MiddleName condition only if a middle initial is present
+        if ($middleInitial) {
+            $query->where(DB::raw('LEFT(MiddleName, 1)'), '=', $middleInitial);
+        }
+
+        // Execute the query
+        $physician = $query->first();
+
+        return $physician;
+
+    }
+
     private function listVarsity()
     {
         $query = ListVarsity::with('event')
@@ -76,11 +109,13 @@ class EligibilityForm extends TCPDF
             $address = $student->p_street . ', ' . $student->p_municipality . ', ' . $student->p_province . ', ' . $student->p_zip ?? 'N/A';
     
             $age = date_diff(date_create($dob), date_create('today'))->y;
+
+            $this->setName(\Str::slug($student->LastName.'-'.$student->FirstName));
     
             return [
                 'FullName'  => strtoupper($fullName),
-                'DOB'        => $dob,
-                'Address'    => $address,
+                'DOB'        => $dob ?? 'N/A',
+                'Address'    => $address ?? 'N/A',
                 'ContactNo'  => $student->ContactNo ?? 'N/A',
                 'EmergencyName' => $student->emer_name ?? 'N/A',
                 'EmergencyContact' => $student->emer_contact ?? 'N/A',
@@ -100,7 +135,17 @@ class EligibilityForm extends TCPDF
     
     public function Header()
     {
+        $startYear = date('Y'); // Get the current year
+
+        // Fetch the ScuaaLogo where the Date column contains the current year
+        $scuaaList = Scuaa::where('Date', 'LIKE', '%' . $startYear . '%')
+            ->select('*')
+            ->first();
+
+        $this->setDate(\Str::slug($scuaaList->Date));
+
         $this->listAthletes = $this->listVarsity();
+        $this->physician = $this->physician();
         $this->letter->ScuaaHeader();
 
         $this::setXY(184, 2);
@@ -110,6 +155,17 @@ class EligibilityForm extends TCPDF
 
     private function headerLable()
     {
+        $physician = $this->physician ?? null;
+
+        // dd($this->getStatus());
+
+        if($this->getStatus() === '0'){
+            $physician = null;
+            $fullname = '';
+        } else {
+            $fullname = $physician->FirstName . ' ' . $physician->MiddleName . ' ' . $physician->LastName;
+        }
+
         $startYear = date('Y'); // Get the current year
 
         // Fetch the ScuaaLogo where the Date column contains the current year
@@ -134,7 +190,8 @@ class EligibilityForm extends TCPDF
             ['CONTACT NO:', 145, 0, 11, 'L'],
         ];
 
-        foreach ($labels as $label) {
+        foreach ($labels as $label) 
+        {
             [$text, $xOffset, $yOffset, $fontSize, $align] = $label;
             $x += $xOffset;
             $y += $yOffset;
@@ -155,14 +212,14 @@ class EligibilityForm extends TCPDF
         $this::Cell(30, 10, 'This is to certify that:', 0, 0, 'C');
 
         $this::SetFont('calibri', '', 10.5);
-        $this::writeHTMLCell(0,0,$x + 0.2,$y + 67,'<span>is <strong>Physically Fit</strong> to participate in the;</span>',0, 1,false,true,'L');
+        $this::writeHTMLCell(0,0,$x + 0.2,$y + 64,'<span>is <strong>Physically Fit</strong> to participate in the;</span>',0, 1,false,true,'L');
 
         $this::SetFont('calibri', '', 10);
         $html ='<div style="text-align: justify;">
-                    <span style="font-family:calibri;">[ √ ]</span> <span style="font-family:times new roman;"><strong><i>REGIONAL SCUAA GAMES '. $startYear .'</i></strong> on <strong><i>'. $scuaaList->Date .'</i></strong>
-                    at <strong><i>'. $scuaaList->University .'</i></strong>, '. $scuaaList->Location .'.</span>
+                    <p><span style="font-family:calibri;">[ √ ]</span> <span style="font-family:times new roman;"><strong><i>REGIONAL SCUAA GAMES '. $startYear .'</i></strong> on <strong><i>'. $scuaaList->Date .'</i></strong>
+                    at <strong><i>'. $scuaaList->University .'</i></strong>, '. $scuaaList->Location .'.</span></p>
                 </div>';
-        $this::writeHTMLCell(97,0, $x, $y + 73,$html,0, 1,false,true,'L');
+        $this::writeHTMLCell(97,0, $x, $y + 64,$html,0, 1,false,true,'L');
 
         $this::setXY($x - 2.5, $y + 85);
         $this::Cell(30, 10, 'Blood Pressure:', 0, 0, 'C');
@@ -176,7 +233,11 @@ class EligibilityForm extends TCPDF
 
         $this::setXY($x + 49.5, $y + 96);
         $this::SetFont('calibrib', '', 14);
-        $this::Cell(30, 10, strtoupper($this->prefs->GetDefaultValue($this->pref, "Physician")), 0, 0, 'C');
+        $this::Cell(30, 10, $fullname, 0, 0, 'C');
+
+        $this::setXY($x + 33, $y + 113);
+        $this::SetFont('calibrib', '', 11);
+        $this::Cell(30, 10, $physician->license ?? '', 0, 0, 'C');
 
         $this::setXY($x + 27, $y + 106.5);
         $this::SetFont('calibri', '', 10);
@@ -195,13 +256,13 @@ class EligibilityForm extends TCPDF
         $this::AddFont('calibri', 'BI', 'calibribi.php');
         $this::SetFont('calibri', '', 10);
         $html = '<div style="text-align: justify;">
-                    In consideration of the acceptance of my entry, myself, my heirs, executors, administrators & assigns, do hereby release & discharge the organizers of the 
+                    <p>In consideration of the acceptance of my entry, myself, my heirs, executors, administrators & assigns, do hereby release & discharge the organizers of the 
                     <strong><i>REGIONAL SCUAA GAMES '. $startYear .'</i></strong>, assisting groups of private or government agencies, the Commission on Higher Education and other concerned institutions, respective schools and officials, and other parties, individual or group, from all claims and damages, demands or actions whatsoever in any manner arising from of growing out of my participation in, or while traveling to and from the above-mentioned sports competition. 
                     I further attest and verify that I have obtained the necessary clearance from my medical doctor and guaranteed 
-                    <strong><i>Physically Fit</i></strong> to participate in the said sports competition.
+                    <strong><i>Physically Fit</i></strong> to participate in the said sports competition.</p>
                 </div>';
         
-        $this::writeHTMLCell(99, 0, $x + 100, $y + 48, $html, 0, 1, false, true, 'L');
+        $this::writeHTMLCell(99, 0, $x + 100, $y + 40, $html, 0, 1, false, true, 'L');
         
         $this::setXY($x + 134, $y + 115);
         $this::SetFont('calibrib', '', 10);
@@ -214,22 +275,22 @@ class EligibilityForm extends TCPDF
 
         $this::SetFont('calibri', '', 11);
         $html = '<div style="text-align: justify; word-wrap: break-word; line-height: 1.2;">
-                    This is to certify that I have full knowledge of and permission for my son/daughter/foster child to join and participate in the following competitions:
+                    <p>This is to certify that I have full knowledge of and permission for my son/daughter/foster child to join and participate in the following competitions:</p>
                 </div>';
-        $this::writeHTMLCell(198, 0, $x , $y + 138, $html, 0, 1, false, true, 'L');
+        $this::writeHTMLCell(198, 0, $x , $y + 128, $html, 0, 1, false, true, 'L');
         
         $this::SetFont('calibri', '', 10);
         $html ='<div style="text-align: justify;">
-                    <span style="font-family:calibri;">[ √ ]</span> <span style="font-family:times new roman;"><strong><i>REGIONAL SCUAA GAMES '. $startYear .'</i></strong> on <strong><i>'. $scuaaList->Date .'</i></strong>
-                    at <strong><i>'. $scuaaList->University .'</i></strong>, '. $scuaaList->Location .'.</span>
+                    <p><span style="font-family:calibri;">[ √ ]</span> <span style="font-family:times new roman;"><strong><i>REGIONAL SCUAA GAMES '. $startYear .'</i></strong> on <strong><i>'. $scuaaList->Date .'</i></strong>
+                    at <strong><i>'. $scuaaList->University .'</i></strong>, '. $scuaaList->Location .'.</span></p>
                 </div>';
-        $this::writeHTMLCell(198,0, $x, $y + 155,$html,0, 1,false,true,'L');
+        $this::writeHTMLCell(198,0, $x, $y + 146, $html,0, 1,false,true,'L');
         
         $this::SetFont('calibri', '', 11);
         $html = '<div style="text-align: justify; word-wrap: break-word; line-height: 1.2;">
-                    I concur and agree on the rules, policies and regulations being implemented by the concerned organizers.
+                    <p>I concur and agree on the rules, policies and regulations being implemented by the concerned organizers.</p>
                 </div>';
-        $this::writeHTMLCell(198, 0, $x , $y + 168, $html, 0, 1, false, true, 'L');
+        $this::writeHTMLCell(198, 0, $x , $y + 158.5, $html, 0, 1, false, true, 'L');
 
         $this::setXY($x + 33, $y + 184);
         $this::SetFont('calibrib', '', 11);
@@ -252,7 +313,8 @@ class EligibilityForm extends TCPDF
     {
         $columns = 95;
         $columnSpacing = 2;
-        for ($j = 0; $j < $columns; $j++) {
+        for ($j = 0; $j < $columns; $j++) 
+        {
             $this::setXY($dashX, $dashY);
             $this::SetFont('calibri', '', 10);
             $this::Cell(10, 0, "=", 0, 0, 'C');
@@ -370,6 +432,7 @@ class EligibilityForm extends TCPDF
 
     public function Body()
     {
+        // dd($this->getStatus());
         $x = 15;
         $y = 8;
         $dashX = 6;
@@ -487,9 +550,9 @@ class EligibilityForm extends TCPDF
     /**
      * Get the value of sy
      */
-    public function getSy()
+    public function getDate()
     {
-        return $this->sy;
+        return $this->date;
     }
 
     /**
@@ -497,9 +560,9 @@ class EligibilityForm extends TCPDF
      *
      * @return  self
      */
-    public function setSy($sy)
+    public function setDate($date)
     {
-        $this->sy = $sy;
+        $this->date = $date;
 
         return $this;
     }
@@ -507,9 +570,9 @@ class EligibilityForm extends TCPDF
     /**
      * Get the value of sem
      */
-    public function getEvent()
+    public function getStatus()
     {
-        return $this->event;
+        return $this->status;
     }
 
     /**
@@ -517,9 +580,29 @@ class EligibilityForm extends TCPDF
      *
      * @return  self
      */
-    public function setEvent($event)
+    public function setStatus($status)
     {
-        $this->event = $event;
+        $this->status = $status;
+
+        return $this;
+    }
+    
+        /**
+     * Get the value of sem
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set the value of sem
+     *
+     * @return  self
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
 
         return $this;
     }

@@ -270,11 +270,19 @@ class ScuaaController extends Controller
             if(!$request->has('filterSchoolYear') || $request->filterSchoolYear == '0'){
                 throw new Exception('Please select an school year.');
             }
-    
+            $date = $request->date;
+            $dates = explode(" to ", $date);
+            if (count($dates) != 2) {
+                throw new Exception('Invalid date range format');
+            }
+            $startDate = date('F j', strtotime($dates[0]));
+            $endDate = date('j, Y', strtotime($dates[1]));
+            $formattedDate = $startDate . '-' . $endDate;
+
             $pdf = new ScuaaReport('P', 'cm', array(330.2, 215.9));
-            $pdf->setId($request->DateOfGraduation);
             $pdf->setSy($request->filterSchoolYear);
             $pdf->setEvent($request->filterEvent);
+            $pdf->setScreen($formattedDate);
         
             // HEADER
         
@@ -284,27 +292,23 @@ class ScuaaController extends Controller
         
             });
         
-            // $pdf::setFooterCallback(function($p) use ($pdf){
-            //   $pdf->Footer();
-            // });
-        
             $pdf::AddPage('L', array(215.9, 330.2));
             $pdf::SetTopMargin(57);
             $pdf::SetAutoPageBreak(TRUE,20);
             $pdf->Body();
-            $date = \Str::slug($request->DateOfGraduation);
+            $date = $pdf->getDate();
         
-            $fname = "scuaalist-".$date.".pdf";
+            $fname = "scuaa-list-".$date.".pdf";
         
-            // $public = "public";
-            // $directoryPath = 'prcgraduation/'.session('campus');
-            // if (!Storage::exists($public."/".$directoryPath)) {
-            //   Storage::makeDirectory($public."/".$directoryPath);
-            // }
+            $public = "public";
+            $directoryPath = 'varsity/scuaa-offcial-entry/';
+            if (!Storage::exists($public."/".$directoryPath)) {
+                Storage::makeDirectory($public."/".$directoryPath);
+            }
+            $filePath = storage_path("app/public/" . $directoryPath . $fname);
+            $pdf::Output($filePath,'I');
         
-            $pdf::Output(storage_path($fname),'I');
-        
-            // return response()->download($fname);
+            return response()->download($filePath);
         }
         catch(Exception $e){
             return response()->json(['Error' => $e->getMessage()], 400);
@@ -314,7 +318,17 @@ class ScuaaController extends Controller
     public function scuaaChecklist(Request $request)
     {
         $pdf = new ChecklistReport('P', 'cm', array(330.2, 215.9));
-        $pdf->setId($request->DateOfGraduation);
+
+        $date = $request->date;
+        $dates = explode(" to ", $date);
+        if (count($dates) != 2) {
+            throw new Exception('Invalid date range format');
+        }
+        $startDate = date('F j', strtotime($dates[0]));
+        $endDate = date('j, Y', strtotime($dates[1]));
+        $formattedDate = $startDate . '-' . $endDate;
+
+        $pdf->setScreen($formattedDate);
         $pdf->setSy($request->filterSchoolYear);
         $pdf->setEvent($request->filterEvent);
     
@@ -333,67 +347,61 @@ class ScuaaController extends Controller
         $pdf::SetTopMargin(57);
         $pdf::SetAutoPageBreak(TRUE,20);
         $pdf->Body();
-        $date = \Str::slug($request->DateOfGraduation);
+        $date = $pdf->getDate();
     
         $fname = "checklist-".$date.".pdf";
+        $public = "public";
+        $directoryPath = 'varsity/check-list/';
+        if (!Storage::exists($public."/".$directoryPath)) {
+            Storage::makeDirectory($public."/".$directoryPath);
+        }
+        $filePath = storage_path("app/public/" . $directoryPath . $fname);
+        $pdf::Output($filePath,'I');
     
-        // $public = "public";
-        // $directoryPath = 'prcgraduation/'.session('campus');
-        // if (!Storage::exists($public."/".$directoryPath)) {
-        //   Storage::makeDirectory($public."/".$directoryPath);
-        // }
-    
-        $pdf::Output(storage_path($fname),'I');
-    
-        // return response()->download($fname);
+        return response()->download($filePath);
     }
 
     public function scuaaEligibility(Request $request)
     {
-        try{
+        try {
             $id = Crypt::decryptstring($request->id);
-    
-        }catch(DecryptException $e){
+            $status = $request->status;
+        } catch (DecryptException $e) {
             session(['ErrorBlob' => "Invalid Hash"]);
-            return false;
+            return response()->json(['error' => "Invalid Hash"], 400);
         }
-        
-        $pdf = new EligibilityForm('P', 'cm', array(215.9,330.2));
+    
+        $pdf = new EligibilityForm('P', 'cm', array(215.9, 330.2));
         $pdf->setId($id);
-        // dd($id);
-        // HEADER
+        $pdf->setStatus($status);
     
-    
-        $pdf::setHeaderCallback(function($p) use ($pdf){
+        // Set up the PDF
+        $pdf::setHeaderCallback(function ($p) use ($pdf) {
             $pdf->Header();
-    
         });
-    
-        // $pdf::setFooterCallback(function($p) use ($pdf){
-        //     $pdf->Footer();
-        // });
-    
-    
     
         $pdf::AddPage();
         $pdf::SetTopMargin(40);
         $pdf::SetLeftMargin(15);
         $pdf::SetRightMargin(15);
-        $pdf::SetAutoPageBreak(TRUE,10);
+        $pdf::SetAutoPageBreak(TRUE, 10);
         $pdf->Body();
-        $date = \Str::slug($request->DateOfGraduation);
     
-        $fname = "eligibility-".$date.".pdf";
+        $date = $pdf->getDate();
+        $fname = $pdf->getName() . "-eligibility-" . $date . ".pdf";
+        $directoryPath = 'varsity/scuaa-eligibility/';
+        $public = "public";
     
-        // $public = "public";
-        // $directoryPath = 'prcgraduation/'.session('campus');
-        // if (!Storage::exists($public."/".$directoryPath)) {
-        //   Storage::makeDirectory($public."/".$directoryPath);
-        // }
+        // Ensure the directory exists
+        if (!Storage::exists($public . "/" . $directoryPath)) {
+            Storage::makeDirectory($public . "/" . $directoryPath);
+        }
     
-        $pdf::Output(storage_path($fname),'I');
+        $filePath = storage_path("app/public/" . $directoryPath . $fname);
+        $pdf::Output($filePath, 'I');
     
-        // return response()->download($fname);
+        // Return the file for download
+        return response()->download($filePath);
     }
 
     public function destroyAthletes(Request $request)

@@ -18,8 +18,8 @@
                 <i class="text-danger bx bx-trash"></i>
             </a>
             &nbsp;
-            <a href="{{ route('generate.eligibility', ['id' => Crypt::encryptstring($list->id)]) }}">
-                <i class='bx bxs-file-pdf'></i>
+            <a href="#" id="generateEli" cid="{{ Crypt::encryptString($list->id) }}">
+                <i class='bx text-success bx-download'></i>
             </a>
         </td>
     </tr>

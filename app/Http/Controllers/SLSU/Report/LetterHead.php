@@ -188,18 +188,19 @@ class LetterHead extends TCPDF
 
     $x = 20;
     $yl = 3;
-    $y=11;
+    $y=8;
     $this::SetTextColor(0,0,0);
     $this::Image($logoPath, $x, $yl, 24.9, 25);
-    $x+=35;
+    $x+=28;
     $this::setXY($x, $y);
     $this::SetFont('arialb','',16);
     $this::Cell(30,5,$title,0,0,'L');
-    $y+=8;
-    $this::setXY($x, $y);
-    $this::SetFont('lucidafax','',10);
-    $this::Cell(30,5,$dateLocation,0,0,'L');
-    $this::SetFont("cambria",'',8);
+    $y-=1;
+    $this::SetFont('lucidafaxdemib', '', 10);
+    $html = '<div style="text-align: justify; word-wrap: break-word; line-height: 1.2;">
+                <p>'.$dateLocation.'sdfsdf fsfsf sersfs erwsr</p>
+            </div>';
+    $this::writeHTMLCell(156, 0, $x , $y, $html, 0, 1, false, true, 'L');
 
     // Add vertical line
     $this::SetLineWidth(0.4);
@@ -216,7 +217,7 @@ class LetterHead extends TCPDF
 
     // Add "OFFICIAL ENTRY FORM AND GALLERY OF" text with border
     $this::setXY(228, 14);
-    $this::SetFont('lucidafax','B',11);
+    $this::SetFont('lucidafaxdemib','',11);
     $this::Cell(70, 15, 'OFFICIAL ENTRY FORM AND GALLERY OF', 0, 0, 'C');
   }
 

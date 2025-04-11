@@ -600,7 +600,7 @@ Route::group(['prefix' => 'varsity', 'middleware' => ['auth', 'varsity']], funct
   Route::post('/set-scuaa', $controller_path . '\SLSU\VARSITY\ScuaaController@setScuaa');
   Route::get('/generate/list', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaList')->name('generate.list');
   Route::get('/generate/checklist', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaChecklist')->name('generate.checklist');
-  Route::get('/generate/eligibility', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaEligibility')->name('generate.eligibility');
+  Route::GET('/generate/eligibility', $controller_path . '\SLSU\VARSITY\ScuaaController@scuaaEligibility')->name('generate.eligibility');
   Route::post('/delete-coaches', $controller_path . '\SLSU\VARSITY\ScuaaController@destroyCoaches');
   Route::post('/delete-athletes', $controller_path . '\SLSU\VARSITY\ScuaaController@destroyAthletes');
 });

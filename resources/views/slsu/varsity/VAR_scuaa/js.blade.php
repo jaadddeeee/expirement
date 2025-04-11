@@ -163,88 +163,143 @@
     $("#btnGenerateList").on("click", function (e) {
         e.preventDefault();
 
-        var filterEvent = $("#filterEvent").val();
-        var filterSchoolYear = $("#filterSchoolYear").val();
+        const toggleSwitch = `
+            <label class="form-label">Date Screening:</label>
+            <input type="text" name="screenDate" id="dateRange" placeholder="YYYY-MM-DD to YYYY-MM-DD" class="form-control flatpickr-input text-decoration-none">
+        `;
 
-        $.ajax({
-            url: "{{ route('generate.list') }}",
-            method: "GET",
-            data: {
-                filterEvent: filterEvent,
-                filterSchoolYear: filterSchoolYear,
-            },
-            success: function (response) {
-                window.open(response.url, '_blank'); // Open the generated PDF
-            },
-            error: function (xhr) {
-            // Parse the error response
-                var response = xhr.responseJSON;
-
-                // Show SweetAlert with the error message
-                Swal.fire({
-                    icon: "error",
-                    title: "Error!",
-                    text: response.Error,
+        Swal.fire({
+            title: "Generate Scuaa List",
+            width: 390,
+            html: toggleSwitch,
+            showCancelButton: true,
+            confirmButtonText: "Generate",
+            didOpen: () => {
+                flatpickr("#dateRange", {
+                    mode: "range",
+                    dateFormat: "Y-m-d", 
+                    minDate: "today", 
                 });
-            },
+        },
+        }).then((result) => {
+        if (result.isConfirmed) {
+
+            let filterEvent = $("#filterEvent").val();
+            let filterSchoolYear = $("#filterSchoolYear").val();
+            let dateRange = $("#dateRange").val(); // Get the selected date range
+
+            if(dateRange == "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please select Date Screening!',
+                });
+                return;
+            }
+
+            let url = "{{ route('generate.list') }}" +
+                "?filterSchoolYear=" + encodeURIComponent(filterSchoolYear) +
+                "&filterEvent=" + encodeURIComponent(filterEvent) + 
+                "&date=" + encodeURIComponent(dateRange);
+
+            // Open the generated certificate in a new tab (forces the download)
+            window.open(url, '_blank');
+            }
         });
     });
 
     $("#btnGenerateChecklist").on("click", function (e) {
         e.preventDefault();
 
-        var filterEvent = $("#filterEvent").val();
-        var filterSchoolYear = $("#filterSchoolYear").val();
+        const toggleSwitch = `
+            <label class="form-label">Date Screening:</label>
+            <input type="text" name="screenDate" id="dateRange" placeholder="YYYY-MM-DD to YYYY-MM-DD" class="form-control flatpickr-input text-decoration-none">
+        `;
 
-        $.ajax({
-            url: "{{ route('generate.checklist') }}",
-            method: "GET",
-            data: {
-                filterEvent: filterEvent,
-                filterSchoolYear: filterSchoolYear,
-            },
-            success: function (response) {
-                window.open(response.url, '_blank'); // Open the generated PDF
-            },
-            error: function (xhr) {
-            // Parse the error response
-                var response = xhr.responseJSON;
-
-                // Show SweetAlert with the error message
-                Swal.fire({
-                    icon: "error",
-                    title: "Error!",
-                    text: response.Error,
+        Swal.fire({
+            title: "Generate Check List",
+            width: 390,
+            html: toggleSwitch,
+            showCancelButton: true,
+            confirmButtonText: "Generate",
+            didOpen: () => {
+                flatpickr("#dateRange", {
+                    mode: "range",
+                    dateFormat: "Y-m-d", 
+                    minDate: "today", 
                 });
-            },
+        },
+        }).then((result) => {
+        if (result.isConfirmed) {
+
+            let filterEvent = $("#filterEvent").val();
+            let filterSchoolYear = $("#filterSchoolYear").val();
+            let dateRange = $("#dateRange").val(); // Get the selected date range
+
+            if(dateRange == "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please select Date Screening!',
+                });
+                return;
+            }
+
+            let url = "{{ route('generate.checklist') }}" +
+                "?filterSchoolYear=" + encodeURIComponent(filterSchoolYear) +
+                "&filterEvent=" + encodeURIComponent(filterEvent) + 
+                "&date=" + encodeURIComponent(dateRange);
+
+            // Open the generated certificate in a new tab (forces the download)
+            window.open(url, '_blank');
+            }
         });
     });
 
-    // $("#generateEli").on("click", function (e) {
-    //     e.preventDefault();
-    //     let id = $(this).attr("cid");
-    //     $.ajax({
-    //         url: "{{ route('generate.eligibility') }}",
-    //         method: "GET",
-    //         data: {
-    //             id,
-    //         },
-    //         success: function (response) {
-    //             window.open(response.url, '_blank'); // Open the generated PDF
-    //         },
-    //         error: function (xhr) {
-    //         // Parse the error response
-    //             var response = xhr.responseJSON;
+    $(document).on("click", "#generateEli", function () {
+        const toggleSwitch = `
+            <label class="switch" style="margin: 10px 0;">
+                <input type="checkbox" id="generateToggle">
+                <span class="slider"></span>
+            </label>
+        `;
 
-    //             // Show SweetAlert with the error message
-    //             Swal.fire({
-    //                 icon: "error",
-    //                 title: "Error!",
-    //                 text: response.Error,
-    //             });
-    //         },
-    //     });
-    // });
+        // Display SweetAlert with the toggle switch
+        Swal.fire({
+            title: "Generate Eligibility",
+            width: 390,
+            text: "In Campus / Off Campus",
+            html: '<small id="toggleText">Off Campus</small><br>' + toggleSwitch,
+            showCancelButton: true,
+            confirmButtonText: "Generate",
+            didOpen: () => {
+                const toggle = document.querySelector("#generateToggle");
+                const toggleText = document.querySelector("#toggleText");
+
+                // Add event listener to the toggle switch
+                toggle.addEventListener("change", function () {
+                    if (this.checked) {
+                        toggleText.innerHTML = "In Campus";
+                    } else {
+                        toggleText.innerHTML = "Off Campus";
+                    }
+                });
+            },
+        }).then((result) => {
+        if (result.isConfirmed) {
+
+            let toggleState = document.querySelector("#generateToggle").checked ? 1 : 0;
+            let id = $(this).attr("cid");
+
+            let url = "{{ route('generate.eligibility') }}" +
+                "?id=" + encodeURIComponent(id) +
+                "&status=" + encodeURIComponent(toggleState);
+
+            // Open the generated certificate in a new tab (forces the download)
+            window.open(url, '_blank');
+            }
+        });
+    });
 
     $(document).on("click", "#deleteCoaches", function(e) {
         e.preventDefault();

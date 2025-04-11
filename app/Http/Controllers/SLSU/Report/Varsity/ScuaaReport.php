@@ -163,6 +163,8 @@ class ScuaaReport extends TCPDF
         ->select('*')
         ->first();
 
+    $this->setDate(\Str::slug($scuaaList->Date));
+
       $this->listAthletes = $this->listVarsity();
       $this->listCoaches = $this->listCoaches();
       $this->letter->ScuaaHeaderLandScape();
@@ -181,9 +183,9 @@ class ScuaaReport extends TCPDF
       $this::Cell(1,5,'Date of Screening:',0,0,'C');
 
       $startY -= 1.9;
-      $this::setXY(73, $startY);
-      $this::SetFont('lucidafax','BU',14);
-      $this::Cell(1,5,strtoupper($scuaaList->University),0,1,'C');
+      $this::setXY(28, $startY);
+      $this::SetFont('lucidafaxdemib','U',14);
+      $this::Cell(2,5,strtoupper($scuaaList->University),0,1,'L');
 
       $this::setXY(304, 12);
       $this::SetFont('calibri','',10);
@@ -192,13 +194,13 @@ class ScuaaReport extends TCPDF
 
   private function drawCategory()
   {
-    $event = $this->listAthletes[0] ?? null;
 
-    $date = date('F j, Y');
+    // dd($this->getScreen());
+    $event = $this->listAthletes[0] ?? null;
 
     $this::SetFont('calibri','',12);
     $this::setXY(295, 32);
-    $this::Cell(1,5,$date,0,0,'C');
+    $this::Cell(1,5,$this->getScreen(),0,0,'C');
     $this::Line(266, 37, 325, 37);
 
     $this::setXY(295, 39);
@@ -206,7 +208,7 @@ class ScuaaReport extends TCPDF
     $this::Cell(1,5,$event['gender'],0,0,'C');
     $this::Line(266, 44, 325, 44);
 
-    $this::SetFont('lucidafax','B',12);
+    $this::SetFont('lucidafaxdemib','',12);
     $this::setXY(265, 25);
     $this::Cell(1,5,$event['event_name'],0,0,'C');
   }
@@ -427,9 +429,9 @@ class ScuaaReport extends TCPDF
         /**
    * Get the value of data
    */
-  public function getData()
+  public function getDate()
   {
-    return $this->data;
+    return $this->date;
   }
 
   /**
@@ -437,9 +439,9 @@ class ScuaaReport extends TCPDF
    *
    * @return  self
    */
-  public function setData($data)
+  public function setDate($date)
   {
-    $this->data = $data;
+    $this->date = $date;
 
     return $this;
   }
@@ -447,9 +449,9 @@ class ScuaaReport extends TCPDF
   /**
    * Get the value of id
    */
-  public function getId()
+  public function getScreen()
   {
-    return $this->id;
+    return $this->screen;
   }
 
   /**
@@ -457,9 +459,9 @@ class ScuaaReport extends TCPDF
    *
    * @return  self
    */
-  public function setId($id)
+  public function setScreen($screen)
   {
-    $this->id = $id;
+    $this->screen = $screen;
 
     return $this;
   }
