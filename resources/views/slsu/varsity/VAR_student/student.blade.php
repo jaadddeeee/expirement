@@ -76,7 +76,7 @@
                 </div>
                 @if (session('campus') == 'SG')
                     <div class="d-flex justify-content-start container-xxl gap-2">
-                        <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" id="btn-list">Add SCUAA list</a>
+                        <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" id="btn-list">Add SCUAA list <span id="selected-row" style="--bs-text-opacity: .5;"></span></a>
                     </div>
                 @endif
 
@@ -169,14 +169,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- <div class="d-flex justify-content-end mt-2">
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination pagination-sm">
-                                    {{ $varsities->appends(request()->query())->links() }}
-                                </ul>
-                            </nav>
-                        </div> --}}
                     </div>
                 </div>
             </div>

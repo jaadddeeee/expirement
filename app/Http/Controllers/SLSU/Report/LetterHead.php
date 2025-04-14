@@ -181,8 +181,7 @@ class LetterHead extends TCPDF
         ->select('*')
         ->first();
 
-        preg_match('/\d{4}/', $scuaaList->Date, $matches);
-        $title = $scuaaList->Title . ' ' . ($matches ? $matches[0] : '');
+        $title = $scuaaList->Title;
         $dateLocation = $scuaaList->Date .', '. $scuaaList->University .', '. $scuaaList->Location;
         $logoPath = ('storage/' . $scuaaList->ScuaaLogo);
 

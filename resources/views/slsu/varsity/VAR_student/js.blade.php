@@ -411,9 +411,26 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         var selectAllCheckbox = document.getElementById('select-all');
+        const selectedCountElement = document.getElementById('selected-row');
 
         function getCheckboxes() {
             return document.querySelectorAll('.select-row');
+        }
+
+        function selectedCount() {
+            var checkboxes = getCheckboxes();
+            var checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+
+            // If no checkboxes are selected, set the count to null or an empty string
+            if (checkedCount === 0) {
+                selectedCountElement.textContent = "";
+                selectedCountElement.classList.remove("border", "px-1", "rounded", "text-dark");
+                selectedCountElement.style.border = "none";
+            } else {
+                selectedCountElement.textContent = checkedCount;
+                selectedCountElement.classList.add("px-1", "rounded", "text-dark");
+                selectedCountElement.style.border = "1px solid rgba(0, 0, 0, 0.3)"; // Add border with 50% opacity
+            }
         }
 
         function restoreCheckboxStates() {
@@ -442,6 +459,7 @@
                 checkbox.checked = isChecked;
                 localStorage.setItem('checkbox_' + checkbox.value, isChecked);
             });
+            selectedCount();
         });
 
         // Handle individual row checkbox changes
@@ -449,11 +467,13 @@
             if (event.target.classList.contains('select-row')) {
                 localStorage.setItem('checkbox_' + event.target.value, event.target.checked);
                 updateSelectAllState();
+                selectedCount();
             }
         });
 
         // Restore checkbox states on page load
         restoreCheckboxStates();
+        selectedCount();
 
         // Handle pagination: Restore checkbox states when the page changes
         document.addEventListener('pageChange', function () {
