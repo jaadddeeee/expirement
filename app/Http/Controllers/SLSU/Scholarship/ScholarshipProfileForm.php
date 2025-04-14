@@ -7,31 +7,24 @@ use App\Http\Controllers\SLSU\Report\LetterHead;
 use Illuminate\Contracts\Encryption\DecryptException;
 
 use Illuminate\Support\Facades\DB;
+use DateTime;
+
 
 
 use GENERAL;
 
 class ScholarshipProfileForm extends TCPDF
 {
-    protected $id;
-    protected $letter;
-    protected $studentName;
-    protected $courseYear;
-    protected $studentNo;
-    protected $scholarship;
+    protected $id, $letter, $studentName, $semester, $schoolYear;
 
-    protected $semester;
-    protected $schoolYear;
-    protected $date;
-    protected $schEnrollmentId;
-    protected $course;
+    // Student Info
+    protected $studentNo, $email, $contactNo, $age, $birthDate, $birthPlace, $sex, $civilStatus, $citizenship, $motherName, $fatherName, $motherOccu, $fatherOccu;
 
-    protected $major;
+    // Academic Info
+    protected $course, $major, $section, $scholarship, $schEnrollmentId;
 
-    protected $section;
-
-    protected $contactNo;
-    protected $Email;
+    // Address
+    protected $p_address, $zipCode;
 
     public function __construct()
     {
@@ -67,6 +60,19 @@ class ScholarshipProfileForm extends TCPDF
                     'students.Section',
                     'students.ContactNo',
                     'students.email',
+                    'students.BirthDate',
+                    'students.Birthplace',
+                    'students.Sex',
+                    'students.civil_status',
+                    'students.nationality',
+                    'students.mother_name',
+                    'students.mother_occu',
+                    'students.father_name',
+                    'students.father_occu',
+                    'students.p_street',
+                    'students.p_municipality',
+                    'students.p_province',
+                    'students.p_zip',
                     'sch_scholarships.sch_name AS scholarship_name',
                     'sch_scholar_enrollments.id AS enrollment_id',
                     'sch_scholar_enrollments.semester',
@@ -78,18 +84,38 @@ class ScholarshipProfileForm extends TCPDF
                 throw new \Exception('Scholar not found');
             }
 
-            $this->studentName = $scholar->FirstName . ' ' . ($scholar->MiddleName ? substr($scholar->MiddleName, 0, 1) . '.' : '') . ' ' . $scholar->LastName;
-            $this->course = $scholar->Course;
-            $this->courseYear = $scholar->Course . ' - ' . $scholar->StudentYear;
-            $this->studentNo = $scholar->student_no;
+            // Calculate age
+            if (empty($scholar->BirthDate)) {
+                $age = 0;
+            } else {
+                $from = new DateTime($scholar->BirthDate);
+                $to = new DateTime('today');
+                $age = $from->diff($to)->y;
+            }
+
             $this->scholarship = $scholar->scholarship_name ?? 'N/A';
+            $this->studentNo = $scholar->student_no;
+            $this->studentName = $scholar->LastName . ', ' . $scholar->FirstName . ' ' . ($scholar->MiddleName ? substr($scholar->MiddleName, 0, 1) . '.' : '');
+            $this->sex = $scholar->Sex;
+            $this->course = $scholar->Course;
+            $this->section = $scholar->StudentYear . ' - ' . $scholar->Section;
+            $this->birthDate = $scholar->BirthDate ? date('F j, Y', strtotime($scholar->BirthDate)) : 'N/A';
+            $this->birthPlace = $scholar->Birthplace;
+            $this->major = $scholar->major;
+            $this->motherName = $scholar->mother_name;
+            $this->motherOccu = $scholar->mother_occu;
+            $this->fatherName = $scholar->father_name;
+            $this->fatherOccu = $scholar->father_occu;
+
             $this->semester = GENERAL::Semesters()[$scholar->semester]['Short'];
             $this->schoolYear = GENERAL::setSchoolYearLabel($scholar->school_year, $scholar->semester);
-            $this->date = date('F j, Y');
-            $this->major = $scholar->major;
-            $this->section = $scholar->StudentYear . ' - ' . $scholar->Section;
             $this->contactNo = $scholar->ContactNo;
-            $this->Email = $scholar->email;
+            $this->email = $scholar->email;
+            $this->age = $age;
+            $this->p_address = $scholar->p_street . ', ' . $scholar->p_municipality . ', ' . $scholar->p_province;
+            $this->zipCode = $scholar->p_zip;
+            $this->citizenship = $scholar->nationality;
+            $this->civilStatus = $scholar->civil_status;
         } catch (DecryptException $e) {
             throw new \Exception('Invalid or corrupted scholarship ID');
         } catch (\Exception $e) {
@@ -152,24 +178,36 @@ class ScholarshipProfileForm extends TCPDF
         $this::SetFont('cambria', 'B', 10);
         $this::Cell(0, 10, "{$this->scholarship}", 0, 1, 'L');
 
+        // first semester checkbox
         $checkboxX1 = 122;
         $checkboxY1 = $startY + 12.5;
         $checkboxSize = 3;
         $this::Rect($checkboxX1, $checkboxY1, $checkboxSize, $checkboxSize);
 
+        // second semester checkbox
         $checkboxX2 = $checkboxX1 + 10;
         $checkboxY2 = $checkboxY1;
         $this::Rect($checkboxX2, $checkboxY2, $checkboxSize, $checkboxSize);
 
+        // summer checkbox
         $checkboxX3 = $checkboxX2 + 11;
         $checkboxY3 = $checkboxY2;
         $this::Rect($checkboxX3, $checkboxY3, $checkboxSize, $checkboxSize);
 
+        $this::SetFont('zapfdingbats', '', 10); // Use ZapfDingbats font for the checkmark
+        if ($this->semester === '1st') {
+            $this::Text($checkboxX1 + -1, $checkboxY1 + -1, '4');
+        } elseif ($this->semester === '2nd') {
+            $this::Text($checkboxX2 + -1, $checkboxY2 + -1, '4');
+        } elseif ($this->semester === 'Sum') {
+            $this::Text($checkboxX3 + -1, $checkboxY3 + -1, '4');
+        } elseif ($this->semester === 'Sum2') {
+            $this::Text($checkboxX3 + -1, $checkboxY3 + -1, '4');
+        }
 
         $pictureBoxX = 161;
         $pictureBoxY = 73;
         $pictureBoxSize = 32;
-        // Draw the box
         $this::Rect($pictureBoxX, $pictureBoxY, $pictureBoxSize, $pictureBoxSize, 'D');
 
 
@@ -185,7 +223,11 @@ class ScholarshipProfileForm extends TCPDF
         $startY += 5;
         $this::setXY(105, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Academic Year:_________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Academic Year :", 0, 1, 'L');
+
+        $this::setXY(130, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->schoolYear}", 0, 0, 'L');
 
         $startY += 10;
         $this::setXY(25, $startY);
@@ -198,7 +240,7 @@ class ScholarshipProfileForm extends TCPDF
 
         $this::setXY(105, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Gen. Ave.: _______________", 0, 1, 'L');
+        $this::Cell(0, 10, "Gen. Ave.            : ___________________", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
@@ -211,7 +253,7 @@ class ScholarshipProfileForm extends TCPDF
 
         $this::setXY(105, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Units Enrolled: __________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Units Enrolled  : ___________________", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
@@ -225,7 +267,7 @@ class ScholarshipProfileForm extends TCPDF
 
         $this::setXY(105, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Date Enrolled: ___________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Date Enrolled   : ___________________", 0, 1, 'L');
 
 
         $startY += 5;
@@ -239,7 +281,7 @@ class ScholarshipProfileForm extends TCPDF
 
         $this::setXY(105, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Date Complied: __________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Date Complied : ___________________", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
@@ -248,7 +290,7 @@ class ScholarshipProfileForm extends TCPDF
 
         $this::setXY(45, $startY);
         $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->Email}", 0, 1, 'L');
+        $this::Cell(0, 10, "{$this->email}", 0, 1, 'L');
 
         $startY += 13;
         $this::setXY(25, $startY);
@@ -257,40 +299,97 @@ class ScholarshipProfileForm extends TCPDF
 
         $startY += 8;
         $this::setXY(25, $startY);
+        $this::SetFont('cambria', '', 10);
+        $this::Cell(0, 10, "Name                  :   ", 0, 1, 'L');
+
+        $this::setXY(50, $startY);
         $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "Name    :____________________________________________________________ Age:________ Sex:_________", 0, 1, 'L');
+        $this::Cell(0, 10, "{$this->studentName}", 0, 1, 'L');
 
-        $startY += 4;
-        $this::setXY(40, $startY);
+        $this::setXY(120, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Last Name              First Name            Middle Initial", 0, 1, 'L');
+        $this::Cell(0, 10, "Age          : ", 0, 1, 'L');
+
+        $this::setXY(135, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->age}", 0, 1, 'L');
+
+        $this::setXY(145, $startY);
+        $this::SetFont('cambria', '', 10);
+        $this::Cell(0, 10, "Sex:", 0, 1, 'L');
+
+        $this::setXY(152, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->sex}", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Home Address:______________________________________________________________________ Zip Code:_____________", 0, 1, 'L');
+        $this::Cell(0, 10, "Home Address :", 0, 1, 'L');
+
+        $this::setXY(50, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->p_address}", 0, 1, 'L');
+
+        $this::setXY(120, $startY);
+        $this::SetFont('cambria', '', 10);
+        $this::Cell(0, 10, "Zip Code:", 0, 1, 'L');
+
+        $this::setXY(135, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->zipCode}", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Date of Birth:__________________ Place of Birth:______________________________ Citizenship: _________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Date of Birth     :", 0, 1, 'L');
+
+        $this::setXY(50, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->birthDate}", 0, 1, 'L');
+
+        $this::setXY(85, $startY);
+        $this::SetFont('cambria', '', 10);
+        $this::Cell(0, 10, "Place of Birth:", 0, 1, 'L');
+
+        $this::setXY(107, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->birthPlace}", 0, 1, 'L');
+
+        $this::setXY(145, $startY);
+        $this::SetFont('cambria', '', 10);
+        $this::Cell(0, 10, "Citizenship:", 0, 1, 'L');
+
+        $this::setXY(164, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->citizenship}", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Civil Status:         Single         Married         others, pls specify ____________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Civil Status:         Single         Married         others, pls specify _________________________", 0, 1, 'L');
 
+        // Single checkbox
         $checkboxX4 = 47;
         $checkboxY4 = $startY + 3.5;
         $this::Rect($checkboxX4, $checkboxY4, $checkboxSize, $checkboxSize);
 
+        // Married checkbox
         $checkboxX5 = 63;
         $checkboxY5 = $checkboxY4;
         $this::Rect($checkboxX5, $checkboxY5, $checkboxSize, $checkboxSize);
 
+        // others checkbox
         $checkboxX6 = 82;
         $checkboxY6 = $checkboxY5;
         $this::Rect($checkboxX6, $checkboxY6, $checkboxSize, $checkboxSize);
+
+        $this::SetFont('zapfdingbats', '', 10); // Use ZapfDingbats font for the checkmark
+        if ($this->civilStatus === 'Single') {
+            $this::Text($checkboxX4 + -1, $checkboxY4 + -1, '4');
+        } elseif ($this->civilStatus === 'Married') {
+            $this::Text($checkboxX5 + -1, $checkboxY5 + -1, '4');
+        }
 
         $startY += 5;
         $this::setXY(25, $startY);
@@ -300,12 +399,37 @@ class ScholarshipProfileForm extends TCPDF
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Mother's Complete Name:_______________________________________ Occupation:_____________________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Mother's Complete Name:", 0, 1, 'L');
+
+        $this::setXY(65, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->motherName}", 0, 1, 'L');
+
+        $this::setXY(116, $startY);
+        $this::SetFont('cambria', '', 10);
+        $this::Cell(0, 10, "Occupation:", 0, 1, 'L');
+
+        $this::setXY(135, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->motherOccu}", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Father's Complete Name:_______________________________________  Occupation:_____________________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Father's Complete Name:", 0, 1, 'L');
+
+        $this::setXY(65, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->fatherName}", 0, 1, 'L');
+
+        $this::setXY(135, $startY);
+        $this::SetFont('cambria', 'B', 10);
+        $this::Cell(0, 10, "{$this->fatherOccu}", 0, 1, 'L');
+
+
+        $this::setXY(116, $startY);
+        $this::SetFont('cambria', '', 10);
+        $this::Cell(0, 10, "Occupation:", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
@@ -391,44 +515,6 @@ class ScholarshipProfileForm extends TCPDF
         return $this->studentName;
     }
 
-    public function setStudentName($studentName)
-    {
-        $this->studentName = $studentName;
-        return $this;
-    }
-
-    public function getCourseYear()
-    {
-        return $this->courseYear;
-    }
-
-    public function setCourseYear($courseYear)
-    {
-        $this->courseYear = $courseYear;
-        return $this;
-    }
-
-    public function getStudentNo()
-    {
-        return $this->studentNo;
-    }
-
-    public function setStudentNo($studentNo)
-    {
-        $this->studentNo = $studentNo;
-        return $this;
-    }
-
-    public function getScholarship()
-    {
-        return $this->scholarship;
-    }
-
-    public function setScholarship($scholarship)
-    {
-        $this->scholarship = $scholarship;
-        return $this;
-    }
 
     public function getSemester()
     {
@@ -449,17 +535,6 @@ class ScholarshipProfileForm extends TCPDF
     public function setSchoolYear($schoolYear)
     {
         $this->schoolYear = $schoolYear;
-        return $this;
-    }
-
-    public function getDate()
-    {
-        return $this->date;
-    }
-
-    public function setDate($date)
-    {
-        $this->date = $date;
         return $this;
     }
 }
