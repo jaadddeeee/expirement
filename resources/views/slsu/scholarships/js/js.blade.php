@@ -217,10 +217,6 @@
         }
 
 
-        // scholarship UI for editing/updating scholarships
-
-
-
 
 
         // SCHOLARSHIP CRUD
@@ -673,112 +669,111 @@
 
         // SCHOLARSHIP REQUIREMENTS
 
-        // show modal for adding requirements
-        // $(document).on('click', '.addRequirements', function(e) {
-        //     e.preventDefault();
 
-        //     const scholarshipId = $(this).data('scholarship-id');
-        //     const scholarshipName = $(this).data('scholarship-name');
-        //     const scholarshipAcronym = $(this).data('scholarship-acronym');
+        $(document).on('click', '.addRequirements', function(e) {
+            e.preventDefault();
 
-        //     $('#addRequirementsModalLabel').text(
-        //         `Add Requirements for ${scholarshipName} (${scholarshipAcronym})`);
+            const scholarshipId = $(this).data('scholarship-id');
+            const scholarshipName = $(this).data('scholarship-name');
+            const scholarshipAcronym = $(this).data('scholarship-acronym');
 
-        //     $('#addRequirementsForm input[name="scholarship_id"]').val(scholarshipId);
+            $('#addRequirementsModalLabel').text(
+                `Add Requirements for ${scholarshipName} (${scholarshipAcronym})`);
 
-        //     $('#requirementsContainer').html('');
+            $('#addRequirementsForm input[name="scholarship_id"]').val(scholarshipId);
 
-        //     $('#addRequirementsModal').modal('show');
-        // });
+            $('#requirementsContainer').html('');
 
-        // add new requirement row
-        // $('#btnAddRequirement').on('click', function() {
-        //     const requirementHtml = `
-        //         <div class="input-group mb-2 requirement-item">
-        //             <input type="number" name="quantities[]" class="form-control ms-2" placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto;">
-        //             <input type="text" name="requirements[]" class="form-control ms-2" placeholder="Enter a requirement">
-        //             <button type="button" class="btn btn-danger btnRemoveRequirement ms-2">
-        //                 <i class="fa fa-trash"></i>
-        //             </button>
-        //         </div>
-        //     `;
-        //     $('#requirementsContainer').append(requirementHtml);
-        // });
+            $('#addRequirementsModal').modal('show');
+        });
 
-        // remove a requirement row
-        // $(document).on('click', '.btnRemoveRequirement', function() {
-        //     $(this).closest('.requirement-item').remove();
-        // });
+        $('#btnAddRequirement').on('click', function() {
+            const requirementHtml = `
+                <div class="input-group mb-2 requirement-item">
+                    <input type="number" name="quantities[]" class="form-control ms-2" placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto;">
+                    <input type="text" name="requirements[]" class="form-control ms-2" placeholder="Enter a requirement">
+                    <button type="button" class="btn btn-danger btnRemoveRequirement ms-2">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            $('#requirementsContainer').append(requirementHtml);
+        });
 
-        // save requirements
-        // $('#btnSaveRequirements').on('click', function() {
-        //     let hasValidInput = false;
-        //     $('input[name="requirements[]"]').each(function() {
-        //         if ($(this).val().trim() !== '') {
-        //             hasValidInput = true;
-        //         }
-        //     });
+        $(document).on('click', '.btnRemoveRequirement', function() {
+            $(this).closest('.requirement-item').remove();
+        });
 
-        //     if (!hasValidInput) {
-        //         Swal.fire({
-        //             icon: 'warning',
-        //             title: 'Missing Requirements',
-        //             text: 'Please enter at least one valid requirement before saving.',
-        //             showConfirmButton: true
-        //         });
-        //         return;
-        //     }
 
-        //     const formData = $('#addRequirementsForm').serialize();
+        $('#btnSaveRequirements').on('click', function() {
+            let hasValidInput = false;
+            $('input[name="requirements[]"]').each(function() {
+                if ($(this).val().trim() !== '') {
+                    hasValidInput = true;
+                }
+            });
 
-        //     $.ajax({
-        //         method: 'POST',
-        //         data: formData,
-        //         beforeSend: function() {
-        //             $('#btnSaveRequiremnts').prop('disabled', true).html(
-        //                 "<i class='spinner-grow spinner-grow-sm'></i> Saving...");
-        //         },
-        //         success: function(response) {
-        //             const {
-        //                 Error,
-        //                 Message
-        //             } = response;
+            if (!hasValidInput) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Requirements',
+                    text: 'Please enter at least one valid requirement before saving.',
+                    showConfirmButton: true
+                });
+                return;
+            }
 
-        //             if (Error == 0) {
-        //                 Swal.fire({
-        //                     icon: 'success',
-        //                     title: 'Success!',
-        //                     text: Message,
-        //                     showConfirmButton: true
-        //                 }).then(() => {
-        //                     $('#addRequirementsModal').modal('hide');
-        //                     window.location.reload();
-        //                 });
-        //             } else {
-        //                 Swal.fire({
-        //                     icon: 'warning',
-        //                     title: 'Warning!',
-        //                     text: Message,
-        //                     showConfirmButton: true
-        //                 });
-        //             }
-        //         },
-        //         error: function(xhr) {
-        //             Swal.fire({
-        //                 icon: 'error',
-        //                 title: 'An unexpected error occurred',
-        //                 text: xhr.statusText,
-        //                 showConfirmButton: true
-        //             });
-        //         },
-        //         complete: function() {
-        //             $('#btnSaveRequiremnts').prop('disabled', false).html(
-        //                 "Save Requirements");
-        //         }
-        //     });
-        // });
+            const formData = $('#addRequirementsForm').serialize();
 
-        // add and edit/update requirements
+            $.ajax({
+                url: "{{ route('scholarships.requirements.store') }}",
+                method: 'POST',
+                data: formData,
+                beforeSend: function() {
+                    $('#btnSaveRequiremnts').prop('disabled', true).html(
+                        "<i class='spinner-grow spinner-grow-sm'></i> Saving...");
+                },
+                success: function(response) {
+                    const {
+                        Error,
+                        Message
+                    } = response;
+
+                    if (Error == 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: Message,
+                            showConfirmButton: true
+                        }).then(() => {
+                            $('#addRequirementsModal').modal('hide');
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Warning!',
+                            text: Message,
+                            showConfirmButton: true
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'An unexpected error occurred',
+                        text: xhr.statusText,
+                        showConfirmButton: true
+                    });
+                },
+                complete: function() {
+                    $('#btnSaveRequiremnts').prop('disabled', false).html(
+                        "Save Requirements");
+                }
+            });
+        });
+
+        // edit/update requirements
         $(document).on('click', '.editRequirements', function(e) {
             e.preventDefault();
 
@@ -838,18 +833,18 @@
             });
         });
 
-        $('#btnAddEditRequirement').on('click', function() {
-            const requirementHtml =
-                `<div class="input-group mb-2 requirement-edit-item">
-                    <input type="hidden" name="requirement_ids[]" value="">
-                    <input type="number" name="quantities_edit[]" class="form-control ms-2" placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto; border-radius: 0.50rem 0 0 0.50rem;">
-                    <input type="text" name="requirements_edit[]" class="form-control ms-2" placeholder="Enter a requirement">
-                    <button type="button" class="btn btn-danger btnRemoveEditRequirement ms-2 me-2">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                </div>`;
-            $('#editRequirementsContainer').append(requirementHtml);
-        });
+        // $('#btnAddEditRequirement').on('click', function() {
+        //     const requirementHtml =
+        //         `<div class="input-group mb-2 requirement-edit-item">
+        //             <input type="hidden" name="requirement_ids[]" value="">
+        //             <input type="number" name="quantities_edit[]" class="form-control ms-2" placeholder="Qty" min="1" style="width: 80px; flex: 0 0 auto; border-radius: 0.50rem 0 0 0.50rem;">
+        //             <input type="text" name="requirements_edit[]" class="form-control ms-2" placeholder="Enter a requirement">
+        //             <button type="button" class="btn btn-danger btnRemoveEditRequirement ms-2 me-2">
+        //                 <i class="fa fa-trash"></i>
+        //             </button>
+        //         </div>`;
+        //     $('#editRequirementsContainer').append(requirementHtml);
+        // });
 
         let lastDeletedItem = null;
         let lastDeletedId = null;

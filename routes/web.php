@@ -573,7 +573,7 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   Route::delete('/destroy', $controller_path . '\SLSU\Scholarship\ScholarshipController@destroy')->name('scholarships.destroy');
 
   // scholarship requirements
-  // Route::post('/requirements/store', $controller_path . '\SLSU\Scholarship\ScholarshipController@storeRequirements')->name('scholarships.requirements.store');
+  Route::post('/requirements/store', $controller_path . '\SLSU\Scholarship\ScholarshipController@storeRequirements')->name('scholarships.requirements.store');
   Route::get('/requirements/edit', $controller_path . '\SLSU\Scholarship\ScholarshipController@editRequirements')->name('scholarships.requirements.edit');
   Route::put('/requirements/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@updateRequirements')->name('scholarships.requirements.update');
   Route::delete('/requirements/delete', $controller_path . '\SLSU\Scholarship\ScholarshipController@destroyRequirements')->name('scholarships.requirements.destroy');

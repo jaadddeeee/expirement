@@ -23,6 +23,7 @@
             let scholarshipName = "{{ request('scholarshipName') }}";
             let schoolYear = $('#filterSchoolYear').val();
             let semester = $('#filterSemester').val();
+            let entriesPerPage = $('#entriesPerPage').val();
 
             $.ajax({
                 url: "{{ route('scholars.index') }}",
@@ -32,7 +33,8 @@
                     id: id,
                     scholarshipName: scholarshipName,
                     filterSchoolYear: schoolYear,
-                    filterSemester: semester
+                    filterSemester: semester,
+                    entriesPerPage: entriesPerPage
                 },
                 beforeSend: function() {
                     $('#loadingIndicator').show();
@@ -40,6 +42,15 @@
                 },
                 success: function(response) {
                     $('#scholarsTable').html(response.scholarsTable);
+
+                    // Reapply checked state to previously selected scholars
+                    $('.select-scholar').each(function() {
+                        const scholarId = $(this).val();
+                        if (selectedScholarIds.includes(scholarId)) {
+                            $(this).prop('checked', true).trigger('change');
+                        }
+                    });
+
                     initializeSelectAllFunctionality();
                 },
                 error: function(xhr) {
@@ -62,14 +73,13 @@
             const semester = $('#filterSemester').val();
 
             if (schoolYear && semester) {
-                $('#addScholarBtnModal').removeClass('d-none'); // Show the button
+                $('#addScholarBtnModal').removeClass('d-none');
             } else {
-                $('#addScholarBtnModal').addClass('d-none'); // Hide the button
+                $('#addScholarBtnModal').addClass('d-none');
             }
         }
 
         toggleAddScholarButton();
-
 
         // Handle filter form submission
         $('#filterForm').on('submit', function(e) {
@@ -93,7 +103,6 @@
 
                     toggleAddScholarButton();
 
-                    // Update the URL to include filter parameters
                     let currentUrl = new URL(window.location.href);
                     let filterParams = new URLSearchParams(formData);
                     filterParams.forEach((value, key) => {
@@ -491,16 +500,16 @@
             });
         });
 
-        // copy and delete selected scholars
-        function initializeSelectAllFunctionality() {
 
-            // select all checkbox event listener
+        let selectedScholarIds = [];
+
+        function initializeSelectAllFunctionality() {
+            // Select all checkbox event listener
             $('#selectAllScholars').off('change').on('change', function() {
                 const isChecked = $(this).is(':checked');
                 const schoolYearFrom = $('#filterSchoolYear').val();
                 const semesterFrom = $('#filterSemester').val();
 
-                // e check if wapa na set and sy og sem
                 if (!schoolYearFrom || !semesterFrom) {
                     Swal.fire({
                         icon: 'warning',
@@ -513,19 +522,18 @@
                     return;
                 }
 
-                const firstSelectedSchoolYear = $('.select-scholar').first().data('school-year');
-                const firstSelectedSemester = $('.select-scholar').first().data('semester');
-
                 $('.select-scholar').each(function() {
-                    const currentSchoolYear = $(this).data('school-year');
-                    const currentSemester = $(this).data('semester');
+                    const scholarId = $(this).val();
 
-                    if (currentSchoolYear === firstSelectedSchoolYear && currentSemester ===
-                        firstSelectedSemester) {
-                        $(this).prop('checked', isChecked).trigger('change');
+                    if (isChecked) {
+                        if (!selectedScholarIds.includes(scholarId)) {
+                            selectedScholarIds.push(scholarId);
+                        }
                     } else {
-                        $(this).prop('checked', false);
+                        selectedScholarIds = selectedScholarIds.filter(id => id !== scholarId);
                     }
+
+                    $(this).prop('checked', isChecked).trigger('change');
                 });
 
                 updateSelectAllCheckboxState();
@@ -533,41 +541,18 @@
                 updateCopyButton();
             });
 
-            // individual scholar checkbox event listener
+            // Individual scholar checkbox event listener
             $(document).off('change', '.select-scholar').on('change', '.select-scholar', function() {
+                const scholarId = $(this).val();
                 const row = $(this).closest('tr');
+
                 if ($(this).is(':checked')) {
-                    // get tanan currently checked or selecte scholars
-                    const selectedScholars = $('.select-scholar:checked');
-
-                    // If there are other checked scholars, validate against them
-                    if (selectedScholars.length > 1) {
-                        const currentSchoolYear = $(this).data('school-year');
-                        const currentSemester = $(this).data('semester');
-
-                        let isValid = true;
-                        selectedScholars.not(this).each(function() {
-                            if ($(this).data('school-year') !== currentSchoolYear ||
-                                $(this).data('semester') !== currentSemester) {
-                                isValid = false;
-                                return false;
-                            }
-                        });
-
-                        if (!isValid) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Invalid Selection',
-                                text: 'You can only select scholars from the same school year and semester.',
-                            });
-                            $(this).prop('checked', false);
-                            row.removeClass('highlight');
-                            return;
-                        }
+                    if (!selectedScholarIds.includes(scholarId)) {
+                        selectedScholarIds.push(scholarId);
                     }
-
                     row.addClass('highlight');
                 } else {
+                    selectedScholarIds = selectedScholarIds.filter(id => id !== scholarId);
                     row.removeClass('highlight');
                 }
 
@@ -576,7 +561,7 @@
                 updateCopyButton();
             });
 
-            // Update the state of the "Select All" checkbox and btns
+            // Update the state of the "Select All" checkbox and buttons
             updateSelectAllCheckboxState();
             updateDeleteButton();
             updateCopyButton();
@@ -656,7 +641,7 @@
             $('#displaySemesterFrom').toggleClass('text-danger', !semesterFrom);
         });
 
-        // Handle the "Copy Scholars" button click
+        // copy scholars btn
         $('#saveCopyChanges').on('click', function() {
             const scholarshipId = $('input[name="scholarship_id"]').val();
             const schoolYearFrom = $('#hiddenSchoolYearFrom').val();
@@ -667,7 +652,6 @@
                 return $(this).val();
             }).get();
 
-            // Validate input
             if (!schoolYearFrom || !semesterFrom || !schoolYearTo || !semesterTo) {
                 Swal.fire({
                     icon: 'warning',
@@ -697,7 +681,7 @@
 
             // Confirm the action
             Swal.fire({
-                title: 'Are you sure?',
+                title: 'Copy Scholars',
                 text: `You are about to copy ${selectedScholars.length} selected scholars to the target school year and semester.`,
                 icon: 'warning',
                 showCancelButton: true,
@@ -758,6 +742,7 @@
             });
         });
 
+        // delete scholars
         $('#deleteScholarsBtn').on('click', function() {
             const selectedScholars = $('.select-scholar:checked').map(function() {
                 return $(this).val();
@@ -773,7 +758,7 @@
             }
 
             Swal.fire({
-                title: 'Are you sure?',
+                title: 'Delete Scholars',
                 text: `You are about to delete ${selectedScholars.length} selected scholars. This action cannot be undone!`,
                 icon: 'warning',
                 showCancelButton: true,

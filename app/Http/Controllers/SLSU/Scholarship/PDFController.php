@@ -23,7 +23,7 @@ class PDFController
         $schoolYear = $request->school_year;
         $semester = $request->semester;
 
-        $pdf = new ScholarshipCertificate('P', 'mm', 'A4');
+        $pdf = new ScholarshipCertificate('P', 'mm', array(210, 297));
         $pdf->setId($id);
         $pdf->setSchEnrollmentId($enrollmentId);
         $pdf->setSchoolYear($schoolYear);
@@ -91,7 +91,7 @@ class PDFController
 
         $studentName = str_replace(' ', '-', $pdf->getStudentName());
         $date = date("Y-m-d-h-i-s");
-        $fileName = "Certificate-of-Scholarship-" . $studentName . "-" . $date . ".pdf";
+        $fileName = "Scholarship-Profile-Form-" . $studentName . "-" . $date . ".pdf";
         $directoryPath = 'scholarship/' . session('campus');
 
         if (!Storage::exists("public/$directoryPath")) {

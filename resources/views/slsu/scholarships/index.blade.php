@@ -262,7 +262,7 @@
     </div>
 
     <!-- Add Requirements Modal -->
-    {{-- <div class="modal fade" id="addRequirementsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="addRequirementsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <!-- Modal Header -->
@@ -297,7 +297,7 @@
                 </div>
             </div>
         </div>
-    </div> --}}
+    </div>
 
     <!-- Add/Edit Requirements Modal -->
     <div class="modal fade" id="editRequirementsModal" tabindex="-1" aria-labelledby="editRequirementsModalLabel"
@@ -318,9 +318,9 @@
                             <!-- Existing requirements will be loaded here dynamically -->
                         </div>
 
-                        <button type="button" class="btn btn-sm btn-success mt-3" id="btnAddEditRequirement">
+                        {{-- <button type="button" class="btn btn-sm btn-success mt-3" id="btnAddEditRequirement">
                             <i class="fa fa-plus"></i> Add Requirement
-                        </button>
+                        </button> --}}
                     </form>
                 </div>
                 <div class="modal-footer">
