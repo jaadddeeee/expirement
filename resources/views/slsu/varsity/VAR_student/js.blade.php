@@ -409,20 +409,11 @@
         });
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var selectAllCheckbox = document.getElementById('select-all');
 
         function getCheckboxes() {
             return document.querySelectorAll('.select-row');
-        }
-
-        function getAllStoredCheckboxes() {
-            return Object.keys(localStorage)
-                .filter(key => key.startsWith('checkbox_'))
-                .map(key => ({
-                    value: key.replace('checkbox_', ''),
-                    checked: localStorage.getItem(key) === 'true'
-                }));
         }
 
         function restoreCheckboxStates() {
@@ -434,9 +425,9 @@
         }
 
         function updateSelectAllState() {
-            var storedCheckboxes = getAllStoredCheckboxes();
-            var checkedCount = storedCheckboxes.filter(c => c.checked).length;
-            var totalCount = storedCheckboxes.length;
+            var checkboxes = getCheckboxes();
+            var checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+            var totalCount = checkboxes.length;
 
             selectAllCheckbox.checked = checkedCount > 0 && checkedCount === totalCount;
             selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
@@ -444,52 +435,34 @@
             localStorage.setItem('selectAllChecked', selectAllCheckbox.checked);
         }
 
-        // Restore states on page load
-        restoreCheckboxStates();
-
-        // Select All should apply across all pages
-        selectAllCheckbox.addEventListener('change', function() {
+        // Handle "Select All" checkbox change
+        selectAllCheckbox.addEventListener('change', function () {
             var isChecked = this.checked;
-
-            // Update checkboxes on the current page
             getCheckboxes().forEach(checkbox => {
                 checkbox.checked = isChecked;
                 localStorage.setItem('checkbox_' + checkbox.value, isChecked);
             });
-
-            // Apply selection across pages by updating localStorage
-            getAllStoredCheckboxes().forEach(checkbox => {
-                localStorage.setItem('checkbox_' + checkbox.value, isChecked);
-            });
-
-            localStorage.setItem('selectAllChecked', isChecked);
         });
 
-        // Listen for checkbox changes and store state
-        document.addEventListener('change', function(event) {
+        // Handle individual row checkbox changes
+        document.addEventListener('change', function (event) {
             if (event.target.classList.contains('select-row')) {
                 localStorage.setItem('checkbox_' + event.target.value, event.target.checked);
                 updateSelectAllState();
             }
         });
 
-        // // Handle pagination: Restore checkbox states when the page changes
-        // document.addEventListener('pageChange', function() {
-        //     setTimeout(restoreCheckboxStates, 100); // Slight delay to allow new checkboxes to load
-        // });
+        // Restore checkbox states on page load
+        restoreCheckboxStates();
+
+        // Handle pagination: Restore checkbox states when the page changes
+        document.addEventListener('pageChange', function () {
+            setTimeout(restoreCheckboxStates, 100); // Slight delay to allow new checkboxes to load
+        });
     });
 
     function getCheckboxes() {
         return document.querySelectorAll('.select-row');
-    }
-
-    function getAllStoredCheckboxes() {
-        return Object.keys(localStorage)
-            .filter(key => key.startsWith('checkbox_'))
-            .map(key => ({
-                value: key.replace('checkbox_', ''),
-                checked: localStorage.getItem(key) === 'true'
-            }));
     }
 
     function restoreCheckboxStates() {
@@ -510,6 +483,85 @@
 
         localStorage.setItem('selectAllChecked', selectAllCheckbox.checked);
     }
+    
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     var selectAllCheckbox = document.getElementById('select-all');
+
+    //     function getCheckboxes() {
+    //         return document.querySelectorAll('.select-row');
+    //     }
+
+    //     function getAllStoredCheckboxes() {
+    //         return Object.keys(localStorage)
+    //             .filter(key => key.startsWith('checkbox_'))
+    //             .map(key => ({
+    //                 value: key.replace('checkbox_', ''),
+    //                 checked: localStorage.getItem(key) === 'true'
+    //             }));
+    //     }
+
+    //     function restoreCheckboxStates() {
+    //         getCheckboxes().forEach(checkbox => {
+    //             var storedValue = localStorage.getItem('checkbox_' + checkbox.value);
+    //             checkbox.checked = storedValue === 'true';
+    //         });
+    //         updateSelectAllState();
+    //     }
+
+    //     function updateSelectAllState() {
+    //         var storedCheckboxes = getAllStoredCheckboxes();
+    //         var checkedCount = storedCheckboxes.filter(c => c.checked).length;
+    //         var totalCount = storedCheckboxes.length;
+
+    //         selectAllCheckbox.checked = checkedCount > 0 && checkedCount === totalCount;
+    //         selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+
+    //         localStorage.setItem('selectAllChecked', selectAllCheckbox.checked);
+    //     }
+
+    //     // Restore states on page load
+    //     restoreCheckboxStates();
+
+    //     // Select All should apply across all pages
+    //     selectAllCheckbox.addEventListener('change', function() {
+    //         var isChecked = this.checked;
+
+    //         // Update checkboxes on the current page
+    //         getCheckboxes().forEach(checkbox => {
+    //             checkbox.checked = isChecked;
+    //             localStorage.setItem('checkbox_' + checkbox.value, isChecked);
+    //         });
+
+    //         // Apply selection across pages by updating localStorage
+    //         getAllStoredCheckboxes().forEach(checkbox => {
+    //             localStorage.setItem('checkbox_' + checkbox.value, isChecked);
+    //         });
+
+    //         localStorage.setItem('selectAllChecked', isChecked);
+    //     });
+
+    //     // Listen for checkbox changes and store state
+    //     document.addEventListener('change', function(event) {
+    //         if (event.target.classList.contains('select-row')) {
+    //             localStorage.setItem('checkbox_' + event.target.value, event.target.checked);
+    //             updateSelectAllState();
+    //         }
+    //     });
+
+    //     // // Handle pagination: Restore checkbox states when the page changes
+    //     // document.addEventListener('pageChange', function() {
+    //     //     setTimeout(restoreCheckboxStates, 100); // Slight delay to allow new checkboxes to load
+    //     // });
+    // });
+
+    // function getAllStoredCheckboxes() {
+    //     return Object.keys(localStorage)
+    //         .filter(key => key.startsWith('checkbox_'))
+    //         .map(key => ({
+    //             value: key.replace('checkbox_', ''),
+    //             checked: localStorage.getItem(key) === 'true'
+    //         }));
+    // }
 
     // Search functionality with checkbox state restoration
     $('#search').on('input', function() {

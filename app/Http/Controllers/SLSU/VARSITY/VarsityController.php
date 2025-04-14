@@ -56,7 +56,11 @@ class VarsityController extends Controller
             });
         }
 
-        $varsity = $query->paginate(10);
+        // Get the rowsPerPage value from the request, default to 5
+        $rowsPerPage = $request->input('rowsPerPage',5);
+
+        // Paginate the query with the specified rowsPerPage
+        $varsity = $query->paginate($rowsPerPage);
 
         $events = DB::connection(strtolower($campus))
             ->table('var_event')
@@ -77,7 +81,8 @@ class VarsityController extends Controller
             'headerAction' => $headerAction,
             'varsities' => $varsity,
             'Campus' => $campus,
-            'Events' => $events
+            'Events' => $events,
+            'rowsPerPage' => $rowsPerPage,
         ]);
     }
 

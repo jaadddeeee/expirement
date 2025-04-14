@@ -51,8 +51,10 @@ class CoachController extends Controller
                 ->orWhere('MiddleName', 'LIKE', "%{$request->search}%");
         });
     }
+
+    $rowsPerPage = $request->input('rowsPerPage', 5);
     
-    $coach = $query->paginate(10);
+    $coach = $query->paginate($rowsPerPage);
 
     $currentYear = date('Y');
     foreach ($coach as $item) { // Iterate through the paginated collection
@@ -73,7 +75,8 @@ class CoachController extends Controller
         'pageTitle' => $pageTitle,
         'headerAction' => $headerAction,
         'coaches' => $coach,
-        'Campus' => $campus
+        'Campus' => $campus,
+        'rowPerPage' => $rowsPerPage,
         ]);
 }   
 

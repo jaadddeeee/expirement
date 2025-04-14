@@ -25,14 +25,6 @@ class ScuaaController extends Controller
 {
     public function indexCoaches(Request $request)
     {
-        // $athletes = DB::connection('clinic')
-        // ->table('medicalrecord')
-        // ->where('patientId', '1810396-1') // Ensure the subtraction is correct
-        // ->where('campus', 1)
-        // ->first();
-
-        // dd($athletes);
-
         $query = CoachVarsity::with(['event'])
             ->whereNull('deleted_at')
             ->orderBy('SchoolYear', 'desc');
@@ -59,8 +51,10 @@ class ScuaaController extends Controller
         
             $query->whereIn('CoachID', $Emp->pluck('id'));
         }
+
+        $rowsPerPage = $request->input('rowsPerPage', 5);
     
-        $coachList = $query->paginate(10);
+        $coachList = $query->paginate($rowsPerPage);
         
         // Fetch employee data from hrmis.employee
         $employeeData = DB::connection('hrmis')
@@ -100,7 +94,8 @@ class ScuaaController extends Controller
             'headerAction' => '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>',
             'Coaches' => $coachList,
             'ScuaaLists' => $scuaaLists,
-            'Events' => $events
+            'Events' => $events,
+            'rowsPerPage' => $rowsPerPage
         ]);
     }
 
@@ -137,8 +132,10 @@ class ScuaaController extends Controller
             // Filter ListVarsity by matching StudentNo values
             $query->whereIn('StudentNo', $studentNos->unique());
         }
+
+        $rowsPerPage = $request->input('rowsPerPage', 5);
         
-        $varsityList = $query->paginate(10);
+        $varsityList = $query->paginate($rowsPerPage);
         
         // Fetch student data from multiple databases (batch query)
         $connections = ['sg','mcc', 'to', 'bn', 'sj', 'hn'];
@@ -180,7 +177,8 @@ class ScuaaController extends Controller
             'headerAction' => '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>',
             'Lists' => $varsityList,
             'ScuaaLists' => $scuaaLists,
-            'Events' => $events
+            'Events' => $events,
+            'rowsPerPage' => $rowsPerPage
         ]);
     }
     

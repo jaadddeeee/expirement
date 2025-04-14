@@ -98,7 +98,7 @@ class ScuaaReport extends TCPDF
 
     $listAthletes = $varsityList->sortBy('FullName')->values()->toArray();
   
-    return $listAthletes; // Return as a list (array)
+    return $listAthletes;
 
   }
   
@@ -160,7 +160,7 @@ class ScuaaReport extends TCPDF
   }
   
   public function Header(){
-    $startYear = date('Y'); // Get the current year
+    $startYear = date('Y');
 
     // Fetch the ScuaaLogo where the Date column contains the current year
     $scuaaList = Scuaa::where('Date', 'LIKE', '%' . $startYear . '%')
@@ -172,9 +172,7 @@ class ScuaaReport extends TCPDF
       $this->listAthletes = $this->listVarsity();
       $this->listCoaches = $this->listCoaches();
       $this->letter->ScuaaHeaderLandScape();
-      $event = $this->listAthletes[0] ?? null;
       $startY = 40;
-      // dd($this->varsityList);
       
       $this::setXY(15, $startY);
       $this::SetFont('calibrib','',11);
@@ -196,22 +194,26 @@ class ScuaaReport extends TCPDF
       $this::SetFont('calibri','',10);
       $this::Cell(0,5,'SCUAA Form 2',0,1,'L');
 
-      $this::SetFont('calibri','',12);
-      $this::setXY(295, 32);
-      $this::Cell(1,5,$this->getScreen(),0,0,'C');
-      $this::Line(266, 37, 325, 37);
-  
-      $this::setXY(295, 39);
-      $this::SetFont('calibrib','',14);
-      $this::Cell(1,5,$event['gender'],0,0,'C');
-      $this::Line(266, 44, 325, 44);
-  
-      $this::SetFont('lucidafaxdemib','',12);
-      $this::setXY(265, 25);
-      $this::Cell(1,5,$event['event_name'],0,0,'C');
-
       $this::Image(GENERAL::Logo(),7.9,65,30);
-      // $this::Image(GENERAL::PASUCLogo(),7.5,135,30);
+  }
+
+  private function drawCategory()
+  {
+    $event = $this->listAthletes[0] ?? null;
+
+    $this::SetFont('calibri','',12);
+    $this::setXY(295, 32);
+    $this::Cell(1,5,$this->getScreen(),0,0,'C');
+    $this::Line(266, 37, 325, 37);
+
+    $this::setXY(295, 39);
+    $this::SetFont('calibrib','',14);
+    $this::Cell(1,5,$event['gender'],0,0,'C');
+    $this::Line(266, 44, 325, 44);
+
+    $this::SetFont('lucidafaxdemib','',12);
+    $this::setXY(265, 25);
+    $this::Cell(1,5,$event['event_name'],0,0,'C');
   }
 
   private function drawHeaders($startY, $cellHeight, $numColumns, $includeCoach = false, $numberCoach) {
@@ -382,14 +384,16 @@ class ScuaaReport extends TCPDF
       $remainingCoaches = $numCoaches;
       $offsetY = $startY; // Initial Y position
 
+      $this->drawCategory();
       // Process athletes first
       while ($remainingAthletes > 0) {
           // Check if new page is needed
           if ($offsetY + $verticalHeight > $pageHeight - 20) {
               $this::AddPage();
               $offsetY = $startY; // Reset to the first-page starting Y
+              $this->drawCategory();
           }
-  
+          
           // Determine batch size for athletes
           $athleteCurrentBatch = min($remainingAthletes, $numColumns);
 
