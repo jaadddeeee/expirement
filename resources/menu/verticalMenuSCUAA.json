@@ -6,13 +6,13 @@
             "slug": "scuaa",
             "submenu" : [
                 {
-                    "name": "List Athletes",
+                    "name": "List of Athletes",
                     "url": "/varsity/scuaa/athletes",
                     "icon": "menu-icon tf-icons bx bx-list-ol",
                     "slug": "scuaa-athletes"
                 },
                 {
-                    "name": "List Coaches",
+                    "name": "List of Coaches",
                     "url": "/varsity/scuaa/coaches",
                     "icon": "menu-icon tf-icons bx bx-list-ol",
                     "slug": "scuaa-coaches"
