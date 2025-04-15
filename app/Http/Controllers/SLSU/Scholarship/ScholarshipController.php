@@ -285,13 +285,13 @@ class ScholarshipController extends Controller
                 ->pluck('sch_requirements')
                 ->toArray();
 
-            // Check for duplicates within the new inputs
+            // check for duplicates
             $newRequirements = [];
             foreach ($requirements as $index => $requirement) {
                 $requirement = trim($requirement);
 
                 if (empty($requirement)) {
-                    continue; // Skip empty requirements
+                    continue; // skip ang empty requirements
                 }
 
                 if (in_array($requirement, $newRequirements)) {
@@ -304,7 +304,7 @@ class ScholarshipController extends Controller
                 $newRequirements[] = $requirement;
             }
 
-            // Check for duplicates between new inputs and existing requirements
+            // check for duplicates between new inputs and existing requirements
             foreach ($newRequirements as $requirement) {
                 if (in_array($requirement, $existingRequirements)) {
                     return response()->json([
@@ -371,7 +371,6 @@ class ScholarshipController extends Controller
             $requirements = $request->requirements_edit ?? [];
             $deletedIds = $request->deleted_requirement_ids ?? [];
 
-            // Validate input
             if (!$scholarshipId) {
                 return response()->json([
                     'Error' => 1,
@@ -381,13 +380,11 @@ class ScholarshipController extends Controller
 
             $hasChanges = false;
 
-            // Delete removed requirements
             if (!empty($deletedIds)) {
                 ScholarshipRequirements::whereIn('id', $deletedIds)->delete();
                 $hasChanges = true;
             }
 
-            // Update existing or create new requirements
             foreach ($requirements as $index => $requirementText) {
                 $quantity = $quantities[$index] ?? null;
                 $requirementId = $requirementIds[$index] ?? null;
@@ -396,10 +393,9 @@ class ScholarshipController extends Controller
                     continue;
                 }
 
-                // Check for duplicates in the database
                 $duplicate = ScholarshipRequirements::where('scholarship_id', $scholarshipId)
                     ->where('sch_requirements', $requirementText)
-                    ->where('id', '!=', $requirementId) // Exclude the current requirement being updated
+                    ->where('id', '!=', $requirementId)
                     ->exists();
 
                 if ($duplicate) {
@@ -410,7 +406,7 @@ class ScholarshipController extends Controller
                 }
 
                 if ($requirementId) {
-                    // Update existing requirement
+                    // update existing requirement
                     $requirement = ScholarshipRequirements::find($requirementId);
 
                     if ($requirement && ($requirement->quantity != $quantity || $requirement->sch_requirements != $requirementText)) {
@@ -421,7 +417,7 @@ class ScholarshipController extends Controller
                         $hasChanges = true;
                     }
                 } else {
-                    // Create new requirement
+                    // create new requirement
                     ScholarshipRequirements::create([
                         'scholarship_id' => $scholarshipId,
                         'quantity' => $quantity,
@@ -448,5 +444,17 @@ class ScholarshipController extends Controller
                 'Message' => 'An error occurred: ' . $e->getMessage(),
             ], 400);
         }
+    }
+
+    public function scholarshipApplication()
+    {
+        $pageTitle = "SCHOLARSHIP APPLICATION | SLSU";
+
+        // Fetch scholarships with their requirements
+        $scholarships = Scholarship::where('status', 1)
+            ->with('requirements')
+            ->get();
+
+        return view('slsu.scholarships.application', compact('pageTitle', 'scholarships'));
     }
 }

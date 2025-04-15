@@ -7,6 +7,7 @@
             <th>Type</th>
             <th>Provider</th>
             <th>Requirements</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -38,6 +39,12 @@
                         href="javascript:void(0);" title="Edit Requirements">
                         <i class="bx bx-edit-alt"></i>
                     </a>
+                </td>
+                <td>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input toggle-status" type="checkbox" style="cursor: pointer;"
+                            data-scholarship-id="{{ $scholarship->id }}" {{ $scholarship->status ? 'checked' : '' }}>
+                    </div>
                 </td>
                 <td>
                     <!-- View Scholars -->

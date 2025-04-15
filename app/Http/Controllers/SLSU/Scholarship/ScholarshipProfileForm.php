@@ -394,7 +394,7 @@ class ScholarshipProfileForm extends TCPDF
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "If married, name of spouse:___________________________________ Spouse' Occupation:____________________", 0, 1, 'L');
+        $this::Cell(0, 10, "If married, name of spouse:______________________________________ Spouse' Occupation:__________________", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
@@ -416,7 +416,7 @@ class ScholarshipProfileForm extends TCPDF
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Father's Complete Name:", 0, 1, 'L');
+        $this::Cell(0, 10, "Father's Complete Name :", 0, 1, 'L');
 
         $this::setXY(65, $startY);
         $this::SetFont('cambria', 'B', 10);
@@ -434,12 +434,12 @@ class ScholarshipProfileForm extends TCPDF
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Total Family Members:___________  Household Per Capita Income:_____________________________", 0, 1, 'L');
+        $this::Cell(0, 10, "Total Family Members:___________         Household Per Capita Income:_________________________________", 0, 1, 'L');
 
         $startY += 5;
         $this::setXY(25, $startY);
         $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "4Ps Member?  Yes         No          If yes, please specify DSWD Household No. _________________________", 0, 1, 'L');
+        $this::Cell(0, 10, "4Ps Member?  Yes         No            If yes, please specify DSWD Household No. _________________________", 0, 1, 'L');
 
         $checkboxX7 = 54;
         $checkboxY7 = $checkboxY6 + 25;

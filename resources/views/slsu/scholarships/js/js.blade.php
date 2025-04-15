@@ -796,7 +796,7 @@
                         $('#editScholarshipId').val(Scholarship.id);
 
                         $('#editRequirementsModalLabel').text(
-                            `Add/Edit Requirements for ${Scholarship.name}`);
+                            `Edit Requirements for ${Scholarship.name}`);
 
                         const container = $('#editRequirementsContainer');
                         container.empty();
@@ -1049,6 +1049,18 @@
                         'Update Requirements');
                 },
             });
+        });
+
+        $(document).on('change', '.toggle-status', function() {
+            let scholarshipId = $(this).data('scholarship-id');
+            let status = $(this).is(':checked') ? 1 : 0;
+
+            if (status === 1) {
+                $('#scholarshipId').val(scholarshipId);
+                $('#statusModal').modal('show');
+            } else {
+                updateScholarshipStatus(scholarshipId, status);
+            }
         });
 
 

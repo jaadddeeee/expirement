@@ -299,7 +299,7 @@
         </div>
     </div>
 
-    <!-- Add/Edit Requirements Modal -->
+    <!-- Edit Requirements Modal -->
     <div class="modal fade" id="editRequirementsModal" tabindex="-1" aria-labelledby="editRequirementsModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -328,6 +328,37 @@
                     <button type="button" id="btnUpdateRequirements" class="btn btn-primary">
                         <i class="fa fa-save me-1"></i> Update Requirements</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="statusForm">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="statusModalLabel">Set Scholarship Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="scholarshipId" name="scholarship_id">
+                        <div class="mb-3">
+                            <label for="slots" class="form-label">Number of Slots</label>
+                            <input type="number" class="form-control" id="slots" min="1" name="slots"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

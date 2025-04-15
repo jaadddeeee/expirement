@@ -594,3 +594,5 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   Route::get('/generate-noa', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipCertificate')->name('generate-noa');
   Route::get('/generate-profile-form', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipProfileForm')->name('generate-profile-form');
 });
+
+Route::get('/scholarship-application', $controller_path . '\SLSU\Scholarship\ScholarshipController@scholarshipApplication')->name('scholarship-application');
