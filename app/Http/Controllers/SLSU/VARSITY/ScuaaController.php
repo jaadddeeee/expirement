@@ -75,9 +75,6 @@ class ScuaaController extends Controller
                 'event_name' => $item->event->event ?? null,
             ];
         });
-    
-        $scuaaLists = Scuaa::paginate(5);; // Fetch all records
-
 
         $events = Event::select('id', 'event')->orderby('event')->get();
 
@@ -93,7 +90,6 @@ class ScuaaController extends Controller
             'title_coach' => "List of Coaches",
             'headerAction' => '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>',
             'Coaches' => $coachList,
-            'ScuaaLists' => $scuaaLists,
             'Events' => $events,
             'rowsPerPage' => $rowsPerPage
         ]);
@@ -159,9 +155,6 @@ class ScuaaController extends Controller
             ];
         });
 
-        $scuaaLists = Scuaa::paginate(5);; // Fetch all records
-
-
         $events = Event::select('id', 'event')->orderby('event')->get();
 
         if ($request->ajax()) {
@@ -176,7 +169,6 @@ class ScuaaController extends Controller
             'title_athlete' => "List of Athletes ",
             'headerAction' => '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>',
             'Lists' => $varsityList,
-            'ScuaaLists' => $scuaaLists,
             'Events' => $events,
             'rowsPerPage' => $rowsPerPage
         ]);

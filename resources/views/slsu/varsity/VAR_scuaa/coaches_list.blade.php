@@ -51,8 +51,6 @@
                                         class='bx bxs-filter-alt'></i></button>
                             </div>
                             <div class="d-flex mt-1 gap-2 justify-content-end">
-                                <a href="" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#scuaaHistory"><i class='bx bx-history'></i></a>
                                 {!! $headerAction ?? '' !!}
                             </div>
                         </form>

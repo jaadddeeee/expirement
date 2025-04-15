@@ -169,7 +169,7 @@
         `;
 
         Swal.fire({
-            title: "Generate Scuaa List",
+            title: "Generate Official List",
             width: 390,
             html: toggleSwitch,
             showCancelButton: true,
