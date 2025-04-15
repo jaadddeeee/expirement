@@ -30,6 +30,11 @@ class Event extends Model
         return $this->hasMany(Varsity::class, 'VarsityEvent');
     }
 
+    public function coaches()
+    {
+        return $this->hasMany(Coach::class, 'CoachEvent');
+    }
+
     public function __construct(){
         $this->connection = strtolower(session('campus'));
     }

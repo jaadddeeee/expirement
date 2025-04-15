@@ -125,31 +125,18 @@ class ChecklistReport extends TCPDF
         $employeeData = DB::connection('hrmis')
             ->table('employee')
             ->whereIn('id', $query->pluck('CoachID'))
-            ->whereIn('campus', [1, 2, 3, 4, 5, 6])
+            ->whereIn('Campus', [1, 2, 3, 4, 5, 6])
             ->get()
             ->keyBy('id'); // Convert collection to key-value pair
-
-                $campusToFolder = [
-                1 => 'SG',
-                2 => 'MCC',
-                3 => 'TO',
-                4 => 'BN',
-                5 => 'SJ',
-                6 => 'HN',
-            ];
     
         // Merge employee details into coach list
-        $coachList = $query->map(function ($item) use ($employeeData, $campusToFolder) {
+        $coachList = $query->map(function ($item) use ($employeeData) {
             $emp = $employeeData->get($item->CoachID); // Retrieve employee by CoachID
             $coach = $item->coach; // Get the coach relationship
 
             $fullName = ($emp->FirstName ?? 'N/A')  . (!empty($emp->MiddleName) ? ' ' . $emp->MiddleName[0] . '. ' : '') .
             ($emp->LastName ?? 'N/A');
 
-            $campus = $emp->Campus ?? null;
-            $folder = $campusToFolder[$campus] ?? 'UNKNOWN';
-
-            $picture = ('storage/' . $coach->Picture);
     
             return [
                 'SchoolYear' => $item->SchoolYear,
@@ -157,7 +144,6 @@ class ChecklistReport extends TCPDF
                 'Email'     => $emp->EmailAddress ?? null,
                 'ContactNo'  => $emp->Cellphone ?? null,
                 'FullName'  => strtoupper($fullName) ?? null,
-                'Picture'    => $picture ?? null,
                 'event_name' => optional($item->event)->event ?? null,
             ];
         });

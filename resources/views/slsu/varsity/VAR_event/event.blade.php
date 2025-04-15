@@ -50,6 +50,9 @@
                                                 data-id="{{ Crypt::encryptstring($event->id) }}"><i
                                                     class = 'bx bx-edit text-warning'></i></a>
                                             &nbsp;
+                                            <a href = "#" class="deleteEvent"
+                                            data-id="{{ Crypt::encryptstring($event->id) }}"><i
+                                                class = 'bx bx-trash text-danger'></i></a>
                                         </td>
                                     </tr>
                                 @endforeach

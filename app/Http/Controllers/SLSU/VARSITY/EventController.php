@@ -12,7 +12,7 @@ use Crypt;
 class EventController extends Controller
 {
     public function index(){
-        $events = Event::all();
+        $events = Event::whereNull('deleted_at')->get();
 
         $pageTitle = "Manage Event";
         $headerAction = '<a href="javascript:history.back()" class="btn btn-sm btn-primary" role="button">Back</a>';
@@ -26,7 +26,16 @@ class EventController extends Controller
     public function save(Request $request){
       try {
         $event = $request->event ?? throw new Exception("Empty Event");
-        $existEvent = Event::where("event", $event)->exists() && throw new Exception("Duplicate entry for event");
+        $existEvent = Event::where("event", $event)->first();
+
+        if($existEvent && $event == $existEvent->event){
+          if($existEvent->deleted_at !== null){
+            Event::where('id', $existEvent->id)->update(['deleted_at' => null]);
+            return response()->json(['Error' => 0, "Message" => trim($event). " successfully restored." ]);
+          }else {
+            throw new Exception("Event already exists");
+          }
+        }
 
         if(!str_contains(strtolower($event), 'men') && !str_contains(strtolower($event),'women')){
           throw new Exception("The event name must contain 'Men' or 'Women'");
@@ -43,7 +52,7 @@ class EventController extends Controller
         return response()->json(['Error' => \GENERAL::Error("Unable to insert event")], 400 );
       }
       catch(Exception $e){
-        return response()->json(['Error' => \GENERAL::Error($e->getMessage())], 400);
+        return response()->json(['Error' => \GENERAL::Error($e->getMessage(),$e->getFile())], 400);
       }
     }
     
@@ -98,6 +107,25 @@ class EventController extends Controller
       } catch (Exception $e) {
           return response()->json(['Error' => \GENERAL::Error($e->getMessage())], 400);
       }
+  }
+
+  public function destroyEvent(Request $request){
+    try{
+      $id = Crypt::decryptString($request->id); 
+      // dd($id);
+      $event = Event::findOrFail($id);
+
+      if($event->varsities()->exists() || $event->coaches()->exists()){
+        throw new Exception("Unable to delete ". $event->event .". Event is still in active.");
+      }
+
+      $event->delete();
+      return response()->json(['Errors' => 0, "Message" => "Event successfully deleted"]);
+    }catch(Exception $e){
+      return response()->json(['Errors' => $e->getMessage()], 400);
+    }catch(DecryptException $e){
+      return response()->json(['Errors' => 'Invalid Event ID'], 400);
+    }
   }
   
 }

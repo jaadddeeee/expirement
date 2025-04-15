@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use Exception;
 
 
+
 class VarsityController extends Controller
 {
     public function index(Request $request)
@@ -30,6 +31,7 @@ class VarsityController extends Controller
                 'var_varsity.SchoolYear',
                 'var_varsity.Semester',
                 'var_varsity.id',
+                'var_varsity.StudentNo',
                 'students.FirstName as FirstName',
                 'students.MiddleName as MiddleName',
                 'students.LastName as LastName',
@@ -183,32 +185,71 @@ class VarsityController extends Controller
                 throw new Exception($event->event . ' event has reached the maximum number of participants.');
             }
 
-            // Check if the varsity student already exists for the current school year
             $exists = ListVarsity::where([
                 'StudentNo' => $varsity->StudentNo,
-                'SchoolYear' => date('Y'),
-                ])
-                ->select('id', 'deleted_at')
-                ->first();
-                // dd($exists);
-                if ($exists) {
+            ])
+            ->select('id', 'SchoolYear', 'deleted_at')
+            ->first();
+            
+            if ($exists) {
+                if ($exists->SchoolYear == date('Y')) {
                     if ($exists->deleted_at !== null) {
                         // Restore the soft-deleted record manually
                         ListVarsity::where('id', $exists->id)
-                            ->update(['deleted_at' => null]);
-    
+                            ->update([
+                                'SchoolYear' => date('Y'),
+                                'deleted_at' => null
+                            ]);
+            
                         return response()->json(['success' => true, 'message' => 'Varsity restored successfully.']);
                     } else {
                         throw new Exception("Varsity already exists for this school year.");
                     }
+                } else {
+                    // Update the existing record for a different year
+                    ListVarsity::where('id', $exists->id)
+                        ->update([
+                            'SchoolYear' => date('Y'),
+                            'Event' => $varsity->VarsityEvent,
+                        ]);
+            
+                    return response()->json(['success' => true, 'message' => 'Varsity updated successfully for the new school year.']);
                 }
+            }
+            
+            // Save the varsity to the var_list table if no record exists
+            ListVarsity::create([
+                'StudentNo' => $varsity->StudentNo,
+                'SchoolYear' => date('Y'),
+                'Event' => $varsity->VarsityEvent,
+            ]);
 
-                // Save the varsity to the var_list table
-                ListVarsity::create([
-                    'StudentNo' => $varsity->StudentNo,
-                    'SchoolYear' => date('Y'),
-                    'Event' => $varsity->VarsityEvent,
-                ]);
+            // Check if the varsity student already exists for the current school year
+            // $exists = ListVarsity::where([
+            //     'StudentNo' => $varsity->StudentNo,
+            //     'SchoolYear' => date('Y'),
+            //     ])
+            //     ->select('id', 'deleted_at')
+            //     ->first();
+            //     // dd($exists);
+            //     if ($exists) {
+            //         if ($exists->deleted_at !== null) {
+            //             // Restore the soft-deleted record manually
+            //             ListVarsity::where('id', $exists->id)
+            //                 ->update(['deleted_at' => null]);
+    
+            //             return response()->json(['success' => true, 'message' => 'Varsity restored successfully.']);
+            //         } else {
+            //             throw new Exception("Varsity already exists for this school year.");
+            //         }
+            //     }
+
+            //     // Save the varsity to the var_list table
+            //     ListVarsity::create([
+            //         'StudentNo' => $varsity->StudentNo,
+            //         'SchoolYear' => date('Y'),
+            //         'Event' => $varsity->VarsityEvent,
+            //     ]);
             }
 
             return response()->json(['success' => true, 'message' => 'Selected varsity students successfully stored.']);
@@ -241,18 +282,35 @@ class VarsityController extends Controller
                 ->first() ?? throw new Exception("This student does not exist in this campus");
 
             // Validate duplicate entry
-            DB::connection(strtolower($campus))
+            $existed = DB::connection(strtolower($campus))
                 ->table('var_varsity')
                 ->where([
                     'StudentNo' => $studentNo,
                 ])
-                ->exists() && throw new Exception("Duplicate entry detected for this Student");
+                ->first();
 
             $gender = $student->Sex;
             $eventGender = str_contains(strtolower($event->event), ' men') ? 'M' : (str_contains(strtolower($event->event), ' women') ? 'F' : null);
 
             if ($eventGender && $eventGender !== $gender) {
                 throw new Exception("Student's gender does not match the event category.");
+            }
+
+            if($existed && $studentNo == $existed->StudentNo){
+                if($existed->deleted_at !== null) {
+                    // Restore the soft-deleted record manually
+                    Varsity::on(strtolower($campus))
+                        ->where('id', $existed->id)
+                        ->update([
+                            'VarsityEvent' => $eventId,
+                            'SchoolYear' => $sy,
+                            'Semester' => $sem,
+                            'deleted_at' => null
+                        ]);
+                    return response()->json(['Error' => 0, "Message" => 'Varsity restored successfully.']);
+                } else {
+                    throw new Exception("Varsity already exists for this student.");
+                }
             }
 
             // Insert into var_varsity
@@ -384,18 +442,30 @@ class VarsityController extends Controller
 
             $id = Crypt::decryptString($request->id);
 
+            $date = date('Y');
+            $coachScuaaExist = DB::connection('sg')
+                ->table('var_scuaa_list')
+                ->where('SchoolYear', $date)
+                ->whereNull('deleted_at')
+                ->where('StudentNo', $id)
+                ->exists();
+    
+            if ($coachScuaaExist) {
+                throw new Exception('Cannot delete coach. This coach is still in active.');
+            }
+
             // Find the Varsity record, delete record
             $varsity = Varsity::on(strtolower($campus))
-                ->where('id', $id)
+                ->where('StudentNo', $id)
                 ->firstOrFail() ?? throw new Exception('Varsity record not found.');
 
             $varsity->delete();
 
             return response()->json(['success' => true, 'message' => 'Varsity successfully deleted.']);
         } catch (DecryptException) {
-            return response()->json(['error' => General::Error('Invalid encrypted ID.')], 400);
+            return response()->json(['error' => \GENERAL::Error('Invalid encrypted ID.')], 400);
         } catch (Exception $e) {
-            return response()->json(['error' => General::Error($e->getMessage())], 400);
+            return response()->json(['error' => \GENERAL::Error($e->getMessage())], 400);
         }
     }
 }

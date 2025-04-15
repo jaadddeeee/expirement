@@ -127,6 +127,55 @@
         });
     });
 
+    $('.deleteEvent').on('click', function(e) {
+        e.preventDefault();
+
+        let id = $(this).attr('data-id');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will delete the event select, You can't revert this!",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Delete',    
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('delete.event') }}",
+                    method: 'POST',
+                    data: {id},
+                    cache:false,
+                    beforeSend: function(){
+                        swal.fire({
+                            position: 'center',
+                            icon: 'info',
+                            title: 'Deleting...',
+                            showConfirmButton: false
+                        });
+                    },
+                    success:function(data){
+                        if(data.Errors == 0){
+                            swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: data.Message, 
+                            }).then(() => {
+                                    window.location.reload();
+                            })
+                        }
+                    },
+                    error:function(response){
+                        var errors = response.responseJSON.Errors;
+                        swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: errors,
+                        });
+                    }
+                })
+            }
+        })
+    });
+
     $(document).on("hidden.bs.modal", "#updateModalEvent", function() {
         window.history.pushState({}, "", "/varsity/event");
         window.location.reload();

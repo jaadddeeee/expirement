@@ -304,7 +304,7 @@
                         if (response.status == 419) {
                             window.location.reload();
                         } else {
-                            var errors = response.responseJSON.errors;
+                            var errors = response.responseJSON.error;
 
                             Swal.fire(
                                 'Error!',
@@ -620,6 +620,7 @@
     $("#btn-list").on("click", function(e) {
         e.preventDefault();
         var campus = $('#filterCampus').val();
+        const selectedCountElement = document.getElementById('selected-row');
 
         // Collect selected varsity IDs (including those stored across pages)
         let selectedVarsities = [];
@@ -662,7 +663,14 @@
                         'Successfully saved',
                         data.message,
                         'success'
-                    );
+                    ).then(result => {
+                        if (result.isConfirmed) {
+                            selectedCountElement.textContent = "";
+                            selectedCountElement.classList.remove("border", "px-1", "rounded", "text-dark");
+                            selectedCountElement.style.border = "none";
+                        }
+
+                    });
 
                     // Reset checkboxes on current page
                     document.querySelectorAll('.select-row:checked').forEach(function(checkbox) {

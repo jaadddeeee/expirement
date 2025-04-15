@@ -10,6 +10,7 @@ use App\Models\Enrolled;
 use App\Models\Registration;
 use App\Models\Student;
 use App\Models\VARSITY\Scuaa;
+use App\Models\VARSITY\Coach;
 use App\Models\VARSITY\CoachVarsity;
 use App\Models\VARSITY\ListVarsity;
 use GENERAL;
@@ -101,63 +102,136 @@ class ScuaaReport extends TCPDF
     return $listAthletes;
 
   }
-  
+
   private function listCoaches()
   {
-      $query = CoachVarsity::with('event','coach')
+      $query = CoachVarsity::with('event', 'coach')
           ->whereNull('deleted_at')
           ->where('Event', $this->getEvent())
           ->where('SchoolYear', $this->getSy())
           ->orderBy('SchoolYear', 'desc')
-          ->get(); // Fetch all records
+          ->get();
+  
+      // Fetch coach IDs
+      $coachIDs = $query->pluck('CoachID')->unique();
   
       // Fetch employee data from hrmis.employee
       $employeeData = DB::connection('hrmis')
           ->table('employee')
-          ->whereIn('id', $query->pluck('CoachID'))
-          ->whereIn('campus', [1, 2, 3, 4, 5, 6])
+          ->whereIn('id', $coachIDs)
+          ->whereIn('Campus', [1, 2, 3, 4, 5, 6])
           ->get()
-          ->keyBy('id'); // Convert collection to key-value pair
-    
-          $campusToFolder = [
-            1 => 'SG',
-            2 => 'MCC',
-            3 => 'TO',
-            4 => 'BN',
-            5 => 'SJ',
-            6 => 'HN',
-        ];
+          ->keyBy('id');
+  
+      // Fetch pictures from var_coaches across multiple connections
+      $connections = ['sg', 'mcc', 'to', 'bn', 'sj', 'hn'];
+      $coachPictures = collect();
+  
+      foreach ($connections as $connection) {
+          $pictures = Coach::on($connection)
+              ->whereIn('EmpNo', $coachIDs)
+              ->get()
+              ->map(function ($coach) use ($connection) {
+                  $coach->connection = $connection; // if needed for debugging
+                  return $coach;
+              });
+  
+          // Properly merge into the main collection
+          $coachPictures = $coachPictures->merge($pictures);
+      }
+  
+      $coachPictures = $coachPictures->keyBy('EmpNo');
   
       // Merge employee details into coach list
-      $coachList = $query->map(function ($item) use ($employeeData, $campusToFolder) {
-          $emp = $employeeData->get($item->CoachID); // Retrieve employee by CoachID
-          $coach = $item->coach; // Get the coach relationship
-
+      $coachList = $query->map(function ($item) use ($employeeData, $coachPictures) {
+          $emp = $employeeData->get($item->CoachID);
+  
+          if (!$emp) return null;
+  
           $fullName = ($emp->LastName ?? 'N/A') . ', ' . ($emp->FirstName ?? 'N/A') .
-          (!empty($emp->MiddleName) ? ' ' . $emp->MiddleName[0] . '.' : '');
-
-          $campus = $emp->Campus ?? null;
-          $folder = $campusToFolder[$campus] ?? 'UNKNOWN';
-
-          $picture = ('storage/' . $coach->Picture);
+              (!empty($emp->MiddleName) ? ' ' . $emp->MiddleName[0] . '.' : '');
+  
+          // Safely get picture data
+          $pictureData = $coachPictures->get($item->CoachID);
+          $picture = $pictureData && $pictureData->Picture
+              ? 'storage/' . $pictureData->Picture
+              : 'storage/default.jpg'; // Fallback if picture not available
   
           return [
               'SchoolYear' => $item->SchoolYear,
               'EmpID'      => $item->CoachID,
-              'Email'     => $emp->EmailAddress ?? null,
-              'ContactNo'  => $emp->Cellphone ?? null,
-              'FullName'  => $fullName ?? null,
-              'Picture'    => $picture ?? null,
-              'event_name' => optional($item->event)->event ?? null,
+              'Email'      => $emp->EmailAddress ?? 'N/A',
+              'ContactNo'  => $emp->Cellphone ?? 'N/A',
+              'FullName'   => $fullName,
+              'Picture'    => $picture,
+              'event_name' => optional($item->event)->event ?? 'N/A',
           ];
-      });
-
-      $listCoaches = $coachList->sortBy('FullName')->values()->toArray();
-
-      // dd($listCoaches);
+      })->filter(); // Removes null entries
   
-      return $listCoaches; // Return the transformed list
+      $listCoaches = $coachList->sortBy('FullName')->values()->toArray();
+  
+      return $listCoaches;
   }
+  
+  
+  // private function listCoaches()
+  // {
+  //   $query = CoachVarsity::with('event', 'coach')
+  //   ->whereNull('deleted_at')
+  //   ->where('Event', $this->getEvent())
+  //   ->where('SchoolYear', $this->getSy())
+  //   ->orderBy('SchoolYear', 'desc')
+  //   ->get(); // Fetch all records
+
+  //   // Fetch coach IDs
+  //   $coachIDs = $query->pluck('CoachID')->unique();
+
+  //   // Fetch employee data from hrmis.employee
+  //   $employeeData = DB::connection('hrmis')
+  //       ->table('employee')
+  //       ->whereIn('id', $coachIDs)
+  //       ->whereIn('Campus', [1, 2, 3, 4, 5, 6])
+  //       ->get()
+  //       ->keyBy('id'); // Key by employee ID for faster lookup
+
+  //   // Define campus-to-folder mapping
+  //   $campusToFolder = [
+  //       1 => 'SG',
+  //       2 => 'MCC',
+  //       3 => 'TO',
+  //       4 => 'BN',
+  //       5 => 'SJ',
+  //       6 => 'HN',
+  //   ];
+
+  //   // Merge employee details into coach list
+  //   $coachList = $query->map(function ($item) use ($employeeData, $campusToFolder) {
+  //       $emp = $employeeData->get($item->CoachID);
+  //       $coach = $item->coach;
+
+  //       $fullName = ($emp->LastName ?? 'N/A') . ', ' . ($emp->FirstName ?? 'N/A') .
+  //           (!empty($emp->MiddleName) ? ' ' . $emp->MiddleName[0] . '.' : '');
+
+  //       $campus = $emp->Campus ?? null;
+  //       $folder = $campusToFolder[$campus] ?? 'UNKNOWN';
+
+  //       $picture = 'storage/'.($coach->Picture);
+
+  //       return [
+  //           'SchoolYear' => $item->SchoolYear,
+  //           'EmpID'      => $item->CoachID,
+  //           'Email'      => $emp->EmailAddress ?? 'N/A',
+  //           'ContactNo'  => $emp->Cellphone ?? 'N/A',
+  //           'FullName'   => $fullName,
+  //           'Picture'    => $picture,
+  //           'event_name' => optional($item->event)->event ?? 'N/A',
+  //       ];
+  //   });
+
+  //   $listCoaches = $coachList->sortBy('FullName')->values()->toArray();
+
+  //   return $listCoaches; // Return the transformed list
+  // }
   
   public function Header(){
     $startYear = date('Y');

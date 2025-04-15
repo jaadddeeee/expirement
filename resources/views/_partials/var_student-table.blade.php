@@ -22,7 +22,7 @@
                 <i class="bx bx-edit text-warning"></i>
             </a>
             &nbsp;
-            <a href="#" class="deleteVarsity" cid="{{ Crypt::encryptString($varsity->id) }}">
+            <a href="#" class="deleteVarsity" cid="{{ Crypt::encryptString($varsity->StudentNo) }}">
                 <i class="text-danger bx bx-trash"></i>
             </a>
         </td>

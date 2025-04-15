@@ -573,6 +573,7 @@ Route::group(['prefix' => 'varsity', 'middleware' => ['auth', 'varsity']], funct
   Route::post('/save-event', $controller_path . '\SLSU\VARSITY\EventController@save');
   Route::get('/edit-event/{id}', $controller_path . '\SLSU\VARSITY\EventController@edit')->name('events-edit');
   Route::patch('/update-event', $controller_path . '\SLSU\VARSITY\EventController@update')->name('update-event');
+  Route::post('/delete-event', $controller_path . '\SLSU\VARSITY\EventController@destroyEvent')->name('delete.event');
   //Coach
   Route::get('/coach', $controller_path . '\SLSU\VARSITY\CoachController@index')->name('coaches');
   Route::post('/employees-campus', $controller_path . '\SLSU\VARSITY\CoachController@emplist');

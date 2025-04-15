@@ -57,11 +57,15 @@ class CoachController extends Controller
     $coach = $query->paginate($rowsPerPage);
 
     $currentYear = date('Y');
-    foreach ($coach as $item) { // Iterate through the paginated collection
-        $item->alreadyExists = CoachVarsity::where('CoachID', $item->EmpNo)
-            ->where('SchoolYear', $currentYear)
-            ->first();
-    }
+
+    if ($request->filterCampus || $campus == 'SG') {
+        foreach ($coach as $item) { 
+            $item->alreadyExists = CoachVarsity::where('CoachID', $item->EmpNo)
+                ->where('SchoolYear', $currentYear)
+                ->whereNull('deleted_at')
+                ->first();
+        }
+    }  
 
     if ($request->ajax()) {
         return response()->json([
@@ -144,20 +148,20 @@ class CoachController extends Controller
         $event = Crypt::decryptString($request->Event ?: throw new Exception("Please select event"));
         $ct = $request->coachType ?? throw new Exception("Please select coach type");
 
-        if (!$request->hasFile('CoachImage')) {
-            throw new Exception('Logo is required');
-        }
+        // if (!$request->hasFile('CoachImage')) {
+        //     throw new Exception('Picture is required');
+        // }
 
         $picture = $request->file('CoachImage');
         
         $campusID = GENERAL::Campuses()[$campus]['ID'];
 
         // Check for duplicate entry
-        $C = DB::connection(strtolower($campus))
+        $existed = DB::connection(strtolower($campus))
             ->table('var_coaches')
-            ->where("id", $EmpNo)
-            ->exists() && throw new Exception('Duplicate entry detected for this coach');
-        
+            ->where("EmpNo", $EmpNo)
+            ->first();
+
         DB::connection('hrmis')
             ->table('employee')
             ->whereNull('deleted_at')
@@ -178,6 +182,22 @@ class CoachController extends Controller
         if ($picture) {
             $imagePath = $picture->store("coachphoto/".strtoupper($campus), 'public'); // Store in storage/app/public/coachphoto/{campus}
             // \Log::info('Image stored at: ' . $imagePath);
+        }
+
+        if($existed && $EmpNo == $existed->EmpNo){
+            if($existed->deleted_at !== null){
+                Coach::on(strtolower($campus))
+                ->where('id', $existed->id)
+                ->update([
+                    'CoachType' => $ct,
+                    'CoachEvent' => $event,
+                    'Picture' => $imagePath,
+                    'deleted_at' => null
+                ]);
+                return response()->json(['Error' => 0, "Message" => "Coach successfully restored."]);
+            }else {
+                throw new Exception('Duplicate entry detected for this coach');
+            }
         }
         
         Coach::on(strtolower($campus))
@@ -283,9 +303,22 @@ class CoachController extends Controller
 
         $campus = auth()->user()->AllowSuper == 1 ? ($request->campus ?? throw new Exception('Select Campus')) : session('campus');
 
+        // Check if the coach has related records in the var_scuaa_coach table
+        $date = date('Y');
+        $coachScuaaExist = DB::connection('sg')
+            ->table('var_scuaa_coach')
+            ->where('SchoolYear', $date)
+            ->whereNull('deleted_at')
+            ->where('CoachID', $id)
+            ->exists();
+
+        if ($coachScuaaExist) {
+            throw new Exception('Cannot delete coach. This coach is still in active.');
+        }
+
         // Find the Varsity record, delete record
         $varsity = Coach::on(strtolower($campus))
-                    ->where('id', $id)
+                    ->where('EmpNo', $id)
                     ->firstOrFail();
 
         $varsity->delete();
@@ -340,21 +373,34 @@ public function saveSelectedCoach(Request $request)
 
         // // Check if the varsity student already exists for the current school year
         $exists = CoachVarsity::where([
-            'CoachID' => $coach->EmpNo,
-            'SchoolYear' => date('Y'),
-        ])->exists();
-
+            'CoachID' => $coach->EmpNo
+        ])
+        ->select('id', 'deleted_at')
+        ->first();
+        
         if ($exists) {
-            throw new Exception("Varsity already exists for this school year.");
-        }
+            if ($exists->deleted_at !== null) {
+                // Restore the soft-deleted record manually
+                CoachVarsity::where('id', $exists->id)
+                    ->update([
+                        'SchoolYear' => date('Y'),
+                        'deleted_at' => null
+                    ]);
 
-        // // Save the varsity to the var_list table
-        CoachVarsity::create([
-            'CoachID' => $coach->EmpNo,
-            'SchoolYear' => date('Y'),
-            'Event' => $coach->CoachEvent,
-        ]);
-        // }
+                return response()->json(['success' => true, 'message' => 'Coach restored successfully.']);
+            } else {
+                CoachVarsity::where('id', $exists->id)
+                    ->update([
+                        'SchoolYear' => date('Y'),
+                    ]);
+            }
+        }else{
+            CoachVarsity::create([
+                'CoachID' => $coach->EmpNo,
+                'SchoolYear' => date('Y'),
+                'Event' => $coach->CoachEvent,
+            ]);
+        }
 
         return response()->json(['success' => true, 'message' => 'Selected coach successfully stored.']);
     } catch (Exception $e) {
