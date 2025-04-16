@@ -191,7 +191,6 @@ class CoachController extends Controller
                 ->update([
                     'CoachType' => $ct,
                     'CoachEvent' => $event,
-                    'Picture' => $imagePath,
                     'deleted_at' => null
                 ]);
                 return response()->json(['Error' => 0, "Message" => "Coach successfully restored."]);
