@@ -237,28 +237,85 @@ class ChecklistReport extends TCPDF
             $this::Line($x, $startY, $x, $endY);
         }
 
-        foreach ($this->listCoaches as $coach) {
-            $this::SetFont('calibrib', 'B', 12); 
-            $this::setXY(13 + ($cols * 80), $startY - 33); 
-            $this::Cell(40, 51, $coach['FullName'], 0, 0, 'C');
-            $cols++;
+            
+        $totalCoaches = count($this->listCoaches);
+        //Coaches Name
+        if ($totalCoaches > 3) {
+            // Place the first 3 coaches above
+            for ($col = 0; $col < 3; $col++) {
+                $this::SetFont('calibrib', 'B', 12);
+                $this::setXY(15 + ($col * 80), $startY - 55); 
+                $this::Cell(40, 51, $this->listCoaches[$col]['FullName'], 0, 0, 'C');
+            }
+        
+            // Place the remaining coaches below
+            $col = 0;
+            for ($i = 3; $i < $totalCoaches; $i++) {
+                $x = 15 + ($col * 80); 
+                $y = $startY - 33; 
+        
+                $this::SetFont('calibrib', '', 12);
+                $this::setXY($x, $y);
+                $this::Cell(40, 51, $this->listCoaches[$i]['FullName'], 0, 0, 'C');
+        
+                $col++;
+                if ($col >= 3) {
+                    $col = 0; 
+                }
+            }
+        } else {
+            // Place all coaches below if there are 3 or fewer
+            $col = 0;
+            foreach ($this->listCoaches as $coach) {
+                $this::SetFont('calibrib', '', 12);
+                $this::setXY(15 + ($col * 80), $startY - 33); 
+                $this::Cell(40, 51, $coach['FullName'], 0, 0, 'C');
+                $col++;
+            }
         }
 
         $this::SetXY(256, $startY - 33);
         $this::SetFont('calibriB', '', 12);
         $this::Cell(40, 51,strtoupper($this->prefs->GetDefaultValue($this->pref, "SportsDirector")), 0, 0, 'C');
-        //label
+        //label for Sport Director
         $this::SetXY(256, $startY - 28);
         $this::SetFont('calibri', '', 12);
         $this::Cell(40, 51, 'Name & Signature of Sport Director', 0, 0, 'C');
 
-        //label
-        for ($col = 0; $col < 3; $col++) {
-            $this::SetXY(13 + ($col * 80), $startY - 28);
-            $this::SetFont('calibri', '', 12);
-            $this::Cell(40, 51, 'Name & Signature of Coach', 0, 0, 'C');
-            
+
+        //label for Coach
+        if ($totalCoaches > 3) {
+            // Place the first 3 coaches above
+            for ($col = 0; $col < 3; $col++) {
+                $this::SetXY(15 + ($col * 80), $startY - 50); 
+                $this::SetFont('calibri', '', 12);
+                $this::Cell(40, 51, 'Name & Signature of Coach', 0, 0, 'C');
+            }
+        
+            // Place the remaining coaches below
+            $col = 0; 
+            for ($i = 3; $i < $totalCoaches; $i++) {
+                $x = 15 + ($col * 80); 
+                $y = $startY - 28; 
+        
+                $this::SetXY($x, $y);
+                $this::SetFont('calibri', '', 12);
+                $this::Cell(40, 51, 'Name & Signature of Coach', 0, 0, 'C');
+        
+                $col++;
+                if ($col >= 3) {
+                    $col = 0; 
+                }
+            }
+        } else {
+            // Place all coaches below if there are 3 or fewer
+            for ($col = 0; $col < $totalCoaches; $col++) {
+                $this::SetXY(15 + ($col * 80), $startY - 28);
+                $this::SetFont('calibri', '', 12);
+                $this::Cell(40, 51, 'Name & Signature of Coach', 0, 0, 'C');
+            }
         }
+
     }
     
     private function headerLine()
