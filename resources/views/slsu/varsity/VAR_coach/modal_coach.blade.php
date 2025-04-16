@@ -14,7 +14,7 @@
                         <div class="row mt-1  ">
                             <div class = "form-group">
                                 <div class="col-auto">
-                                    <label class="form-label">Campus: </label>
+                                    <label class="form-label">Campus </label><span class="text-danger ps-1">*</span>
                                     <select name="Campus" id="Campus" class="form-select">
                                         <option value="0">Select Campus</option>
                                         @foreach (GENERAL::Campuses() as $index => $campus)
@@ -31,7 +31,7 @@
                         <div class="col">
                             <div class="form-group">
                                 <div class="col-auto position-relative">
-                                    <label class="form-label">Employee: </label>
+                                    <label class="form-label">Employee </label><span class="text-danger ps-1">*</span>
                                     <!-- Employee Input Field -->
                                     <input type="text" name="Emp" id="Emp" class="form-control"
                                         placeholder="Enter employee name">
@@ -46,7 +46,7 @@
                         <div class="col">
                             <div class="form-group">
                                 <div class="col-auto">
-                                    <label class="form-label">Coach Type: </label>
+                                    <label class="form-label">Coach Type </label><span class="text-danger ps-1">*</span>
                                     <select name="coachType" id="coachType" class="form-select">
                                         <option value="0">Select Type</option>
                                         @foreach (GENERAL::CoachType() as $index => $type)
@@ -61,7 +61,7 @@
                         <div class="col">
                             <div class="form-group">
                                 <div class="col-auto">
-                                    <label class="form-label">Event: </label>
+                                    <label class="form-label">Event </label><span class="text-danger ps-1">*</span>
                                     <select name="Event" id="Event" class="form-select">
                                         <option value="0">Select Event</option>
                                     </select>
@@ -118,22 +118,6 @@
                             </div>
                         </div>
                     @endif
-                    {{-- <div class="row mt-2">
-                <div class="form-group">
-                  <div class="col-auto">
-                    <div class="d-flex justify-content-center align-items-center">
-                      <div class="position-relative d-inline-block">
-                          <label class="form-label d-flex align-items-center justify-content-center border border-primary rounded-pill fs-6 px-4 py-2 w-auto position-relative">
-                              <span class="position-absolute bg-white px-2 fw-bold text-primary" style="top: -12px; left: 50%; transform: translateX(-50%); z-index: 1;">
-                                  COACH
-                              </span>
-                              <span id="updateEmp" class="ms-2"></span>
-                          </label>
-                      </div>
-                  </div>                                                        
-                  </div>
-                </div>
-              </div> --}}
                     <div class="row mt-2">
                         <div class="form-group">
                             <div class="col-auto">
@@ -143,28 +127,31 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Coach Type</label>
-                                <select name="updateCT" id="updateCT" class="form-select">
-                                    <option value="0"></option>
-                                    @foreach (GENERAL::CoachType() as $index => $type)
-                                        <option value = "{{ $index }}">{{ $type['Type'] }}</option>
-                                    @endforeach
-                                </select>
+                    <div class="row all mt-2">
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Coach Type</label>
+                                    <select name="updateCT" id="updateCT" class="form-select">
+                                        <option value="0"></option>
+                                        @foreach (GENERAL::CoachType() as $index => $type)
+                                            <option value = "{{ $index }}">{{ $type['Type'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Event</label>
+                                    <select name="updateEvent" id="updateEvent" class="form-select">
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Event</label>
-                                <select name="updateEvent" id="updateEvent" class="form-select">
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+
                 </form>
             </div>
             <div class="modal-footer">
