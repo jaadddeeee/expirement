@@ -28,35 +28,38 @@
                             </div>
                         </div>
                     @endif
-                    <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto position-relative">
-                                <label class="form-label">Student</label>
-                                <!-- Student Input Field -->
-                                <input type="text" name="Stud" id="Stud" class="form-control"
-                                    placeholder="Enter student name">
-                                <input type="hidden" name="StudentNo" id="StudentNo">
-                                <div id="StudentDropdown" class="dropdown-menu position-absolute w-100 shadow bg-white"
-                                    style="display: none; z-index: 1050; max-height: 200px; overflow-y: auto; border: 1px; border-radius: 5px;">
-                                    <ul id="StudentList" class="list-group list-group-flush"></ul>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto position-relative">
+                                    <label class="form-label">Student <span class = 'text-danger'>*</span></label>
+                                    <!-- Student Input Field -->
+                                    <input type="text" name="Stud" id="Stud" class="form-control"
+                                        placeholder="Enter student name">
+                                    <input type="hidden" name="StudentNo" id="StudentNo">
+                                    <div id="StudentDropdown" class="dropdown-menu position-absolute w-100 shadow bg-white"
+                                        style="display: none; z-index: 1050; max-height: 200px; overflow-y: auto; border: 1px; border-radius: 5px;">
+                                        <ul id="StudentList" class="list-group list-group-flush"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Event <span class = 'text-danger'>*</span></label>
+                                    <select name="Event" id="Event" class="form-select">
+                                        <option value="0">Select Event</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row all mt-2">
+                    <div class="row mt-2">
+                        <div class="col">
                         <div class="form-group">
                             <div class="col-auto">
-                                <label class="form-label">Event</label>
-                                <select name="Event" id="Event" class="form-select">
-                                    <option value="0">Select Event</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label for="Description" class="form-label">School Year:</label>
+                                <label for="Description" class="form-label">School Year <span class = 'text-danger'>*</span></label>
                                 <select class = "form-select" name = "SchoolYear" id = "SchoolYear">
                                     <option value="0"></option>
                                     @foreach (GENERAL::SchoolYears() as $index => $sy)
@@ -65,20 +68,22 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="row all mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label for="Description" class="form-label">Semester:</label>
-                                <select class = "form-select" name = "Semester" id = "Semester">
-                                    <option value="0"></option>
-                                    @foreach (GENERAL::Semesters() as $index => $sem)
-                                        <option value="{{ $index }}">{{ $sem['Long'] }}</option>
-                                    @endforeach
-                                </select>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label for="Description" class="form-label">Semester <span class = 'text-danger'>*</span></label>
+                                    <select class = "form-select" name = "Semester" id = "Semester">
+                                        <option value="0"></option>
+                                        @foreach (GENERAL::Semesters() as $index => $sem)
+                                            <option value="{{ $index }}">{{ $sem['Long'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    
                 </form>
             </div>
             <div class="modal-footer">
@@ -119,25 +124,28 @@
                         </div>
                     @endif
                     <div class="row mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Student</label>
-                                <!-- Employee Input Field -->
-                                <input type="text" name="updateStud" id="updateStud" class="form-control"
-                                    readonly>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Student</label>
+                                    <!-- Employee Input Field -->
+                                    <input type="text" name="updateStud" id="updateStud" class="form-control"
+                                        readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label class="form-label">Event</label>
+                                    <select name="updateEvent" id="updateEvent" class="form-select">
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="row mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label class="form-label">Event</label>
-                                <select name="updateEvent" id="updateEvent" class="form-select">
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
+                        <div class="col">
                         <div class="form-group">
                             <div class="col-auto">
                                 <label class="form-label">School Year</label>
@@ -149,20 +157,22 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="form-group">
-                            <div class="col-auto">
-                                <label for="Description" class="form-label">Semester:</label>
-                                <select class = "form-select" name = "updateSem" id = "updateSem">
-                                    <option value="0"></option>
-                                    @foreach (GENERAL::Semesters() as $index => $sem)
-                                        <option value="{{ $index }}">{{ $sem['Long'] }}</option>
-                                    @endforeach
-                                </select>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <div class="col-auto">
+                                    <label for="Description" class="form-label">Semester:</label>
+                                    <select class = "form-select" name = "updateSem" id = "updateSem">
+                                        <option value="0"></option>
+                                        @foreach (GENERAL::Semesters() as $index => $sem)
+                                            <option value="{{ $index }}">{{ $sem['Long'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </div>  
+
                 </form>
             </div>
             <div class="modal-footer">
