@@ -538,7 +538,6 @@
 
             // If validation passes
             field.addClass('is-valid');
-            field.after('<div class="valid-feedback">Looks good!</div>');
             return true;
         }
 
@@ -1054,15 +1053,152 @@
         $(document).on('change', '.toggle-status', function() {
             let scholarshipId = $(this).data('scholarship-id');
             let status = $(this).is(':checked') ? 1 : 0;
+            let toggle = $(this); // ✅ cache the checkbox element
+
 
             if (status === 1) {
                 $('#scholarshipId').val(scholarshipId);
                 $('#statusModal').modal('show');
             } else {
-                updateScholarshipStatus(scholarshipId, status);
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This will deactivate the scholarship.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, deactivate it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        updateScholarshipStatus(scholarshipId, status);
+                        $('#statusForm')[0].reset();
+                        $('#dateRange').val('');
+                    } else {
+                        toggle.prop('checked', true); // ✅ revert toggle correctly
+                    }
+                });
             }
         });
 
 
+        // Function to update the scholarship status
+        function updateScholarshipStatus(scholarshipId, status) {
+            $.ajax({
+                url: "{{ route('scholarships.status.update') }}",
+                type: 'POST',
+                data: {
+                    scholarship_id: scholarshipId,
+                    status: status
+                },
+                success: function(response) {
+                    const {
+                        Error,
+                        Message
+                    } = response;
+
+                    if (Error == 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: Message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to update scholarship status.',
+                            showConfirmButton: true
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again.',
+                        showConfirmButton: true
+                    });
+                }
+            });
+        }
+
+        // date range picker for 
+        $('#dateRange').daterangepicker({
+            autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Clear',
+                format: 'YYYY-MM-DD'
+            }
+        });
+
+        // Set the selected date range in the input field
+        $('#dateRange').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format(
+                'YYYY-MM-DD'));
+        });
+
+        // Clear the input field when the user cancels
+        $('#dateRange').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+        });
+
+        $('#statusForm').on('submit', function(e) {
+            e.preventDefault();
+
+            let scholarshipId = $('#scholarshipId').val();
+            let slots = $('#slots').val();
+            let dateRange = $('#dateRange').val();
+            let [startDate, endDate] = dateRange.split(' to ');
+
+            $.ajax({
+                url: "{{ route('scholarships.status.update') }}",
+                type: 'POST',
+                data: {
+                    scholarship_id: scholarshipId,
+                    slots: slots,
+                    start_date: startDate,
+                    deadline: endDate,
+                    status: 1
+                },
+                success: function(response) {
+                    const {
+                        Error,
+                        Message
+                    } = response;
+
+                    if (Error == 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: Message,
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Hide the modal after the SweetAlert is closed
+                            $('#statusModal').modal('hide');
+                            // Reload the page to reflect changes
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to update scholarship details.',
+                            showConfirmButton: true
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again.',
+                        showConfirmButton: true
+                    });
+                },
+            })
+        });
     });
 </script>

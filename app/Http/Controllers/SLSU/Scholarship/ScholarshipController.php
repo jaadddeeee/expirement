@@ -457,4 +457,32 @@ class ScholarshipController extends Controller
 
         return view('slsu.scholarships.application', compact('pageTitle', 'scholarships'));
     }
+
+    public function updateStatus(Request $request)
+    {
+        try {
+            $campus = strtolower(session('campus'));
+
+            if (!$campus) {
+                return response()->json(['Error' => 1, 'Message' => 'Invalid campus database connection']);
+            }
+
+            $scholarship = Scholarship::on($campus)->find($request->scholarship_id);
+            $scholarship->status = $request->status;
+            $scholarship->slots = $request->slots;
+            $scholarship->start_date = $request->start_date;
+            $scholarship->deadline_date = $request->deadline;
+            $scholarship->save();
+
+            return response()->json([
+                'Error' => 0,
+                'Message' => 'Scholarship details updated successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'Error' => 1,
+                'Message' => 'An error occurred: ' . $e->getMessage(),
+            ], 400);
+        }
+    }
 }

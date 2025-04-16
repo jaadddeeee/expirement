@@ -350,8 +350,9 @@
                                 required>
                         </div>
                         <div class="mb-3">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="date" name="date" required>
+                            <label for="dateRange" class="form-label">Application Period</label>
+                            <input type="text" class="form-control" id="dateRange" name="dateRange"
+                                placeholder="Select date range" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -366,4 +367,7 @@
 
 @section('page-script')
     @include('slsu.scholarships.js.js')
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 @endsection

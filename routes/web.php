@@ -578,6 +578,9 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   Route::put('/requirements/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@updateRequirements')->name('scholarships.requirements.update');
   Route::delete('/requirements/delete', $controller_path . '\SLSU\Scholarship\ScholarshipController@destroyRequirements')->name('scholarships.requirements.destroy');
 
+  Route::post('/toggle-status/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@toggleStatus')->name('scholarships.toggle-status.update');
+  Route::post('/status/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@updateStatus')->name('scholarships.status.update');
+
   // scholars
   Route::get('/scholars', $controller_path . '\SLSU\Scholarship\ScholarController@index')->name('scholars.index');
   Route::get('/scholars/search-student', $controller_path . '\SLSU\Scholarship\ScholarController@searchStudent')->name('scholars.search-student');

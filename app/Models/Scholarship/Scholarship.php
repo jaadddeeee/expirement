@@ -28,6 +28,9 @@ class Scholarship extends Model
         'sch_provider',
         'status',
         'slots',
+        'description',
+        'start_date',
+        'deadline_date'
     ];
 
     public function __construct()

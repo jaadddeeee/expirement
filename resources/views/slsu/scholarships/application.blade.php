@@ -52,6 +52,16 @@
                                     <span>
                                         <strong>{{ $scholarship->sch_name }}</strong>
                                         <small class="d-block text-muted">{{ $scholarship->sch_acronym }}</small>
+                                        <small class="d-block text-muted">
+                                            Start:
+                                            <strong>
+                                                {{ \Carbon\Carbon::parse($scholarship->start_date)->format('M d, Y') }}
+                                            </strong><br>
+                                            Deadline:
+                                            <strong>
+                                                {{ \Carbon\Carbon::parse($scholarship->deadline_date)->format('M d, Y') }}
+                                            </strong>
+                                        </small>
                                     </span>
                                     <span class="badge rounded-pill bg-primary text-white">
                                         {{ $scholarship->slots }} slot{{ $scholarship->slots > 1 ? 's' : '' }}
