@@ -173,66 +173,6 @@ class ScuaaReport extends TCPDF
       return $listCoaches;
   }
   
-  
-  // private function listCoaches()
-  // {
-  //   $query = CoachVarsity::with('event', 'coach')
-  //   ->whereNull('deleted_at')
-  //   ->where('Event', $this->getEvent())
-  //   ->where('SchoolYear', $this->getSy())
-  //   ->orderBy('SchoolYear', 'desc')
-  //   ->get(); // Fetch all records
-
-  //   // Fetch coach IDs
-  //   $coachIDs = $query->pluck('CoachID')->unique();
-
-  //   // Fetch employee data from hrmis.employee
-  //   $employeeData = DB::connection('hrmis')
-  //       ->table('employee')
-  //       ->whereIn('id', $coachIDs)
-  //       ->whereIn('Campus', [1, 2, 3, 4, 5, 6])
-  //       ->get()
-  //       ->keyBy('id'); // Key by employee ID for faster lookup
-
-  //   // Define campus-to-folder mapping
-  //   $campusToFolder = [
-  //       1 => 'SG',
-  //       2 => 'MCC',
-  //       3 => 'TO',
-  //       4 => 'BN',
-  //       5 => 'SJ',
-  //       6 => 'HN',
-  //   ];
-
-  //   // Merge employee details into coach list
-  //   $coachList = $query->map(function ($item) use ($employeeData, $campusToFolder) {
-  //       $emp = $employeeData->get($item->CoachID);
-  //       $coach = $item->coach;
-
-  //       $fullName = ($emp->LastName ?? 'N/A') . ', ' . ($emp->FirstName ?? 'N/A') .
-  //           (!empty($emp->MiddleName) ? ' ' . $emp->MiddleName[0] . '.' : '');
-
-  //       $campus = $emp->Campus ?? null;
-  //       $folder = $campusToFolder[$campus] ?? 'UNKNOWN';
-
-  //       $picture = 'storage/'.($coach->Picture);
-
-  //       return [
-  //           'SchoolYear' => $item->SchoolYear,
-  //           'EmpID'      => $item->CoachID,
-  //           'Email'      => $emp->EmailAddress ?? 'N/A',
-  //           'ContactNo'  => $emp->Cellphone ?? 'N/A',
-  //           'FullName'   => $fullName,
-  //           'Picture'    => $picture,
-  //           'event_name' => optional($item->event)->event ?? 'N/A',
-  //       ];
-  //   });
-
-  //   $listCoaches = $coachList->sortBy('FullName')->values()->toArray();
-
-  //   return $listCoaches; // Return the transformed list
-  // }
-  
   public function Header(){
     $startYear = date('Y');
 
@@ -267,6 +207,10 @@ class ScuaaReport extends TCPDF
       $this::setXY(304, 12);
       $this::SetFont('calibri','',10);
       $this::Cell(0,5,'SCUAA Form 2',0,1,'L');
+
+      $this::setXY(228, 14);
+      $this::SetFont('lucidafaxdemib','',11);
+      $this::Cell(70, 15, 'OFFICIAL ENTRY FORM AND GALLERY OF', 0, 0, 'C');
 
       $this::Image(GENERAL::Logo(),7.9,65,30);
   }

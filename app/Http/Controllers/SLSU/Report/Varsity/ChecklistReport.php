@@ -192,6 +192,10 @@ class ChecklistReport extends TCPDF
         $this::SetFont('calibri','',10);
         $this::Cell(0,5,'SCUAA Form 1',0,1,'L');
 
+        $this::setXY(229, 14);
+        $this::SetFont('lucidafaxdemib','',11);
+        $this::Cell(70, 15, 'CHECKLIST OF ELIGIBILITY REQUIREMENTS OF', 0, 0, 'C');
+
         $startY += 9.4;
         $ctr = 0;
     

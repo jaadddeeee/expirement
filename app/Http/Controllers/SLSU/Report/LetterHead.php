@@ -213,11 +213,6 @@ class LetterHead extends TCPDF
     // Add horizontal line
     $this::SetLineWidth(0.7);
     $this::Line(5, 30, 325, 30);
-
-    // Add "OFFICIAL ENTRY FORM AND GALLERY OF" text with border
-    $this::setXY(228, 14);
-    $this::SetFont('lucidafaxdemib','',11);
-    $this::Cell(70, 15, 'OFFICIAL ENTRY FORM AND GALLERY OF', 0, 0, 'C');
   }
 
   public function ScuaaHeader(){
