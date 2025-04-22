@@ -362,13 +362,13 @@ public function saveSelectedCoach(Request $request)
             throw new Exception('Event not found.');
         }
 
-        // // Count the number of existing varsity students for the event
-        $existingVarsityCount = CoachVarsity::where('Event', $coach->CoachEvent)->count();
+        // // // Count the number of existing varsity students for the event
+        // $existingVarsityCount = CoachVarsity::where('Event', $coach->CoachEvent)->count();
 
-        // // Check if adding the new varsity student would exceed the total participants
-        if ($existingVarsityCount >= $event->totalAtlhetes) {
-            throw new Exception($event->event . ' event has reached the maximum number of participants.');
-        }
+        // // // Check if adding the new varsity student would exceed the total participants
+        // if ($existingVarsityCount >= $event->totalAtlhetes) {
+        //     throw new Exception($event->event . ' event has reached the maximum number of participants.');
+        // }
 
         // // Check if the varsity student already exists for the current school year
         $exists = CoachVarsity::where([

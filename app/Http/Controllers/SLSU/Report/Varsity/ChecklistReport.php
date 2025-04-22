@@ -280,7 +280,7 @@ class ChecklistReport extends TCPDF
 
         $this::SetXY(256, $startY - 33);
         $this::SetFont('calibriB', '', 12);
-        $this::Cell(40, 51,strtoupper($this->prefs->GetDefaultValue($this->pref, "SportsDirector")), 0, 0, 'C');
+        $this::Cell(40, 51,strtoupper($this->prefs->GetDefaultValue($this->pref, "Sports Director")), 0, 0, 'C');
         //label for Sport Director
         $this::SetXY(256, $startY - 28);
         $this::SetFont('calibri', '', 12);

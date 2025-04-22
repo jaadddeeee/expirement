@@ -444,7 +444,7 @@ class EligibilityForm extends TCPDF
 
         $this::dashLine($dashX, $dashY);
 
-        $dashY += 87;
+        $dashY += 86.6;
         $this::dashLine($dashX, $dashY);
 
         $dashY += 68.7;
@@ -498,7 +498,7 @@ class EligibilityForm extends TCPDF
 
         $this::setXY($x + 25, $y + 224);
         $this::SetFont('calibrib','',14);
-        $this::Cell(30,10,$athlete['EmergencyName'],0,0,'C');
+        $this::Cell(30,10,strtoupper($athlete['EmergencyName']),0,0,'C');
 
         $this::setXY($x + 124, $y + 224);
         $this::SetFont('calibrib','',12);
