@@ -8,6 +8,7 @@ use App\Models\VARSITY\Event;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Exception;
 use Crypt;
+use GENERAL;
 
 class EventController extends Controller
 {
@@ -122,7 +123,7 @@ class EventController extends Controller
       $event->delete();
       return response()->json(['Errors' => 0, "Message" => "Event successfully deleted"]);
     }catch(Exception $e){
-      return response()->json(['Errors' => $e->getMessage()], 400);
+      return response()->json(['Errors' => GENERAL::Error($e->getMessage())], 400);
     }catch(DecryptException $e){
       return response()->json(['Errors' => 'Invalid Event ID'], 400);
     }

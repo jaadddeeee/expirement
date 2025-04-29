@@ -122,6 +122,10 @@
                 }
                 // $("#outAjax").html(data);
 
+            },
+            error: function(response){
+                var errors = response.responseJSON.Error;
+                $("#updatemsg").html(errors);
             }
 
         });
@@ -165,11 +169,11 @@
                     },
                     error:function(response){
                         var errors = response.responseJSON.Errors;
-                        swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: errors,
-                        });
+                        Swal.fire(
+                                'Error!',
+                                errors,
+                                'error'
+                            );
                     }
                 })
             }

@@ -372,7 +372,7 @@ public function saveSelectedCoach(Request $request)
 
         // // Check if the varsity student already exists for the current school year
         $exists = CoachVarsity::where([
-            'CoachID' => $coach->EmpNo
+            'CoachID' => $coach->EmpNo,
         ])
         ->select('id', 'deleted_at')
         ->first();
@@ -381,25 +381,34 @@ public function saveSelectedCoach(Request $request)
             if ($exists->deleted_at !== null) {
                 // Restore the soft-deleted record manually
                 CoachVarsity::where('id', $exists->id)
-                    ->update([
-                        'SchoolYear' => date('Y'),
-                        'deleted_at' => null
-                    ]);
+                    ->update(['deleted_at' => null]);
 
                 return response()->json(['success' => true, 'message' => 'Coach restored successfully.']);
-            } else {
-                CoachVarsity::where('id', $exists->id)
-                    ->update([
-                        'SchoolYear' => date('Y'),
-                    ]);
             }
-        }else{
+        }
+        // if ($exists) {
+        //     if ($exists->deleted_at !== null) {
+        //         // Restore the soft-deleted record manually
+        //         CoachVarsity::where('id', $exists->id)
+        //             ->update([
+        //                 'SchoolYear' => date('Y'),
+        //                 'deleted_at' => null
+        //             ]);
+
+        //         return response()->json(['success' => true, 'message' => 'Coach restored successfully.']);
+        //     } else {
+        //         CoachVarsity::where('id', $exists->id)
+        //             ->update([
+        //                 'SchoolYear' => date('Y'),
+        //             ]);
+        //     }
+        // }else{
             CoachVarsity::create([
                 'CoachID' => $coach->EmpNo,
                 'SchoolYear' => date('Y'),
                 'Event' => $coach->CoachEvent,
             ]);
-        }
+        // }
 
         return response()->json(['success' => true, 'message' => 'Selected coach successfully stored.']);
     } catch (Exception $e) {

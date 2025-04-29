@@ -185,71 +185,71 @@ class VarsityController extends Controller
                 throw new Exception($event->event . ' event has reached the maximum number of participants.');
             }
 
-            $exists = ListVarsity::where([
-                'StudentNo' => $varsity->StudentNo,
-            ])
-            ->select('id', 'SchoolYear', 'deleted_at')
-            ->first();
-            
-            if ($exists) {
-                if ($exists->SchoolYear == date('Y')) {
-                    if ($exists->deleted_at !== null) {
-                        // Restore the soft-deleted record manually
-                        ListVarsity::where('id', $exists->id)
-                            ->update([
-                                'SchoolYear' => date('Y'),
-                                'deleted_at' => null
-                            ]);
-            
-                        return response()->json(['success' => true, 'message' => 'Varsity restored successfully.']);
-                    } else {
-                        throw new Exception("Varsity already exists for this school year.");
-                    }
-                } else {
-                    // Update the existing record for a different year
-                    ListVarsity::where('id', $exists->id)
-                        ->update([
-                            'SchoolYear' => date('Y'),
-                            'Event' => $varsity->VarsityEvent,
-                        ]);
-            
-                    return response()->json(['success' => true, 'message' => 'Varsity updated successfully for the new school year.']);
-                }
-            }
-            
-            // Save the varsity to the var_list table if no record exists
-            ListVarsity::create([
-                'StudentNo' => $varsity->StudentNo,
-                'SchoolYear' => date('Y'),
-                'Event' => $varsity->VarsityEvent,
-            ]);
-
-            // Check if the varsity student already exists for the current school year
             // $exists = ListVarsity::where([
             //     'StudentNo' => $varsity->StudentNo,
-            //     'SchoolYear' => date('Y'),
-            //     ])
-            //     ->select('id', 'deleted_at')
-            //     ->first();
-            //     // dd($exists);
-            //     if ($exists) {
+            // ])
+            // ->select('id', 'SchoolYear', 'deleted_at')
+            // ->first();
+            
+            // if ($exists) {
+            //     if ($exists->SchoolYear == date('Y')) {
             //         if ($exists->deleted_at !== null) {
             //             // Restore the soft-deleted record manually
             //             ListVarsity::where('id', $exists->id)
-            //                 ->update(['deleted_at' => null]);
-    
+            //                 ->update([
+            //                     'SchoolYear' => date('Y'),
+            //                     'deleted_at' => null
+            //                 ]);
+            
             //             return response()->json(['success' => true, 'message' => 'Varsity restored successfully.']);
             //         } else {
             //             throw new Exception("Varsity already exists for this school year.");
             //         }
+            //     } else {
+            //         // Update the existing record for a different year
+            //         ListVarsity::where('id', $exists->id)
+            //             ->update([
+            //                 'SchoolYear' => date('Y'),
+            //                 'Event' => $varsity->VarsityEvent,
+            //             ]);
+            
+            //         return response()->json(['success' => true, 'message' => 'Varsity updated successfully for the new school year.']);
             //     }
+            // }
+            
+            // // Save the varsity to the var_list table if no record exists
+            // ListVarsity::create([
+            //     'StudentNo' => $varsity->StudentNo,
+            //     'SchoolYear' => date('Y'),
+            //     'Event' => $varsity->VarsityEvent,
+            // ]);
 
-            //     // Save the varsity to the var_list table
-            //     ListVarsity::create([
-            //         'StudentNo' => $varsity->StudentNo,
-            //         'SchoolYear' => date('Y'),
-            //         'Event' => $varsity->VarsityEvent,
-            //     ]);
+            // Check if the varsity student already exists for the current school year
+            $exists = ListVarsity::where([
+                'StudentNo' => $varsity->StudentNo,
+                'SchoolYear' => date('Y'),
+                ])
+                ->select('id', 'deleted_at')
+                ->first();
+                // dd($exists);
+                if ($exists) {
+                    if ($exists->deleted_at !== null) {
+                        // Restore the soft-deleted record manually
+                        ListVarsity::where('id', $exists->id)
+                            ->update(['deleted_at' => null]);
+    
+                        return response()->json(['success' => true, 'message' => 'Varsity restored successfully.']);
+                    } else {
+                        throw new Exception("Varsity already exists for this school year.");
+                    }
+                }
+
+                // Save the varsity to the var_list table
+                ListVarsity::create([
+                    'StudentNo' => $varsity->StudentNo,
+                    'SchoolYear' => date('Y'),
+                    'Event' => $varsity->VarsityEvent,
+                ]);
             }
 
             return response()->json(['success' => true, 'message' => 'Selected varsity students successfully stored.']);
@@ -451,7 +451,7 @@ class VarsityController extends Controller
                 ->exists();
     
             if ($coachScuaaExist) {
-                throw new Exception('Cannot delete coach. This coach is still in active.');
+                throw new Exception('Cannot delete varsity. This varsity is still in active.');
             }
 
             // Find the Varsity record, delete record
