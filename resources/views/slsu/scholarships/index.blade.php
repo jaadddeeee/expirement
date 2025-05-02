@@ -3,6 +3,18 @@
 @section('title', $pageTitle)
 
 @section('content')
+    <!-- Tagify CSS -->
+    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css"> --}}
+
+    <!-- Include Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Date Range Picker -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <!-- Jodit Text Editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.2.47/es2021/jodit.min.css" />
+
     {{-- Nav-breadcrumb --}}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-style1">
@@ -275,7 +287,7 @@
                 <div class="modal-body">
                     <form id="addRequirementsForm">
                         @csrf
-                        <input type="hidden" name="scholarship_id">
+                        <input type="hidden" id="addRequirements" name="id">
 
                         <div id="requirementsContainer" class="border rounded p-3"
                             style="max-height: 500px; overflow-y: auto;">
@@ -315,7 +327,7 @@
 
                         <div id="editRequirementsContainer" class="border rounded p-3"
                             style="max-height: 500px; overflow-y: auto;">
-                            <!-- Existing requirements will be loaded here dynamically -->
+                            <!-- load ang requirements diri dynamically -->
                         </div>
 
                         {{-- <button type="button" class="btn btn-sm btn-success mt-3" id="btnAddEditRequirement">
@@ -332,27 +344,79 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal Set Scholarship Details for Application -->
     <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <form id="statusForm">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="statusModalLabel">Set Scholarship Details</h5>
+                        <h5 class="modal-title" id="statusModalLabel">Set Scholarship Application Details</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="scholarshipId" name="scholarship_id">
+                        <!-- Number of Slots -->
                         <div class="mb-3">
                             <label for="slots" class="form-label">Number of Slots</label>
                             <input type="number" class="form-control" id="slots" min="1" name="slots"
                                 required>
                         </div>
+
+                        <!-- Application Period -->
                         <div class="mb-3">
                             <label for="dateRange" class="form-label">Application Period</label>
                             <input type="text" class="form-control" id="dateRange" name="dateRange"
                                 placeholder="Select date range" required>
+                        </div>
+
+                        <!-- Eligible Courses / Majors -->
+                        <div class="mb-3">
+                            <label for="eligibleCourses" class="form-label">Eligible Courses / Majors</label>
+                            <select id="eligibleCourses" name="eligible_courses[]" class="form-select select2" multiple
+                                required>
+                                @foreach ($courses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->course_title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Eligible Year Levels -->
+                        <div class="mb-3">
+                            <label for="eligibleYearLevels" class="form-label">Eligible Year Levels</label>
+                            <select id="eligibleYearLevels" name="eligible_year_levels[]" class="form-select select2"
+                                multiple required>
+                                @foreach (GENERAL::YearStanding() as $index => $yearStanding)
+                                    <option value="{{ $index }}">{{ $yearStanding['Short'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Application Year and Semester -->
+                        <div class="row g-2 mb-3">
+                            <div class="col mb-0">
+                                <label for="schApplicationSY" class="form-label">School Year</label>
+                                <select class="form-select" id="schApplicationSY" name="sch_application_sy" required>
+                                    <option value="">Select School Year</option>
+                                    @foreach (GENERAL::SchoolYears() as $year)
+                                        <option value="{{ $year }}"
+                                            {{ request('sch_application_sy') == $year ? 'selected' : '' }}>
+                                            {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col mb-0">
+                                <label for="schApplicationSem" class="form-label">School Year</label>
+                                <select class="form-select" id="schApplicationSem" name="sch_application_sem" required>
+                                    <option value="">Select Semester</option>
+                                    @foreach (GENERAL::Semesters() as $index => $sem)
+                                        <option value="{{ $index }}"
+                                            {{ request('sch_application_sem') == $index ? 'selected' : '' }}>
+                                            {{ $sem['Long'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -363,11 +427,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal for Seting Release Schedule -->
+    <div class="modal fade" id="setReleaseScheduleModal" tabindex="-1" aria-labelledby="setReleaseScheduleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="setReleaseScheduleModalLabel">Set Release Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="releaseScheduleForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="scholarshipId" name="scholarship_id">
+                        <div class="mb-3">
+                            <label for="releaseDate" class="form-label">Release Date</label>
+                            <input type="date" class="form-control" id="releaseDate" name="release_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="requirements" class="form-label">Requirements</label>
+                            <textarea id="requirementsEditor" name="requirements" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('page-script')
     @include('slsu.scholarships.js.js')
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <!-- Tagify JS -->
+    {{-- <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script> --}}
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Date Range Picker JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <!-- Text Editor For Requirements of Claim -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.2.47/es2021/jodit.min.js"></script>
 @endsection

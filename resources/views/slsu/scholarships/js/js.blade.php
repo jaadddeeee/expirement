@@ -8,10 +8,8 @@
 
         let searchTimeout;
 
+        // INDEX SCHOLARSHIP PAGE
 
-
-
-        // INDEX PAGE
         // search scholarship
         $("#searchScholarship").on('input', function() {
             clearTimeout(searchTimeout);
@@ -99,8 +97,6 @@
             currentUrl.searchParams.set('entriesPerPage', entries);
             window.location.href = currentUrl.toString();
         });
-
-
 
         // scholarship UI for storing scholarships
 
@@ -212,12 +208,9 @@
 
             // if validation passes
             field.addClass('is-valid');
-            field.after('<div class="valid-feedback">Looks good!</div>');
+            // field.after('<div class="valid-feedback">Looks good!</div>');
             return true;
         }
-
-
-
 
         // SCHOLARSHIP CRUD
 
@@ -363,7 +356,7 @@
             }
         });
 
-        // Edit scholarship
+        // edit scholarship
         $(document).on('click', '.editScholarship', function(e) {
             e.preventDefault();
 
@@ -387,15 +380,12 @@
 
                     if (Error == 0) {
                         let scholarship = Scholarship;
-
-                        // Reset the form
                         $('#frmEditScholarship')[0].reset();
 
-                        // Clear validation states and feedback messages
+                        // clear validation states and feedback messages
                         $('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
                         $('.invalid-feedback, .valid-feedback').remove();
 
-                        // Populate the form fields
                         $('#editScholarshipId').val(scholarship.id);
                         $('#editScholarshipName').val(scholarship.name).data(
                             'original-value', scholarship.name);
@@ -420,13 +410,12 @@
 
                         handleScholarshipTypeChange(scholarship.type);
 
-                        // Trigger validation for all fields
+                        // trigger validation for all fields
                         $('#editScholarshipName, #editSchAcronym, #editScholarshipType, #editExternalScholarshipType, #editSchProvider')
                             .each(function() {
                                 validateEditField($(this));
                             });
 
-                        // Show the modal
                         $('#editScholarshipModal').modal('show');
                     } else {
                         Swal.fire({
@@ -447,28 +436,23 @@
         });
 
         function handleScholarshipTypeChange(scholarshipType) {
-            // Reset validation states for external fields
             $('#editExternalScholarshipType, #editSchProvider').removeClass('is-valid is-invalid');
             $('#editExternalScholarshipType').next('.valid-feedback, .invalid-feedback').remove();
             $('#editSchProvider').next('.valid-feedback, .invalid-feedback').remove();
 
             if (parseInt(scholarshipType) === 1) {
-                // Internal scholarship
                 $('#editExternalOptions').hide();
                 $('#editExternalScholarshipType').val('');
                 $('#editSchProvider').val('');
                 $('#editSchProviderHidden').val('');
 
-                // Restore the original provider value for internal scholarships
                 const originalProvider = $('#editSchProvider').data('original-provider') || 'SLSU';
                 $('#editSchProvider').val(originalProvider);
                 $('#editSchProviderHidden').val(originalProvider);
                 $('#editSchProvider').prop('disabled', true);
             } else if (parseInt(scholarshipType) === 2) {
-                // External scholarship
                 $('#editExternalOptions').show();
 
-                // Prefill external type and provider if available
                 const externalType = $('#editExternalScholarshipType').data('original-external-type') || '';
                 const externalProvider = $('#editSchProvider').data('original-external-provider') || '';
 
@@ -477,12 +461,10 @@
                 $('#editSchProviderHidden').val(externalProvider);
                 $('#editSchProvider').prop('disabled', false);
 
-                // Trigger validation for external fields
                 validateEditField($('#editExternalScholarshipType'));
                 validateEditField($('#editSchProvider'));
             }
         }
-
 
         $(document).on('change', '#editScholarshipType', function() {
             const scholarshipType = $(this).val();
@@ -555,7 +537,7 @@
 
             let isValid = true;
 
-            // Validate all required fields
+            // validate all required fields
             $('#editScholarshipName, #editSchAcronym, #editScholarshipType, #editExternalScholarshipType, #editSchProvider')
                 .each(function() {
                     if (!validateEditField($(this))) {
@@ -667,8 +649,6 @@
 
 
         // SCHOLARSHIP REQUIREMENTS
-
-
         $(document).on('click', '.addRequirements', function(e) {
             e.preventDefault();
 
@@ -679,7 +659,7 @@
             $('#addRequirementsModalLabel').text(
                 `Add Requirements for ${scholarshipName} (${scholarshipAcronym})`);
 
-            $('#addRequirementsForm input[name="scholarship_id"]').val(scholarshipId);
+            $('#addRequirementsForm input[name="id"]').val(scholarshipId);
 
             $('#requirementsContainer').html('');
 
@@ -938,12 +918,12 @@
                     return false;
                 }
 
-                // Detect changes
+                // detect changes
                 if (requirement !== originalRequirement || quantity !== originalQuantity) {
                     hasChanges = true;
                 }
 
-                // Check for duplicates
+                // check for duplicates
                 if (newRequirements.includes(requirement)) {
                     Swal.fire({
                         icon: 'warning',
@@ -962,7 +942,7 @@
                 }
             });
 
-            if (!hasValidInput) {
+            if (!hasValidInput && deletedRequirementIds.length === 0) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Missing Requirements',
@@ -972,11 +952,12 @@
                 return;
             }
 
+
             if (!allValid) {
                 return;
             }
 
-            if (!hasChanges) {
+            if (!hasChanges && deletedRequirementIds.length === 0) {
                 Swal.fire({
                     icon: 'info',
                     title: 'No Changes Detected',
@@ -1053,8 +1034,7 @@
         $(document).on('change', '.toggle-status', function() {
             let scholarshipId = $(this).data('scholarship-id');
             let status = $(this).is(':checked') ? 1 : 0;
-            let toggle = $(this); // ✅ cache the checkbox element
-
+            let toggle = $(this);
 
             if (status === 1) {
                 $('#scholarshipId').val(scholarshipId);
@@ -1075,14 +1055,23 @@
                         $('#statusForm')[0].reset();
                         $('#dateRange').val('');
                     } else {
-                        toggle.prop('checked', true); // ✅ revert toggle correctly
+                        toggle.prop('checked', true);
                     }
                 });
             }
         });
 
+        $('#statusModal').on('show.bs.modal', function() {
+            $('#statusForm')[0].reset();
+            $('#dateRange').val('');
+        });
 
-        // Function to update the scholarship status
+        $('#statusModal').on('hidden.bs.modal', function() {
+            $('.toggle-status').prop('checked', false);
+        });
+
+
+        // function to update the scholarship status
         function updateScholarshipStatus(scholarshipId, status) {
             $.ajax({
                 url: "{{ route('scholarships.status.update') }}",
@@ -1134,33 +1123,41 @@
             }
         });
 
-        // Set the selected date range in the input field
+        // set the selected date range in the input field
         $('#dateRange').on('apply.daterangepicker', function(ev, picker) {
             $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format(
                 'YYYY-MM-DD'));
         });
 
-        // Clear the input field when the user cancels
+        // clear the input field when the user cancels
         $('#dateRange').on('cancel.daterangepicker', function(ev, picker) {
             $(this).val('');
         });
 
+
+
         $('#statusForm').on('submit', function(e) {
             e.preventDefault();
 
-            let scholarshipId = $('#scholarshipId').val();
-            let slots = $('#slots').val();
-            let dateRange = $('#dateRange').val();
-            let [startDate, endDate] = dateRange.split(' to ');
+            const scholarshipId = $('#scholarshipId').val();
+            const slots = $('#slots').val();
+            const dateRange = $('#dateRange').val();
+            const eligibleCourses = $('#eligibleCourses').val();
+            const eligibleYearLevels = $('#eligibleYearLevels').val();
+            const schoolYear = $('#schApplicationSY').val();
+            const semester = $('#schApplicationSem').val();
 
             $.ajax({
-                url: "{{ route('scholarships.status.update') }}",
-                type: 'POST',
+                url: "{{ route('scholarships.status.update') }}", // Update with your route
+                method: 'POST',
                 data: {
                     scholarship_id: scholarshipId,
                     slots: slots,
-                    start_date: startDate,
-                    deadline: endDate,
+                    dateRange: dateRange,
+                    eligible_courses: eligibleCourses,
+                    eligible_year_levels: eligibleYearLevels,
+                    sch_application_sy: schoolYear,
+                    sch_application_sem: semester,
                     status: 1
                 },
                 success: function(response) {
@@ -1169,24 +1166,20 @@
                         Message
                     } = response;
 
-                    if (Error == 0) {
+                    if (Error === 0) {
                         Swal.fire({
                             icon: 'success',
                             title: 'Success',
                             text: Message,
-                            showConfirmButton: true
                         }).then(() => {
-                            // Hide the modal after the SweetAlert is closed
                             $('#statusModal').modal('hide');
-                            // Reload the page to reflect changes
                             location.reload();
                         });
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Failed to update scholarship details.',
-                            showConfirmButton: true
+                            text: Message,
                         });
                     }
                 },
@@ -1195,10 +1188,98 @@
                         icon: 'error',
                         title: 'Error',
                         text: 'An unexpected error occurred. Please try again.',
-                        showConfirmButton: true
                     });
                 },
-            })
+            });
+        });
+
+        $('#eligibleCourses').select2({
+            placeholder: "Select eligible courses/majors",
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#statusModal')
+        });
+
+        $('#eligibleYearLevels').select2({
+            placeholder: "Select eligible year level",
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#statusModal')
         });
     });
+
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     const input = document.querySelector('#eligibleCourses');
+
+    //     const courseList = @json($courseTitles);
+    //     const courseData = @json($courses);
+
+    //     const tagify = new Tagify(input, {
+    //         whitelist: courseList,
+    //         dropdown: {
+    //             enabled: 0,
+    //             closeOnSelect: false,
+    //             classname: 'custom-dropdown',
+    //         },
+    //     });
+
+    //     // Show dropdown on click/focus
+    //     tagify.DOM.input.addEventListener('focus', () => tagify.dropdown.show());
+    //     input.addEventListener('click', () => tagify.dropdown.show());
+
+    //     // Track already added course-major combinations to prevent duplication
+    //     const addedCombinations = new Set();
+
+    //     // When a course is added
+    //     tagify.on('add', function(e) {
+    //         const selectedCourse = e.detail.data.value;
+    //         const course = courseData.find(c => c.course_title === selectedCourse);
+
+    //         if (course && course.majors.length > 0) {
+    //             // Concatenate course and major
+    //             course.majors.forEach(major => {
+    //                 const combinedValue = `${course.course_title}-${major.course_major}`;
+    //                 if (!addedCombinations.has(combinedValue)) {
+    //                     addedCombinations.add(combinedValue);
+    //                     tagify.addTags([{
+    //                         value: combinedValue,
+    //                         class: 'tag--major',
+    //                     }]);
+    //                 }
+    //             });
+
+    //             tagify.removeTags(selectedCourse);
+    //         } else if (course) {
+    //             // If no majors, just add the course
+    //             if (!addedCombinations.has(course.course_title)) {
+    //                 addedCombinations.add(course.course_title);
+    //                 tagify.addTags([{
+    //                     value: course.course_title,
+    //                 }]);
+    //             }
+    //         }
+    //     });
+    // });
+
+    // text editor
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     const editor = new Jodit('#requirementsEditor', {
+    //         height: 150,
+    //         placeholder: 'Enter requirements for claiming stipends...',
+    //         toolbarSticky: false,
+    //         buttons: [
+    //             'bold', 'italic', 'underline', '|',
+    //             'ul', 'ol', '|',
+    //             'link', 'align', '|',
+    //             'undo', 'redo', '|',
+    //             'eraser', 'fullsize'
+    //         ]
+    //     });
+
+    //     const form = document.getElementById('releaseScheduleForm');
+    //     form.addEventListener('submit', function(e) {
+    //         const requirementsInput = document.getElementById('requirements');
+    //         requirementsInput.value = editor.value;
+    //     });
+    // });
 </script>

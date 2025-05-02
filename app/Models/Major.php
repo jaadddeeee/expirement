@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Major extends Model
@@ -17,10 +18,17 @@ class Major extends Model
      * @var array
      */
     protected $fillable = [
-        'id','course_major'
+        'id',
+        'course_major'
     ];
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->connection = strtolower(session('campus'));
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'CourseID');
     }
 }

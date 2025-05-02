@@ -200,7 +200,7 @@
             <h5 class="offcanvas-title">
                 <i class="fa fa-edit"></i>
                 Edit
-                <strong style="color: #033874;">{{ $scholarshipName ?? 'Unknown Scholarship' }}</strong>
+                {{-- <strong style="color: #033874;">{{ $scholarshipName ?? 'Unknown Scholarship' }}</strong> --}}
                 <strong>Scholar</strong>
             </h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>

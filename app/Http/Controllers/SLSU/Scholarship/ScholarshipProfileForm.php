@@ -15,19 +15,20 @@ use GENERAL;
 
 class ScholarshipProfileForm extends TCPDF
 {
-    protected $id, $letter, $studentName, $semester, $schoolYear;
+    protected $id, $letter, $studentName, $studentName2, $semester, $schoolYear;
 
     // Student Info
-    protected $studentNo, $email, $contactNo, $age, $birthDate, $birthPlace, $sex, $civilStatus, $citizenship, $motherName, $fatherName, $motherOccu, $fatherOccu;
+    protected $studentNo, $email, $contactNo, $age, $birthDate, $birthPlace, $sex, $civilStatus, $citizenship, $motherName, $fatherName, $motherOccu, $fatherOccu, $picture;
 
     // Academic Info
-    protected $course, $major, $section, $scholarship, $schEnrollmentId;
+    protected $course, $major, $section, $scholarship, $schEnrollmentId, $gwa, $unitsEnrolled, $dateEnrolled;
 
     // Address
     protected $p_address, $zipCode;
 
     public function __construct()
     {
+        // Initialize the LetterHead instance
         $this->letter = new LetterHead();
     }
 
@@ -73,6 +74,7 @@ class ScholarshipProfileForm extends TCPDF
                     'students.p_municipality',
                     'students.p_province',
                     'students.p_zip',
+                    'students.Picture',
                     'sch_scholarships.sch_name AS scholarship_name',
                     'sch_scholar_enrollments.id AS enrollment_id',
                     'sch_scholar_enrollments.semester',
@@ -93,15 +95,48 @@ class ScholarshipProfileForm extends TCPDF
                 $age = $from->diff($to)->y;
             }
 
+            $runningTotal = 0;
+            $runningUnit = 0;
+            $unitsEnrolled = 0;
+
+            $registrations = DB::connection($campus)
+                ->table("registration as r")
+                ->select("r.RegistrationID", "r.SchoolYear", "r.Semester", "r.DateEnrolled")
+                ->where("r.finalize", 1)
+                ->where("r.StudentNo", $scholar->student_no)
+                ->get();
+
+            foreach ($registrations as $registration) {
+                $gradesTable = "grades" . $registration->SchoolYear . $registration->Semester;
+
+                $grades = DB::connection($campus)
+                    ->table($gradesTable . " as g")
+                    ->select("t.units", "g.final", "g.inc")
+                    ->leftJoin("transcript as t", "g.sched", "=", "t.id")
+                    ->where("g.gradesid", $registration->RegistrationID)
+                    ->where("t.exempt", "<>", 1)
+                    ->get();
+
+                foreach ($grades as $grade) {
+                    $out = GENERAL::ComputeForGWA($grade->final, $grade->inc, $grade->units);
+                    $runningTotal += $out['RunningTimes'];
+                    $runningUnit += $out['RunningUnit'];
+                    $unitsEnrolled += $grade->units;
+                }
+            }
+
+            $gwa = $runningUnit > 0 ? $runningTotal / $runningUnit : 0;
+
             $this->scholarship = $scholar->scholarship_name ?? 'N/A';
             $this->studentNo = $scholar->student_no;
             $this->studentName = $scholar->LastName . ', ' . $scholar->FirstName . ' ' . ($scholar->MiddleName ? substr($scholar->MiddleName, 0, 1) . '.' : '');
+            $this->studentName2 = $scholar->FirstName . ' ' . ($scholar->MiddleName ? substr($scholar->MiddleName, 0, 1) . '. ' : '') . $scholar->LastName;
             $this->sex = $scholar->Sex;
             $this->course = $scholar->Course;
             $this->section = $scholar->StudentYear . ' - ' . $scholar->Section;
             $this->birthDate = $scholar->BirthDate ? date('F j, Y', strtotime($scholar->BirthDate)) : 'N/A';
             $this->birthPlace = $scholar->Birthplace;
-            $this->major = $scholar->major;
+            $this->major = $scholar->major ?? 'N/A';
             $this->motherName = $scholar->mother_name;
             $this->motherOccu = $scholar->mother_occu;
             $this->fatherName = $scholar->father_name;
@@ -116,6 +151,11 @@ class ScholarshipProfileForm extends TCPDF
             $this->zipCode = $scholar->p_zip;
             $this->citizenship = $scholar->nationality;
             $this->civilStatus = $scholar->civil_status;
+            $this->picture = $scholar->Picture;
+
+            $this->gwa = number_format($gwa, 3);
+            $this->unitsEnrolled = $unitsEnrolled;
+            $this->dateEnrolled = $registration->DateEnrolled ?? 'N/A';
         } catch (DecryptException $e) {
             throw new \Exception('Invalid or corrupted scholarship ID');
         } catch (\Exception $e) {
@@ -129,57 +169,144 @@ class ScholarshipProfileForm extends TCPDF
 
         $startY = 42;
 
+        $leftMargin = 25.4; // 1 inch
+        $rightMargin = 25.4;
         $pageWidth = $this::GetPageWidth();
+        $usableWidth = $pageWidth - $leftMargin - $rightMargin;
 
         $this::SetFont('cambria', 'B', 12);
-        $textWidth1 = $this::GetStringWidth("OFFICE OF STUDENTS AND AUXILIARY SERVICES");
-
-        $centerX1 = ($pageWidth - $textWidth1) / 2;
-
-        $this::setXY($centerX1, $startY);
-        $this::Cell($textWidth1, 5, "OFFICE OF STUDENTS AND AUXILIARY SERVICES", 0, 1, 'C');
+        $html1 = '<p>OFFICE OF STUDENTS AND AUXILIARY SERVICES</p>';
+        $this::writeHTMLCell($usableWidth, 0, $leftMargin, $startY, $html1, 0, 1, false, true, 'C');
 
         $startY += 10;
-        $this::SetFont('cambria', 'B', 12);
-        $textWidth2 = $this::GetStringWidth("STUDENTS'S SCHOLARSHIP/GRANT CERTIFICATION");
-
-        $centerX2 = ($pageWidth - $textWidth2) / 2;
-
-        $this::setXY($centerX2, $startY);
-        $this::Cell($textWidth2, 4, "STUDENTS'S SCHOLARSHIP/GRANT CERTIFICATION", 0, 1, 'C');
+        $html2 = '<p>STUDENTS\'S SCHOLARSHIP/GRANT CERTIFICATION</p>';
+        $this::writeHTMLCell($usableWidth, 0, $leftMargin, $startY, $html2, 0, 1, false, true, 'C');
     }
 
     public function content()
     {
         $this->generate();
-
         $startY = 65;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', 'B', 11);
-        $this::Cell(0, 10, "Direction: Please fill up the scholarship profile form completely and provide the required", 0, 1, 'L');
 
-        $startY += 5;
-        $this::setXY(44, $startY);
-        $this::SetFont('cambria', 'B', 11);
-        $this::Cell(0, 10, "information.", 0, 1, 'L');
+        $leftMargin = 25.4; // 1 inch
+        $rightMargin = 25.4;
+        $pageWidth = $this::GetPageWidth();
+        $usableWidth = $pageWidth - $leftMargin - $rightMargin;
+
+        $html1 = '<p style="font-family: cambria; font-size: 11px;"><strong>Direction: Please fill-up the scholarship profile form completely and provide the required information.
+                    <br>Write "NA" if not applicable. Do not leave blank.</strong>
+                  </p>
+                  <p style="font-family: cambria; font-size: 10px;">Type of Scholarship/Grant: <strong>' . $this->scholarship . '</strong></p>
+                  <table cellpadding="1" cellspacing="0" style="font-family: cambria; font-size: 10px; width: 100%;">
+                    <tr>
+                        <td style="width: 46%;">Program: <strong>' . $this->course . '</strong></td>
+                        <td style="width: 54%;">Semester: &nbsp;&nbsp;&nbsp;&nbsp; 1st &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2nd &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Summer</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 46%;"></td>
+                        <td style="width: 54%;">Academic Year: <strong>' . $this->schoolYear . '</strong></td>
+                    </tr>
+                    <br>
+                    <tr>
+                        <td style="width: 46%;">Major: <strong>' . $this->major . '</strong></td>
+                        <td style="width: 54%;">Gen. Ave.: <strong>' . $this->gwa . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 46%;">Year & Sec.: <strong>' . $this->section . '</strong></td>
+                        <td style="width: 54%;">Units Enrolled: <strong>' . $this->unitsEnrolled . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 46%;">Student No.: <strong>' . $this->studentNo . '</strong></td>
+                        <td style="width: 54%;">Date Enrolled: <strong>' . $this->dateEnrolled . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 46%;">Contact No.: <strong>' . $this->contactNo . '</strong></td>
+                        <td style="width: 54%;">Date Complied: _______________</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 46%;">E-mail Add.: <strong>' . $this->email . '</strong></td>
+                        <td style="width: 54%;"></td>
+                    </tr>
+                  </table>
+                  <p style="font-family: cambria; font-size: 10px;">
+                    <br><br><strong>PERSONAL INFORMATION:</strong>
+                    <br>
+                    <br><table cellpadding="1" cellspacing="0" style="font-family: cambria; font-size: 10px; width: 100%;">
+                    <tr>
+                        <td style="width: 50%;">Name: <strong>' . $this->studentName . '</strong></td>
+                        <td style="width: 25%;">Age: <strong>' . $this->age . '</strong></td>
+                        <td style="width: 25%;">Sex: <strong>' . $this->sex . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 75%;">Home Address: <strong>' . $this->p_address . ' </strong></td>
+                        <td style="width: 25%;">Zip Code: <strong>' . $this->zipCode . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 30%; font-size: 8px;">Date of Birth: <span style="font-size: 9px;"><strong>' . $this->birthDate . '</strong></span></td>
+                        <td style="width: 45%; font-size: 9px;">Place of Birth: <strong>' . $this->birthPlace . '</strong></td>
+                        <td style="width: 25%; font-size: 9px;">Citizenship: <strong>' . $this->citizenship . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 40%;">Civil Status: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Single &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Married</td>
+                        <td style="width: 50%;">Others, pls specify: ________________________</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%;">If married, name of spouse: <strong>(name sa spouse)</strong></td>
+                        <td style="width: 50%;">Spouse\' Occupation: <strong>(spouse occupation)</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 58%;">Mother\'s Complete Name: <strong>' . $this->motherName . '</strong></td>
+                        <td style="width: 42%;">Occupation: <strong>' . $this->motherOccu . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 58%;">Father\'s Complete Name: <strong>' . $this->fatherName . '</strong></td>
+                        <td style="width: 42%;">Occupation: <strong>' . $this->fatherOccu . '</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%;">Total Family Members: ________</td>
+                        <td style="width: 50%;">Household Per Capita Income: __________</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 30%;">4Ps Member: Yes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No</td>
+                        <td style="width: 70%;">If yes, please specify DSWD Household No.: ___________________</td>
+                    </tr>
+                    </table>
+                    <br><br><br><br>&nbsp;&nbsp;&nbsp;<strong>' . strtoupper($this->studentName2) . '</strong>
+                  </p>';
+        $this::writeHTMLCell($usableWidth, 0, $leftMargin, $startY, $html1, 0, 1, false, true, 'L');
+
+        $html2 = '<p style="font-style: italic; font-family: cambria; font-size: 10px;"><span style="display: inline-block; width: 100%;">__________________________________</span>
+        <br><span style="font-style: italic;">Printed Name and Signature</span>
+        <br><br><br><br><br>Disclaimer: By completing this form, you voluntarily and freely give consent to Southern Leyte State University to collect and process the above personal information 
+        (protected by R.A. 10173, Data Privacy Act of 2012) for records purposes use only.
+        </p>';
+        $this::writeHTMLCell($usableWidth, 0, $leftMargin, 207, $html2, 0, 1, false, true, 'L');
 
 
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', 'B', 11);
-        $this::Cell(0, 10, "Write “NA” if not applicable. Do not leave blank.", 0, 1, 'L');
+        $picture = public_path('storage/photo/SG/' . $this->picture);
 
-        $startY += 13;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Type of Scholarship/Grant:", 0, 1, 'L');
+        if (!empty($this->picture) && file_exists($picture)) {
+            $this::Image($picture, 155, 75, 50.8, 50.8);
+        } else {
+            $pictureBoxX = 155;
+            $pictureBoxY = 75;
+            $pictureBoxSize = 50.8;
+            $this::Rect($pictureBoxX, $pictureBoxY, $pictureBoxSize, $pictureBoxSize, 'D');
 
-        $this::setXY(67, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->scholarship}", 0, 1, 'L');
+            $this::setXY($pictureBoxX, $pictureBoxY + ($pictureBoxSize / 2) - 6);
+            $this::SetFont('cambria', 'B', 12);
+            $this::Cell($pictureBoxSize, 12, "No Image", 0, 0, 'C');
+        }
+
+        $pictureBoxX = 155;
+        $pictureBoxY = 75;
+        $pictureBoxSize = 50.8;
+        $this::Rect($pictureBoxX, $pictureBoxY, $pictureBoxSize, $pictureBoxSize, 'D');
+
+        $startY += 16.5;
 
         // first semester checkbox
-        $checkboxX1 = 122;
+        $checkboxX1 = 115;
         $checkboxY1 = $startY + 12.5;
         $checkboxSize = 3;
         $this::Rect($checkboxX1, $checkboxY1, $checkboxSize, $checkboxSize);
@@ -194,7 +321,7 @@ class ScholarshipProfileForm extends TCPDF
         $checkboxY3 = $checkboxY2;
         $this::Rect($checkboxX3, $checkboxY3, $checkboxSize, $checkboxSize);
 
-        $this::SetFont('zapfdingbats', '', 10); // Use ZapfDingbats font for the checkmark
+        $this::SetFont('zapfdingbats', '', 10); // font for checkmark
         if ($this->semester === '1st') {
             $this::Text($checkboxX1 + -1, $checkboxY1 + -1, '4');
         } elseif ($this->semester === '2nd') {
@@ -205,173 +332,14 @@ class ScholarshipProfileForm extends TCPDF
             $this::Text($checkboxX3 + -1, $checkboxY3 + -1, '4');
         }
 
-        $pictureBoxX = 161;
-        $pictureBoxY = 73;
-        $pictureBoxSize = 32;
-        $this::Rect($pictureBoxX, $pictureBoxY, $pictureBoxSize, $pictureBoxSize, 'D');
+        $startY += 17;
 
 
-        $startY += 9;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Program:                                                                                     Semester:      1st       2nd       Summer", 0, 1, 'L');
-
-        $this::setXY(40, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->course}", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(105, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Academic Year :", 0, 1, 'L');
-
-        $this::setXY(130, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->schoolYear}", 0, 0, 'L');
-
-        $startY += 10;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Major            :", 0, 1, 'L');
-
-        $this::setXY(45, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->major}", 0, 1, 'L');
-
-        $this::setXY(105, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Gen. Ave.            : ___________________", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Year & Sec.  :", 0, 1, 'L');
-
-        $this::setXY(45, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->section}", 0, 1, 'L');
-
-        $this::setXY(105, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Units Enrolled  : ___________________", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Student No. :", 0, 1, 'L');
-
-        $this::setXY(45, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->studentNo}", 0, 1, 'L');
-
-
-        $this::setXY(105, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Date Enrolled   : ___________________", 0, 1, 'L');
-
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Contact No. :", 0, 1, 'L');
-
-        $this::setXY(45, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->contactNo}", 0, 1, 'L');
-
-        $this::setXY(105, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Date Complied : ___________________", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Email Add.  :", 0, 1, 'L');
-
-        $this::setXY(45, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->email}", 0, 1, 'L');
-
-        $startY += 13;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "PERSONAL INFORMATION:", 0, 1, 'L');
-
-        $startY += 8;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Name                  :   ", 0, 1, 'L');
-
-        $this::setXY(50, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->studentName}", 0, 1, 'L');
-
-        $this::setXY(120, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Age          : ", 0, 1, 'L');
-
-        $this::setXY(135, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->age}", 0, 1, 'L');
-
-        $this::setXY(145, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Sex:", 0, 1, 'L');
-
-        $this::setXY(152, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->sex}", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Home Address :", 0, 1, 'L');
-
-        $this::setXY(50, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->p_address}", 0, 1, 'L');
-
-        $this::setXY(120, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Zip Code:", 0, 1, 'L');
-
-        $this::setXY(135, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->zipCode}", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Date of Birth     :", 0, 1, 'L');
-
-        $this::setXY(50, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->birthDate}", 0, 1, 'L');
-
-        $this::setXY(85, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Place of Birth:", 0, 1, 'L');
-
-        $this::setXY(107, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->birthPlace}", 0, 1, 'L');
-
-        $this::setXY(145, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Citizenship:", 0, 1, 'L');
-
-        $this::setXY(164, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->citizenship}", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Civil Status:         Single         Married         others, pls specify _________________________", 0, 1, 'L');
+        $startY += 64;
 
         // Single checkbox
         $checkboxX4 = 47;
-        $checkboxY4 = $startY + 3.5;
+        $checkboxY4 = $startY;
         $this::Rect($checkboxX4, $checkboxY4, $checkboxSize, $checkboxSize);
 
         // Married checkbox
@@ -380,7 +348,7 @@ class ScholarshipProfileForm extends TCPDF
         $this::Rect($checkboxX5, $checkboxY5, $checkboxSize, $checkboxSize);
 
         // others checkbox
-        $checkboxX6 = 82;
+        $checkboxX6 = 85;
         $checkboxY6 = $checkboxY5;
         $this::Rect($checkboxX6, $checkboxY6, $checkboxSize, $checkboxSize);
 
@@ -391,95 +359,18 @@ class ScholarshipProfileForm extends TCPDF
             $this::Text($checkboxX5 + -1, $checkboxY5 + -1, '4');
         }
 
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "If married, name of spouse:______________________________________ Spouse' Occupation:__________________", 0, 1, 'L');
+        $startY += 30;
 
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Mother's Complete Name:", 0, 1, 'L');
-
-        $this::setXY(65, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->motherName}", 0, 1, 'L');
-
-        $this::setXY(116, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Occupation:", 0, 1, 'L');
-
-        $this::setXY(135, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->motherOccu}", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Father's Complete Name :", 0, 1, 'L');
-
-        $this::setXY(65, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->fatherName}", 0, 1, 'L');
-
-        $this::setXY(135, $startY);
-        $this::SetFont('cambria', 'B', 10);
-        $this::Cell(0, 10, "{$this->fatherOccu}", 0, 1, 'L');
-
-
-        $this::setXY(116, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Occupation:", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "Total Family Members:___________         Household Per Capita Income:_________________________________", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "4Ps Member?  Yes         No            If yes, please specify DSWD Household No. _________________________", 0, 1, 'L');
-
+        // 4Ps checkbox
+        // Yes checkbox
         $checkboxX7 = 54;
-        $checkboxY7 = $checkboxY6 + 25;
+        $checkboxY7 = $checkboxY6 + 26;
         $this::Rect($checkboxX7, $checkboxY7, $checkboxSize, $checkboxSize);
 
+        // No checkbox
         $checkboxX8 = 65;
         $checkboxY8 = $checkboxY7;
         $this::Rect($checkboxX8, $checkboxY8, $checkboxSize, $checkboxSize);
-
-        $startY += 15;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', '', 10);
-        $this::Cell(0, 10, "________________________________________", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', 'I', 10);
-        $this::Cell(0, 10, "Printed Name & Signature", 0, 1, 'L');
-
-
-        $startY += 20;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', 'I', 10);
-        $this::Cell(0, 10, "Disclaimer: By completing this form, you voluntarily and freely give consent to Southern Leyte State ", 0, 1, 'L');
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', 'I', 10);
-        $this::Cell(0, 10, "University to collect and process the above personal information (protected by R.A. 10173, Data Privacy Act ", 0, 1, 'L');
-
-
-        $startY += 5;
-        $this::setXY(25, $startY);
-        $this::SetFont('cambria', 'I', 10);
-        $this::Cell(0, 10, "of 2012) for records purposes use only.", 0, 1, 'L');
-
-
-        $this::setXY(163, 83);
-        $this::SetFont('cambria', 'B', 12);
-        $this::Cell(0, 10, "2x2 PICTURE", 0, 1, 'L');
     }
 
     public function Footer()

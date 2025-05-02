@@ -41,38 +41,71 @@
                         {{ GENERAL::Semesters()[$scholar->Semester]['Long'] }}
                     </td>
                     <td>
-                        <!-- Edit Sholar Details -->
-                        <a class="editScholar me-2 text-warning"
-                            data-scholar-id="{{ Crypt::encryptString($scholar->id) }}" href="javascript:void(0);"
-                            title="Edit Scholar">
-                            <i class="bx bx-edit-alt me-1"></i>
-                        </a>
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-primary rounded-circle p-0 d-flex align-items-center justify-content-center"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="width: 25px; height: 25px;">
+                                <i class="bx bx-dots-vertical-rounded fs-6"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <!-- Edit Scholar -->
+                                <li>
+                                    <a class="dropdown-item editScholar text-warning"
+                                        data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                                        href="javascript:void(0);" title="Edit Scholar">
+                                        <i class="bx bx-edit-alt me-1"></i> Edit
+                                    </a>
+                                </li>
 
-                        <!-- Delete Sholar -->
-                        <a class="deleteScholar me-2 text-danger"
-                            data-scholar-id="{{ Crypt::encryptString($scholar->id) }}" href="javascript:void(0);"
-                            title="Delete Scholar">
-                            <i class="bx bx-trash me-1"></i>
-                        </a>
+                                <!-- Delete Scholar -->
+                                <li>
+                                    <a class="dropdown-item deleteScholar text-danger"
+                                        data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                                        href="javascript:void(0);" title="Delete Scholar">
+                                        <i class="bx bx-trash me-1"></i> Delete
+                                    </a>
+                                </li>
 
-                        <!-- Generate Scholarship Certificate -->
-                        <a class="generateSCHCert text-secondary"
-                            data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
-                            data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
-                            data-school-year="{{ $scholar->SchoolYear }}" data-semester="{{ $scholar->Semester }}"
-                            href="javascript:void(0);" title="Generate Scholarship Certificate">
-                            <i class="bx bxs-file-pdf me-1"></i>
-                        </a>
+                                <!-- Generate Scholarship Certificate -->
+                                <li>
+                                    <a class="dropdown-item generateSCHCert text-secondary"
+                                        data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                                        data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
+                                        data-school-year="{{ $scholar->SchoolYear }}"
+                                        data-semester="{{ $scholar->Semester }}" href="javascript:void(0);"
+                                        title="Generate Scholarship Certificate">
+                                        <i class="bx bxs-file-pdf me-1"></i> SCH Certificate
+                                    </a>
+                                </li>
 
-                        <!-- Generate Scholarship Profile Form -->
-                        <a class="generateSCHProfileForm text-secondary"
-                            data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
-                            data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
-                            data-school-year="{{ $scholar->SchoolYear }}" data-semester="{{ $scholar->Semester }}"
-                            href="javascript:void(0);" title="Generate Scholarship Profile Form">
-                            <i class="bx bxs-file-pdf me-1"></i>
-                        </a>
+                                <!-- Generate Scholarship Profile Form -->
+                                <li>
+                                    <a class="dropdown-item generateSCHProfileForm text-secondary"
+                                        data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                                        data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
+                                        data-school-year="{{ $scholar->SchoolYear }}"
+                                        data-semester="{{ $scholar->Semester }}" href="javascript:void(0);"
+                                        title="Generate Profile Form">
+                                        <i class="bx bxs-file-pdf me-1"></i> SCH Profile Form
+                                    </a>
+                                </li>
+
+                                <!-- Generate Scholarship Application Form -->
+                                <li>
+                                    <a class="dropdown-item generateSCHApplicationForm text-secondary"
+                                        data-scholar-id="{{ Crypt::encryptString($scholar->id) }}"
+                                        data-enrollment-id="{{ Crypt::encryptString($scholar->enrollment_id) }}"
+                                        data-school-year="{{ $scholar->SchoolYear }}"
+                                        data-semester="{{ $scholar->Semester }}" href="javascript:void(0);"
+                                        title="Generate Application Form">
+                                        <i class="bx bxs-file-pdf me-1"></i> SCH Application Form
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </td>
+
                 </tr>
             @empty
                 <tr>

@@ -578,8 +578,12 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   Route::put('/requirements/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@updateRequirements')->name('scholarships.requirements.update');
   Route::delete('/requirements/delete', $controller_path . '\SLSU\Scholarship\ScholarshipController@destroyRequirements')->name('scholarships.requirements.destroy');
 
+  // scholarship status on application
   Route::post('/toggle-status/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@toggleStatus')->name('scholarships.toggle-status.update');
   Route::post('/status/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@updateStatus')->name('scholarships.status.update');
+
+  // schedule releasing of stipends
+  Route::post('/schedule-release', $controller_path . '\SLSU\Scholarship\ScholarshipController@scheduleRelease')->name('scholarships.schedule-release');
 
   // scholars
   Route::get('/scholars', $controller_path . '\SLSU\Scholarship\ScholarController@index')->name('scholars.index');
@@ -596,6 +600,7 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   // genererate scholarship PDF's
   Route::get('/generate-noa', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipCertificate')->name('generate-noa');
   Route::get('/generate-profile-form', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipProfileForm')->name('generate-profile-form');
+  Route::get('/generate-application-form', $controller_path . '\SLSU\Scholarship\PDFController@scholarshipApplicationForm')->name('generate-application-form');
 });
 
 Route::get('/scholarship-application', $controller_path . '\SLSU\Scholarship\ScholarshipController@scholarshipApplication')->name('scholarship-application');

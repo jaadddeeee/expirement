@@ -301,7 +301,6 @@
                 url: "{{ route('scholars.store') }}",
                 method: "POST",
                 data: {
-                    _token: "{{ csrf_token() }}",
                     scholarship_id: $('#scholarship_id').val(),
                     students: selectedStudents.map(s => s.studentNo),
                     schoolYear: schoolYear,
@@ -473,8 +472,7 @@
                         url: "{{ route('scholars.destroy') }}",
                         method: 'DELETE',
                         data: {
-                            id: scholarId,
-                            _token: "{{ csrf_token() }}" // Add CSRF token for security
+                            id: scholarId
                         },
                         success: function(response) {
                             const {
@@ -699,8 +697,7 @@
                             semesterFrom: semesterFrom,
                             schoolYearTo: schoolYearTo,
                             semesterTo: semesterTo,
-                            selected_scholars: selectedScholars,
-                            _token: "{{ csrf_token() }}",
+                            selected_scholars: selectedScholars
                         },
                         beforeSend: function() {
                             Swal.fire({
@@ -772,8 +769,7 @@
                         url: "{{ route('scholars.delete-scholars') }}",
                         method: 'DELETE',
                         data: {
-                            scholars: selectedScholars,
-                            _token: "{{ csrf_token() }}",
+                            scholars: selectedScholars
                         },
                         beforeSend: function() {
                             Swal.fire({
@@ -851,6 +847,23 @@
             let semester = $(this).data('semester');
 
             let url = "{{ route('generate-profile-form') }}" +
+                "?scholar_id=" + encodeURIComponent(scholarId) +
+                "&enrollment_id=" + encodeURIComponent(enrollmentId) +
+                "&school_year=" + encodeURIComponent(schoolYear) +
+                "&semester=" + encodeURIComponent(semester);
+
+            // Open the generated certificate in a new tab (forces the download)
+            window.open(url, '_blank');
+        });
+
+        // generate PDF Scholarship Profile Form
+        $(document).on('click', '.generateSCHApplicationForm', function() {
+            let scholarId = $(this).data('scholar-id');
+            let enrollmentId = $(this).data('enrollment-id');
+            let schoolYear = $(this).data('school-year');
+            let semester = $(this).data('semester');
+
+            let url = "{{ route('generate-application-form') }}" +
                 "?scholar_id=" + encodeURIComponent(scholarId) +
                 "&enrollment_id=" + encodeURIComponent(enrollmentId) +
                 "&school_year=" + encodeURIComponent(schoolYear) +

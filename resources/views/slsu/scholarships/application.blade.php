@@ -4,14 +4,22 @@
 
 @section('content')
     <div class="container py-4">
+        <?php
+        $campusCode = strtoupper(session('campus'));
+        $campuses = GENERAL::Campuses();
+        
+        $campusName = isset($campuses[$campusCode]) ? $campuses[$campusCode]['Campus'] : 'Unknown Campus';
+        ?>
         <!-- Header with Logo -->
         <div class="text-center mb-5">
             <img src="{{ asset('images/logo/updated_logo.png') }}" alt="Logo" class="img-fluid" style="max-height: 100px;">
-            <h2 class="mt-3 fw-bold" style="color: #66a6ea">MAIN CAMPUS | SCHOLARSHIP OPPORTUNITIES</h2>
+            <h2 class="mt-3 fw-bold" style="color: #66a6ea">
+                {{ strtoupper($campusName) }} | SCHOLARSHIP OPPORTUNITIES
+            </h2>
             <p class="text-muted">Explore available scholarships for students</p>
         </div>
 
-        <!-- Campus Selector Card -->
+        {{-- <!-- Campus Selector Card -->
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="row align-items-center">
@@ -20,20 +28,21 @@
                     </div>
                     <div class="col-md-6">
                         <select id="campusSelect" class="form-select">
-                            <option value="main" selected>Main Campus</option>
-                            <option value="campus1">Campus 1</option>
-                            <option value="campus2">Campus 2</option>
-                            <option value="campus3">Campus 3</option>
+                            <option value="0">Select campus</option>
+                            @foreach (GENERAL::Campuses() as $index => $campus)
+                                <option value="{{ Crypt::encryptString($index) }}">{{ $campus['Campus'] }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Scholarships Section -->
         @if ($scholarships->isEmpty())
             <div class="alert alert-info">
-                <i class="bx bx-info-circle me-2"></i> Currently there are no available scholarships.
+                <i class="bx bx-info-circle me-2"></i> Currently there are no available scholarships for
+                {{ $campusName }}.
             </div>
         @else
             <div class="row g-4 align-items-start">
@@ -107,13 +116,15 @@
                                         @else
                                             <div class="list-group list-group-flush">
                                                 @foreach ($scholarship->requirements as $requirement)
-                                                    <a href="javascript:void(0);"
-                                                        class="list-group-item list-group-item-action d-flex align-items-center">
-                                                        <span class="badge bg-secondary rounded-pill me-3">
-                                                            {{ $requirement->quantity }}
+                                                    <div class="list-group-item d-flex align-items-center">
+                                                        <span class="me-2 text-muted" style="font-size: 1.2rem;">•</span>
+                                                        <span>
+                                                            <strong>
+                                                                {{ $requirement->quantity }}
+                                                            </strong>
+                                                            {{ $requirement->sch_requirements }}
                                                         </span>
-                                                        {{ $requirement->sch_requirements }}
-                                                    </a>
+                                                    </div>
                                                 @endforeach
                                             </div>
                                         @endif
@@ -175,4 +186,8 @@
             transition: opacity 0.4s ease-in-out;
         }
     </style>
+@endsection
+
+@section('page-script')
+    @include('slsu.scholarships.js.sch-application-js')
 @endsection

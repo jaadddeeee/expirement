@@ -13,4 +13,5 @@ return [
 
   "SS06" => "Doc Code: SLSU-QF-SS06\nRevision: 01\nDate: 11 February 2021", // scholarship certificate
   "SS13" => "Doc Code: SLSU-QF-SS13\nRevision: 00\nDate: 11 February 2021", // scholarship profile form
+  "SS05" => "Doc Code: SLSU-QF-SS05\nRevision: 00\nDate: 20 October 2015", // scholarship application form
 ];
