@@ -370,7 +370,7 @@
                                 placeholder="Select date range" required>
                         </div>
 
-                        <!-- Eligible Courses / Majors -->
+                        <!-- Eligible Courses -->
                         <div class="mb-3">
                             <label for="eligibleCourses" class="form-label">Eligible Courses / Majors</label>
                             <select id="eligibleCourses" name="eligible_courses[]" class="form-select select2" multiple
@@ -378,6 +378,14 @@
                                 @foreach ($courses as $course)
                                     <option value="{{ $course->id }}">{{ $course->course_title }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="eligibleMajors" class="form-label">Eligible Majors</label>
+                            <select id="eligibleMajors" class="form-select select2" multiple disabled>
+                                <option value="">Select Majors</option>
+                                <!-- Will be populated based on selected courses -->
                             </select>
                         </div>
 

@@ -18,6 +18,7 @@ class ScholarshipApplication extends Model
         'start_date',
         'deadline_date',
         'eligible_courses',
+        'eligible_majors',
         'eligible_yearLevel',
         'school_year',
         'semester'
@@ -25,6 +26,7 @@ class ScholarshipApplication extends Model
 
     protected $casts = [
         'eligible_courses' => 'array',
+        'eligible_majors' => 'array',
         'eligible_yearLevel' => 'array',
     ];
 

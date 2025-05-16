@@ -101,6 +101,8 @@
                 <td colspan="7" class="text-center">No scholarships found.</td>
             </tr>
         @endforelse
+
+
     </tbody>
 </table>
 

@@ -22,11 +22,14 @@ class ScholarshipController extends Controller
     public function index(Request $request)
     {
         try {
-
             $pageTitle = "Scholarships";
             $headerAction = '<a href="' . url()->previous() . '" class="btn btn-sm btn-primary" role="button">Back</a>';
 
+            // Using with() relationship instead of join for cleaner code
             $query = Scholarship::whereNull('deleted_at')
+                ->with(['applications' => function ($query) {
+                    $query->select('id', 'scholarship_id', 'status', 'start_date', 'deadline_date', 'slots');
+                }])
                 ->when($request->filled('searchScholarship'), function ($q) use ($request) {
                     $q->where('sch_name', 'LIKE', "%{$request->searchScholarship}%");
                 })
@@ -40,7 +43,6 @@ class ScholarshipController extends Controller
 
             $entriesPerPage = $request->input('entriesPerPage', 10);
             $scholarships = $query->paginate($entriesPerPage);
-
 
             $courses = Course::with('majors')->get();
             $courseTitles = $courses->pluck('course_title');
@@ -382,10 +384,10 @@ class ScholarshipController extends Controller
     {
         try {
             $scholarshipId = $request->scholarship_id_edit;
-            $requirementIds = $request->requirement_ids ?? [];
-            $quantities = $request->quantities_edit ?? [];
-            $requirements = $request->requirements_edit ?? [];
-            $deletedIds = $request->deleted_requirement_ids ?? [];
+            $requirementIds = $request->requirement_ids;
+            $quantities = $request->quantities_edit;
+            $requirements = $request->requirements_edit;
+            $deletedIds = $request->deleted_requirement_ids;
 
             if (!$scholarshipId) {
                 return response()->json([
@@ -433,7 +435,6 @@ class ScholarshipController extends Controller
                         $hasChanges = true;
                     }
                 } else {
-                    // create new requirement
                     ScholarshipRequirements::create([
                         'scholarship_id' => $scholarshipId,
                         'quantity' => $quantity,
@@ -462,6 +463,33 @@ class ScholarshipController extends Controller
         }
     }
 
+    public function getCoursesWithMajors()
+    {
+        try {
+            $campus = strtolower(session('campus'));
+
+            if (!$campus) {
+                return response()->json(['Error' => 1, 'Message' => 'Invalid campus database connection']);
+            }
+
+            $courses = Course::on($campus)
+                ->with(['majors' => function ($query) {
+                    $query->select('id', 'CourseID', 'course_major');
+                }])
+                ->get(['id', 'course_title']);
+
+            return response()->json([
+                'Error' => 0,
+                'courses' => $courses
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'Error' => 1,
+                'Message' => 'An error occurred: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
 
     public function storeApplication(Request $request)
     {
@@ -471,36 +499,48 @@ class ScholarshipController extends Controller
             if (!$campus) {
                 return response()->json(['Error' => 1, 'Message' => 'Invalid campus database connection']);
             }
-
-            // Extract data from the request
             $id = $request->scholarship_id;
             $scholarshipId = Crypt::decryptString($id);
+
+            // extract applications
             $slots = $request->input('slots');
             $dateRange = $request->input('dateRange');
             $eligibleCourses = $request->input('eligible_courses');
+            $eligibleMajors = $request->input('eligible_majors');
             $eligibleYearLevels = $request->input('eligible_year_levels');
             $schoolYear = $request->input('sch_application_sy');
             $semester = $request->input('sch_application_sem');
 
-            // Parse the date range into start_date and deadline_date
+            // parse date range
             [$start_date, $deadline_date] = explode(' to ', $dateRange);
 
-            // Save the scholarship details
-            $application = ScholarshipApplication::on($campus)->create([
-                'scholarship_id' => $scholarshipId,
-                'slots' => $slots,
-                'start_date' => $start_date,
-                'deadline_date' => $deadline_date,
-                'eligible_courses' => json_encode($eligibleCourses),
-                'eligible_yearLevel' => json_encode($eligibleYearLevels),
-                'school_year' => $schoolYear,
-                'semester' => $semester,
-            ]);
+            // Find existing application or create a new one
+            $application = ScholarshipApplication::on($campus)
+                ->updateOrCreate(
+                    ['scholarship_id' => $scholarshipId],
+                    [
+                        'slots' => $slots,
+                        'start_date' => $start_date,
+                        'deadline_date' => $deadline_date,
+                        'eligible_courses' => json_encode($eligibleCourses),
+                        'eligible_majors' => json_encode($eligibleMajors),
+                        'eligible_yearLevel' => json_encode($eligibleYearLevels),
+                        'school_year' => $schoolYear,
+                        'semester' => $semester,
+                        'status' => 1,
+                    ]
+                );
+
+            $scholarship = Scholarship::on($campus)->findOrFail($scholarshipId);
+            $scholarship->status = 1;
+            $scholarship->save();
 
             return response()->json([
                 'Error' => 0,
-                'Message' => 'Scholarship details saved successfully!',
+                'Message' => 'Scholarship application details saved successfully!',
                 'Application' => $application,
+                'Status' => $application->status,
+                'ScholarshipStatus' => $scholarship->status
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -521,35 +561,33 @@ class ScholarshipController extends Controller
         return view('slsu.scholarships.application', compact('pageTitle', 'scholarships'));
     }
 
-    public function updateStatus(Request $request)
+    public function deactivateApplication(Request $request)
     {
         try {
             $campus = strtolower(session('campus'));
-
-            if (!$campus) {
-                return response()->json(['Error' => 1, 'Message' => 'Invalid campus database connection']);
-            }
-
-            // Decrypt the scholarship ID
             $scholarshipId = Crypt::decryptString($request->scholarship_id);
 
-            // Find the scholarship and update its status
-            $scholarship = ScholarshipApplication::on($campus)->findOrFail($scholarshipId);
-            $scholarship->status = $request->status;
-            $scholarship->slots = $request->slots;
-
-
-
+            $scholarship = Scholarship::on($campus)->findOrFail($scholarshipId);
+            $scholarship->status = 0;
             $scholarship->save();
+
+            $application = ScholarshipApplication::on($campus)
+                ->where('scholarship_id', $scholarshipId)
+                ->first();
+
+            if ($application) {
+                $application->status = 0;
+                $application->save();
+            }
 
             return response()->json([
                 'Error' => 0,
-                'Message' => 'Scholarship status updated successfully!',
+                'Message' => 'Scholarship successfully deactivated!'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'Error' => 1,
-                'Message' => 'An error occurred: ' . $e->getMessage(),
+                'Message' => 'An error occurred: ' . $e->getMessage()
             ], 400);
         }
     }

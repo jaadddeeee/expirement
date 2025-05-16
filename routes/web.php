@@ -579,8 +579,9 @@ Route::group(['prefix' => 'scholarship', 'middleware' => ['auth', 'scholarships'
   Route::delete('/requirements/delete', $controller_path . '\SLSU\Scholarship\ScholarshipController@destroyRequirements')->name('scholarships.requirements.destroy');
 
   // scholarship status on application
-  Route::post('/toggle-status/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@toggleStatus')->name('scholarships.toggle-status.update');
-  Route::post('/status/update', $controller_path . '\SLSU\Scholarship\ScholarshipController@updateStatus')->name('scholarships.status.update');
+  Route::get('/course-majors', $controller_path . '\SLSU\Scholarship\ScholarshipController@getCoursesWithMajors')->name('scholarships.application.course-majors');
+  Route::post('/store-application', $controller_path . '\SLSU\Scholarship\ScholarshipController@storeApplication')->name('scholarships.application.store');
+  Route::post('/deactivate-application', $controller_path . '\SLSU\Scholarship\ScholarshipController@deactivateApplication')->name('scholarships.application.deactivate');
 
   // schedule releasing of stipends
   Route::post('/schedule-release', $controller_path . '\SLSU\Scholarship\ScholarshipController@scheduleRelease')->name('scholarships.schedule-release');

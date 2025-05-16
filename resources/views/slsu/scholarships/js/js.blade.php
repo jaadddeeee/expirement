@@ -1031,18 +1031,20 @@
             });
         });
 
+        // handle toggle switch for scholarship status
         $(document).on('change', '.toggle-status', function() {
             let scholarshipId = $(this).data('scholarship-id');
             let status = $(this).is(':checked') ? 1 : 0;
             let toggle = $(this);
 
             if (status === 1) {
+                // show modal
                 $('#scholarshipId').val(scholarshipId);
                 $('#statusModal').modal('show');
             } else {
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'This will deactivate the scholarship.',
+                    text: 'This will deactivate the scholarship and close applications.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
@@ -1051,9 +1053,7 @@
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        updateScholarshipStatus(scholarshipId, status);
-                        $('#statusForm')[0].reset();
-                        $('#dateRange').val('');
+                        deactivateScholarship(scholarshipId, toggle);
                     } else {
                         toggle.prop('checked', true);
                     }
@@ -1061,58 +1061,23 @@
             }
         });
 
+        // reset modal on show and hide
         $('#statusModal').on('show.bs.modal', function() {
             $('#statusForm')[0].reset();
             $('#dateRange').val('');
+
+            if ($.fn.select2) {
+                $('#eligibleCourses').val(null).trigger('change');
+                $('#eligibleYearLevels').val(null).trigger('change');
+            }
+
+            fetchCoursesAndMajors();
         });
 
-        $('#statusModal').on('hidden.bs.modal', function() {
-            $('.toggle-status').prop('checked', false);
+        // Handle course selection change
+        $('#eligibleCourses').on('change', function() {
+            updateEligibleMajors();
         });
-
-
-        // function to update the scholarship status
-        function updateScholarshipStatus(scholarshipId, status) {
-            $.ajax({
-                url: "{{ route('scholarships.status.update') }}",
-                type: 'POST',
-                data: {
-                    scholarship_id: scholarshipId,
-                    status: status
-                },
-                success: function(response) {
-                    const {
-                        Error,
-                        Message
-                    } = response;
-
-                    if (Error == 0) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: Message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to update scholarship status.',
-                            showConfirmButton: true
-                        });
-                    }
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An unexpected error occurred. Please try again.',
-                        showConfirmButton: true
-                    });
-                }
-            });
-        }
 
         // date range picker for 
         $('#dateRange').daterangepicker({
@@ -1134,22 +1099,42 @@
             $(this).val('');
         });
 
-
-
+        // 
         $('#statusForm').on('submit', function(e) {
             e.preventDefault();
 
-            const scholarshipId = $('#scholarshipId').val();
-            const slots = $('#slots').val();
-            const dateRange = $('#dateRange').val();
-            const eligibleCourses = $('#eligibleCourses').val();
-            const eligibleYearLevels = $('#eligibleYearLevels').val();
-            const schoolYear = $('#schApplicationSY').val();
-            const semester = $('#schApplicationSem').val();
+            let scholarshipId = $('#scholarshipId').val();
+            let slots = $('#slots').val();
+            let dateRange = $('#dateRange').val();
+            let eligibleCourses = $('#eligibleCourses').val();
+            let eligibleYearLevels = $('#eligibleYearLevels').val();
+            let schoolYear = $('#schApplicationSY').val();
+            let semester = $('#schApplicationSem').val();
 
+            // Validate form inputs
+            if (!slots || !dateRange || !eligibleCourses || !eligibleYearLevels || !schoolYear || !
+                semester) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please fill in all required fields.'
+                });
+                return;
+            }
+
+            // Show loading state
+            Swal.fire({
+                title: 'Saving...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Submit application details
             $.ajax({
-                url: "{{ route('scholarships.status.update') }}", // Update with your route
-                method: 'POST',
+                url: "{{ route('scholarships.application.store') }}",
+                type: 'POST',
                 data: {
                     scholarship_id: scholarshipId,
                     slots: slots,
@@ -1157,8 +1142,7 @@
                     eligible_courses: eligibleCourses,
                     eligible_year_levels: eligibleYearLevels,
                     sch_application_sy: schoolYear,
-                    sch_application_sem: semester,
-                    status: 1
+                    sch_application_sem: semester
                 },
                 success: function(response) {
                     const {
@@ -1171,6 +1155,8 @@
                             icon: 'success',
                             title: 'Success',
                             text: Message,
+                            timer: 2000,
+                            showConfirmButton: false
                         }).then(() => {
                             $('#statusModal').modal('hide');
                             location.reload();
@@ -1179,7 +1165,254 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
+                            text: Message ||
+                                'Failed to save application details.'
+                        });
+                        // Revert toggle if there was an error
+                        $(`.toggle-status[data-scholarship-id="${scholarshipId}"]`).prop(
+                            'checked', false);
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again.'
+                    });
+
+                    $(`.toggle-status[data-scholarship-id="${scholarshipId}"]`).prop(
+                        'checked', false);
+                }
+            });
+        });
+
+        // Function to deactivate scholarship
+        function deactivateScholarship(scholarshipId, toggle) {
+            $.ajax({
+                url: "{{ route('scholarships.application.deactivate') }}",
+                type: 'POST',
+                data: {
+                    scholarship_id: scholarshipId
+                },
+                success: function(response) {
+                    const {
+                        Error,
+                        Message
+                    } = response;
+
+                    if (Error === 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
                             text: Message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: Message || 'Failed to deactivate scholarship.'
+                        });
+                        toggle.prop('checked', true);
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again.'
+                    });
+                    toggle.prop('checked', true);
+                }
+            });
+        }
+
+
+        // initialize select2 for eligible courses and year levels
+        if ($.fn.select2) {
+            $('#eligibleCourses').select2({
+                placeholder: 'Select eligible courses',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#statusModal')
+            });
+
+            $('#eligibleMajors').select2({
+                placeholder: 'Select eligible majors',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#statusModal')
+
+            });
+
+            $('#eligibleYearLevels').select2({
+                placeholder: 'Select eligible year levels',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#statusModal')
+            });
+        }
+
+        // Global variable to store course-major mapping
+        let courseMajorsMap = {};
+
+        // Function to fetch courses and their majors
+        function fetchCoursesAndMajors() {
+            $.ajax({
+                url: "{{ route('scholarships.application.course-majors') }}",
+                type: 'GET',
+                dataType: 'json',
+                beforeSend: function() {
+                    // Disable selects while loading
+                    $('#eligibleCourses, #eligibleMajors').prop('disabled', true);
+                },
+                success: function(response) {
+                    if (!response.Error) {
+                        // Debug response to console
+                        console.log('API Response:', response);
+
+                        populateCourses(response.courses);
+
+                        // Build course-majors mapping
+                        courseMajorsMap = {};
+                        response.courses.forEach(course => {
+                            courseMajorsMap[course.id] = course.majors;
+                        });
+                    } else {
+                        console.error('Error fetching courses:', response.Message);
+                    }
+
+                    // Enable course select
+                    $('#eligibleCourses').prop('disabled', false);
+                },
+                error: function(xhr) {
+                    console.error('Failed to fetch courses and majors');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to load courses and majors. Please try again.'
+                    });
+
+                    // Enable course select
+                    $('#eligibleCourses').prop('disabled', false);
+                }
+            });
+        }
+
+        // Function to populate courses dropdown
+        function populateCourses(courses) {
+            let courseSelect = $('#eligibleCourses');
+            courseSelect.empty().append('<option value=""></option>');
+
+            courses.forEach(course => {
+                courseSelect.append(`<option value="${course.id}">${course.course_title}</option>`);
+            });
+        }
+
+        // Function to update the majors dropdown based on selected courses
+        function updateEligibleMajors() {
+            let selectedCourses = $('#eligibleCourses').val() || [];
+            let majorSelect = $('#eligibleMajors');
+
+            // Clear previous options
+            majorSelect.empty().append('<option value=""></option>');
+
+            // If no courses selected, disable majors select
+            if (selectedCourses.length === 0) {
+                majorSelect.prop('disabled', true);
+                return;
+            }
+
+            // Enable majors select
+            majorSelect.prop('disabled', false);
+
+            // Get all majors for selected courses and add them to the dropdown
+            let addedMajors = new Set(); // To avoid duplicates
+
+            selectedCourses.forEach(courseId => {
+                if (courseMajorsMap[courseId]) {
+                    courseMajorsMap[courseId].forEach(major => {
+                        // Only add if we haven't seen this major ID before
+                        if (!addedMajors.has(major.id)) {
+                            // Use the course_major field which contains the major name
+                            let majorName = major.course_major;
+
+                            majorSelect.append(
+                                `<option value="${major.id}" data-course="${courseId}">${majorName}</option>`
+                            );
+                            addedMajors.add(major.id);
+                        }
+                    });
+                }
+            });
+
+            // Trigger change event to refresh Select2
+            majorSelect.trigger('change');
+        }
+
+        // Submit form handling - include course-major pairs
+        $('#statusForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // Get form data
+            let scholarshipId = $('#scholarshipId').val();
+            let slots = $('#slots').val();
+            let dateRange = $('#dateRange').val();
+            let eligibleCourses = $('#eligibleCourses').val();
+            let eligibleMajors = $('#eligibleMajors').val();
+            let eligibleYearLevels = $('#eligibleYearLevels').val();
+            let schoolYear = $('#schApplicationSY').val();
+            let semester = $('#schApplicationSem').val();
+
+            // Create an array of course-major pairs
+            let courseMajorPairs = [];
+            eligibleMajors.forEach(majorId => {
+                let courseId = $(`#eligibleMajors option[value="${majorId}"]`).data('course');
+                courseMajorPairs.push({
+                    course_id: courseId,
+                    major_id: majorId
+                });
+            });
+
+            $.ajax({
+                url: "{{ route('scholarships.application.store') }}",
+                type: 'POST',
+                data: {
+                    scholarship_id: scholarshipId,
+                    slots: slots,
+                    dateRange: dateRange,
+                    eligible_courses: eligibleCourses,
+                    eligible_majors: JSON.stringify(courseMajorPairs),
+                    eligible_year_levels: eligibleYearLevels,
+                    sch_application_sy: schoolYear,
+                    sch_application_sem: semester
+                },
+                success: function(response) {
+
+                    const {
+                        Error,
+                        Message
+                    } = response;
+
+                    if (Error === 0) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: Message,
+                            showConfirmButton: true
+                        }).then(() => {
+                            $('#statusModal').modal('hide');
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: Message ||
+                                'Failed to save application details.'
                         });
                     }
                 },
@@ -1187,79 +1420,14 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'An unexpected error occurred. Please try again.',
+                        text: 'An unexpected error occurred. Please try again.'
                     });
-                },
+                }
             });
         });
 
-        $('#eligibleCourses').select2({
-            placeholder: "Select eligible courses/majors",
-            allowClear: true,
-            width: '100%',
-            dropdownParent: $('#statusModal')
-        });
 
-        $('#eligibleYearLevels').select2({
-            placeholder: "Select eligible year level",
-            allowClear: true,
-            width: '100%',
-            dropdownParent: $('#statusModal')
-        });
     });
-
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     const input = document.querySelector('#eligibleCourses');
-
-    //     const courseList = @json($courseTitles);
-    //     const courseData = @json($courses);
-
-    //     const tagify = new Tagify(input, {
-    //         whitelist: courseList,
-    //         dropdown: {
-    //             enabled: 0,
-    //             closeOnSelect: false,
-    //             classname: 'custom-dropdown',
-    //         },
-    //     });
-
-    //     // Show dropdown on click/focus
-    //     tagify.DOM.input.addEventListener('focus', () => tagify.dropdown.show());
-    //     input.addEventListener('click', () => tagify.dropdown.show());
-
-    //     // Track already added course-major combinations to prevent duplication
-    //     const addedCombinations = new Set();
-
-    //     // When a course is added
-    //     tagify.on('add', function(e) {
-    //         const selectedCourse = e.detail.data.value;
-    //         const course = courseData.find(c => c.course_title === selectedCourse);
-
-    //         if (course && course.majors.length > 0) {
-    //             // Concatenate course and major
-    //             course.majors.forEach(major => {
-    //                 const combinedValue = `${course.course_title}-${major.course_major}`;
-    //                 if (!addedCombinations.has(combinedValue)) {
-    //                     addedCombinations.add(combinedValue);
-    //                     tagify.addTags([{
-    //                         value: combinedValue,
-    //                         class: 'tag--major',
-    //                     }]);
-    //                 }
-    //             });
-
-    //             tagify.removeTags(selectedCourse);
-    //         } else if (course) {
-    //             // If no majors, just add the course
-    //             if (!addedCombinations.has(course.course_title)) {
-    //                 addedCombinations.add(course.course_title);
-    //                 tagify.addTags([{
-    //                     value: course.course_title,
-    //                 }]);
-    //             }
-    //         }
-    //     });
-    // });
 
     // text editor
     // document.addEventListener('DOMContentLoaded', function() {
